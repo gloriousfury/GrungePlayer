@@ -129,14 +129,15 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         }
     }
 
-    public void pauseMedia() {
+    public void pauseMedia(MediaPlayer mediaPlayer) {
         if (mediaPlayer.isPlaying()) {
             mediaPlayer.pause();
             resumePosition = mediaPlayer.getCurrentPosition();
+
         }
     }
 
-    private void resumeMedia() {
+    public void resumeMedia(MediaPlayer mediaPlayer) {
         if (!mediaPlayer.isPlaying()) {
             mediaPlayer.seekTo(resumePosition);
             mediaPlayer.start();
@@ -263,7 +264,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         @Override
         public void onReceive(Context context, Intent intent) {
             //pause audio on ACTION_AUDIO_BECOMING_NOISY
-            pauseMedia();
+            pauseMedia(mediaPlayer);
             buildNotification(PlaybackStatus.PAUSED);
         }
     };
@@ -289,7 +290,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                     case TelephonyManager.CALL_STATE_OFFHOOK:
                     case TelephonyManager.CALL_STATE_RINGING:
                         if (mediaPlayer != null) {
-                            pauseMedia();
+                            pauseMedia(mediaPlayer);
                             ongoingCall = true;
                         }
                         break;
@@ -298,7 +299,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                         if (mediaPlayer != null) {
                             if (ongoingCall) {
                                 ongoingCall = false;
-                                resumeMedia();
+                                resumeMedia(mediaPlayer);
                             }
                         }
                         break;
@@ -364,14 +365,14 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             @Override
             public void onPlay() {
                 super.onPlay();
-                resumeMedia();
+                resumeMedia(mediaPlayer);
                 buildNotification(PlaybackStatus.PLAYING);
             }
 
             @Override
             public void onPause() {
                 super.onPause();
-                pauseMedia();
+                pauseMedia(mediaPlayer);
                 buildNotification(PlaybackStatus.PAUSED);
             }
 
