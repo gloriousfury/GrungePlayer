@@ -132,7 +132,6 @@ public class LibraryActivity extends AppCompatActivity
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        new MediaPlayerService().onDestroy();
 
 
     }

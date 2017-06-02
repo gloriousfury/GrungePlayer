@@ -4,6 +4,7 @@ package com.gloriousfury.musicplayer.adapter;
  * Created by OLORIAKE KEHINDE on 11/16/2016.
  */
 
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -21,23 +22,27 @@ import android.widget.Toast;
 
 import com.gloriousfury.musicplayer.R;
 import com.gloriousfury.musicplayer.model.Audio;
+import com.gloriousfury.musicplayer.model.StorageUtil;
 import com.gloriousfury.musicplayer.service.MediaPlayerService;
 import com.gloriousfury.musicplayer.ui.activity.MainActivity;
 import com.gloriousfury.musicplayer.ui.activity.SingleSongActivity;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import static com.gloriousfury.musicplayer.ui.activity.MainActivity.Broadcast_PLAY_NEW_AUDIO;
 
 
 public class AllSongsAdapter extends RecyclerView.Adapter<AllSongsAdapter.ViewHolder> {
     Context context;
-    private List<Audio> song_list;
+    private ArrayList<Audio> song_list;
     boolean serviceBound = false;
     private MediaPlayerService player;
     String SONG_TITLE = "song_title";
     String SONG_ARTIST = "song_artist";
 
 
-    public AllSongsAdapter(Context context, List<Audio> song_list) {
+    public AllSongsAdapter(Context context, ArrayList<Audio> song_list) {
         this.context = context;
         this.song_list = song_list;
 
@@ -68,8 +73,8 @@ public class AllSongsAdapter extends RecyclerView.Adapter<AllSongsAdapter.ViewHo
 
         @Override
         public void onClick(View v) {
-
-            playAudio(context,song_list.get(getAdapterPosition()).getData());
+            int adapterposition =getAdapterPosition();
+            playAudio(adapterposition);
             Intent openSingleSongActivity = new Intent(context, SingleSongActivity.class);
             openSingleSongActivity.putExtra(SONG_TITLE,song_list.get(getAdapterPosition()).getTitle());
             openSingleSongActivity.putExtra(SONG_ARTIST,song_list.get(getAdapterPosition()).getArtist());
@@ -126,22 +131,28 @@ public class AllSongsAdapter extends RecyclerView.Adapter<AllSongsAdapter.ViewHo
     };
 
 
-    private void playAudio(Context context,String media) {
+    private void playAudio(int audioIndex) {
         //Check is service is active
         if (!serviceBound) {
+            //Store Serializable audioList to SharedPreferences
+            StorageUtil storage = new StorageUtil(context);
+            storage.storeAudio(song_list);
+            storage.storeAudioIndex(audioIndex);
+
             Intent playerIntent = new Intent(context, MediaPlayerService.class);
-            playerIntent.putExtra("media", media);
             context.startService(playerIntent);
             context.bindService(playerIntent, serviceConnection, Context.BIND_AUTO_CREATE);
         } else {
+            //Store the new audioIndex to SharedPreferences
+            StorageUtil storage = new StorageUtil(context);
+            storage.storeAudioIndex(audioIndex);
+
             //Service is active
-            //Send media with BroadcastReceiver
+            //Send a broadcast to the service -> PLAY_NEW_AUDIO
+            Intent broadcastIntent = new Intent(Broadcast_PLAY_NEW_AUDIO);
+            context.sendBroadcast(broadcastIntent);
         }
     }
-
-
-
-
-
 }
+
 

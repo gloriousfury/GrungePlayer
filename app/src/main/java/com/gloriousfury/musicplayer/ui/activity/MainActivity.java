@@ -36,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
     ArrayList<Audio> audioList;
     private static final int REQUEST_STORAGE_PERMISSION = 1;
     private static final int REQUEST_MEDIA_PERMISSION = 2;
+    public static final String Broadcast_PLAY_NEW_AUDIO = "com.gloriousfury.MusicPlayer.PlayNewAudio";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
