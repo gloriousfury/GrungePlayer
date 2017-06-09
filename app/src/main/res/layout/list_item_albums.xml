@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="@color/white"
+    android:orientation="vertical"
+    android:layout_margin="@dimen/ten"
+    >
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
+
+
+
+        <ImageView
+            android:id="@+id/song_background"
+            android:layout_width="@dimen/one_hundred"
+            android:layout_height="@dimen/one_hundred"
+            android:background="@color/grey" />
+
+        <TextView
+            android:id="@+id/artist"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/song_background"
+            android:layout_marginLeft="@dimen/five"
+            android:layout_marginTop="@dimen/three"
+           android:maxLines="1"
+            tools:text="Adele"
+            android:textSize="13sp"
+            />
+
+        <TextView
+            android:id="@+id/album_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/artist"
+            android:layout_marginLeft="@dimen/five"
+            android:layout_marginTop="@dimen/three"
+            android:layout_marginBottom="@dimen/five"
+            android:textSize="8sp"
+            tools:text="Hello"
+            android:maxLines="1"
+            />
+
+
+
+
+    </RelativeLayout>
+
+
+</LinearLayout>

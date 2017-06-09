@@ -65,7 +65,7 @@ public class ScrollFragmentContainer extends Fragment {
             if(position == 0){
                 return AllSongsFragment.newInstance();
             } else if(position == 1) {
-                return AllSongsFragment.newInstance();
+                return AlbumsFragment.newInstance();
             } else {
                 return AllSongsFragment.newInstance();
             }
@@ -83,7 +83,7 @@ public class ScrollFragmentContainer extends Fragment {
                 case 0:
                     return "All Songs";
                 case 1:
-                    return "Baked Products";
+                    return "Albums";
 
             }
             return null;

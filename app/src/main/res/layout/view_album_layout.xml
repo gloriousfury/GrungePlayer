@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layout_below="@+id/subcategory_recycler_view2"
+    android:background="#f9f9f9">
+
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/fourty"
+            android:background="@color/white"
+            android:id="@+id/category_header"
+
+            >
+
+
+            <TextView
+                android:id="@+id/title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/ten"
+                android:text="A"
+                android:textColor="@color/colorPrimaryDark"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:layout_centerVertical="true"
+                />
+
+
+
+
+        </RelativeLayout>
+
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/white_ash"
+
+            />
+
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/single_albumlist_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/title"
+            android:layout_marginLeft="@dimen/ten"
+            android:layout_marginRight="@dimen/ten"
+            android:layout_margin="@dimen/ten"
+            android:orientation="horizontal">
+
+
+        </android.support.v7.widget.RecyclerView>
+
+
+
+    </LinearLayout>
