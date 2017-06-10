@@ -1,6 +1,6 @@
 package com.gloriousfury.musicplayer.model;
 
-import android.net.Uri;
+
 
 import java.io.Serializable;
 
@@ -12,21 +12,21 @@ public class Audio implements Serializable {
     private String artist;
     private int duration;
     private long albumId;
-    private Uri albumArtUri;
+    private String albumArtString;
 
     public Audio() {
 
 
     }
 
-    public Audio(String data, String title, String album, String artist, int duration,long albumId, Uri albumArtUri) {
+    public Audio(String data, String title, String album, String artist, int duration,long albumId, String albumArtString) {
         this.data = data;
         this.title = title;
         this.album = album;
         this.artist = artist;
         this.duration = duration;
         this.albumId = albumId;
-        this.albumArtUri = albumArtUri;
+        this.albumArtString = albumArtString;
     }
 
     public String getData() {
@@ -78,12 +78,12 @@ public class Audio implements Serializable {
         this.albumId = albumId;
     }
 
-    public Uri getAlbumArtUri() {
-        return albumArtUri;
+    public String getAlbumArtUriString() {
+        return albumArtString;
     }
 
-    public void setAlbumArtUri(Uri albumArtUri) {
-        this.albumArtUri= albumArtUri;
+    public void setAlbumArtUriString(String albumArtString) {
+        this.albumArtString= albumArtString;
     }
 
 

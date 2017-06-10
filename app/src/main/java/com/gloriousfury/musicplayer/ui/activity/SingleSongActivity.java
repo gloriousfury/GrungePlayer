@@ -1,6 +1,7 @@
 package com.gloriousfury.musicplayer.ui.activity;
 
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Handler;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -16,6 +17,7 @@ import com.gloriousfury.musicplayer.model.StorageUtil;
 import com.gloriousfury.musicplayer.service.MediaPlayerService;
 import com.gloriousfury.musicplayer.utils.PlaybackStatus;
 import com.gloriousfury.musicplayer.utils.Timer;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
@@ -34,6 +36,9 @@ public class SingleSongActivity extends AppCompatActivity  implements SeekBar.On
 
     @BindView(R.id.img_play_pause)
     ImageView playPauseView;
+
+    @BindView(R.id.song_background)
+    ImageView songBackground;
 
     @BindView(R.id.songCurrentDuration)
     TextView songCurrentDuration;
@@ -59,6 +64,7 @@ public class SingleSongActivity extends AppCompatActivity  implements SeekBar.On
 
     String SONG_TITLE = "song_title";
     String SONG_ARTIST = "song_artist";
+    String ALBUM_ART_URI = "song_album_art_uri";
     private ArrayList<Audio> audioList;
     private int audioIndex = -1;
     private Audio activeAudio; //an object of the currently playing audio
@@ -94,9 +100,17 @@ public class SingleSongActivity extends AppCompatActivity  implements SeekBar.On
             String song_title = getSongData.getString(SONG_TITLE);
             String song_artist = getSongData.getString(SONG_ARTIST);
 
+            Uri albumArtUri = Uri.parse(getSongData.getString(ALBUM_ART_URI));
+
 
             songTitle.setText(song_title);
             artist.setText(song_artist);
+            if(albumArtUri!= null){
+
+//                Picasso.with(this).load(albumArtUri).into(songBackground);
+
+
+            }
 
          storage  = new StorageUtil(getApplicationContext());
 

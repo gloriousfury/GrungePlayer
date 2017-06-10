@@ -1,8 +1,11 @@
 package com.gloriousfury.musicplayer.ui.fragment;
 
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -23,6 +26,8 @@ import com.gloriousfury.musicplayer.adapter.AllSongsAdapter;
 import com.gloriousfury.musicplayer.model.AlbumLists;
 import com.gloriousfury.musicplayer.model.Audio;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 
 
@@ -91,9 +96,9 @@ public class AlbumsFragment extends Fragment {
         ContentResolver contentResolver = getActivity().getContentResolver();
 
         Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
-        String selection = MediaStore.Audio.Media.TITLE + "!=0";
+        String selection = MediaStore.Audio.Media.IS_MUSIC + "!= 0";
         String sortOrder = MediaStore.Audio.Media.TITLE + " ASC";
-        cursor = contentResolver.query(uri, null, selection, null, sortOrder);
+        Cursor cursor = contentResolver.query(uri, null, selection, null, sortOrder);
 
         if (cursor != null && cursor.getCount() > 0) {
             audioList = new ArrayList<>();
@@ -102,9 +107,35 @@ public class AlbumsFragment extends Fragment {
                 String title = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE));
                 String album = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM));
                 String artist = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST));
+                Long albumId = cursor.getLong(cursor
+                        .getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID));
+
+                int duration = cursor.getInt(cursor
+                        .getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
+
+                Uri sArtworkUri = Uri
+                        .parse("content://media/external/audio/albumart");
+                Uri albumArtUri = ContentUris.withAppendedId(sArtworkUri, albumId);
+
+
+                Bitmap bitmap = null;
+                try {
+                    bitmap = MediaStore.Images.Media.getBitmap(
+                            getActivity().getContentResolver(), albumArtUri);
+                    bitmap = Bitmap.createScaledBitmap(bitmap, 30, 30, true);
+
+                } catch (FileNotFoundException exception) {
+                    exception.printStackTrace();
+                    bitmap = BitmapFactory.decodeResource(getResources(),
+                            R.mipmap.ic_launcher);
+                } catch (IOException e) {
+
+                    e.printStackTrace();
+                }
+
 
                 // Save to audioList
-                audioList.add(new Audio(data, title, album, artist));
+                audioList.add(new Audio(data, title, album, artist, duration,albumId,albumArtUri.toString()));
             }
         }
 

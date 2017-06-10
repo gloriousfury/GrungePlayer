@@ -9,6 +9,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.net.Uri;
 import android.os.IBinder;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -26,6 +27,7 @@ import com.gloriousfury.musicplayer.model.StorageUtil;
 import com.gloriousfury.musicplayer.service.MediaPlayerService;
 import com.gloriousfury.musicplayer.ui.activity.MainActivity;
 import com.gloriousfury.musicplayer.ui.activity.SingleSongActivity;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +42,7 @@ public class AllSongsAdapter extends RecyclerView.Adapter<AllSongsAdapter.ViewHo
     private MediaPlayerService player;
     String SONG_TITLE = "song_title";
     String SONG_ARTIST = "song_artist";
+    String ALBUM_ART_URI = "song_album_art_uri";
 
 
     public AllSongsAdapter(Context context, ArrayList<Audio> song_list) {
@@ -78,6 +81,7 @@ public class AllSongsAdapter extends RecyclerView.Adapter<AllSongsAdapter.ViewHo
             Intent openSingleSongActivity = new Intent(context, SingleSongActivity.class);
             openSingleSongActivity.putExtra(SONG_TITLE,song_list.get(getAdapterPosition()).getTitle());
             openSingleSongActivity.putExtra(SONG_ARTIST,song_list.get(getAdapterPosition()).getArtist());
+            openSingleSongActivity.putExtra(ALBUM_ART_URI,song_list.get(getAdapterPosition()).getAlbumArtUriString());
             context.startActivity(openSingleSongActivity);
 
         }
@@ -96,8 +100,8 @@ public class AllSongsAdapter extends RecyclerView.Adapter<AllSongsAdapter.ViewHo
         holder.song_title.setText(song_list.get(position).getTitle());
         holder.artist.setText(song_list.get(position).getArtist());
 
-
-        Picasso.with(context).load(song_list.get(position).getProductImage()).into(holder.productImage);
+        Uri albumArtUri =  Uri.parse(song_list.get(position).getAlbumArtUriString());
+        Picasso.with(context).load(albumArtUri).resize(120,120).into(holder.song_background);
 
     }
 

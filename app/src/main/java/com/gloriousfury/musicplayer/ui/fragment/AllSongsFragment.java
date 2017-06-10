@@ -123,7 +123,8 @@ public class AllSongsFragment extends Fragment implements View.OnClickListener {
 
 
                 // Save to audioList
-                audioList.add(new Audio(data, title, album, artist, duration,albumId,albumArtUri));
+                audioList.add(new Audio(data, title, album, artist, duration,albumId,albumArtUri.toString()
+                ));
             }
         }
 

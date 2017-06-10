@@ -119,7 +119,7 @@ public class LibraryFragment extends Fragment {
 
 
                 // Save to audioList
-                audioList.add(new Audio(data, title, album, artist, duration,albumId,albumArtUri));
+                audioList.add(new Audio(data, title, album, artist, duration,albumId,albumArtUri.toString()));
             }
         }
 
