@@ -23,6 +23,7 @@ import android.widget.AlphabetIndexer;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.SectionIndexer;
+import android.widget.Toast;
 
 import com.gloriousfury.musicplayer.R;
 import com.gloriousfury.musicplayer.adapter.AlbumsList_Adapter;
@@ -273,7 +274,7 @@ public class AlbumsFragment extends Fragment implements
                     }
                 }
 
-                albumList = prepareData1(audioList);
+
                 return cursor;
             }
 
@@ -287,8 +288,10 @@ public class AlbumsFragment extends Fragment implements
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-
-        adapter.setAlbumData(albumList);
+        albumList = prepareData1(audioList);
+        adapter = new AlbumsList_Adapter(getActivity(),albumList);
+        recyclerView.setAdapter(adapter);
+//        adapter.setAlbumData(albumList);
     }
 
     @Override

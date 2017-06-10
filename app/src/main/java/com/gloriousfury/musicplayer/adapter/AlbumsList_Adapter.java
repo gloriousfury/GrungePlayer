@@ -138,7 +138,12 @@ public class AlbumsList_Adapter extends RecyclerView.Adapter<AlbumsList_Adapter.
     @Override
     public int getItemCount() {
 
-        return albumLists.size();
+        if (albumLists ==null) {
+
+            return 0;
+        } else {
+            return albumLists.size();
+        }
     }
 
 
