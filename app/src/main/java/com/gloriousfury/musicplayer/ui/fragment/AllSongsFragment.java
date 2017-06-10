@@ -1,8 +1,11 @@
 package com.gloriousfury.musicplayer.ui.fragment;
 
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
@@ -24,7 +27,10 @@ import com.gloriousfury.musicplayer.adapter.AllSongsAdapter;
 import com.gloriousfury.musicplayer.model.Audio;
 import com.gloriousfury.musicplayer.ui.activity.MainActivity;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.logging.Logger;
 
 
 /**
@@ -68,14 +74,9 @@ public class AllSongsFragment extends Fragment implements View.OnClickListener {
         AllSongsAdapter adapter = new AllSongsAdapter(getActivity(), loadAudio());
 
 
-
         recyclerView.setAdapter(adapter);
         return v;
     }
-
-
-
-
 
 
     private ArrayList<Audio> loadAudio() {
@@ -94,9 +95,35 @@ public class AllSongsFragment extends Fragment implements View.OnClickListener {
                 String title = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE));
                 String album = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM));
                 String artist = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST));
+                Long albumId = cursor.getLong(cursor
+                        .getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID));
+
+                int duration = cursor.getInt(cursor
+                        .getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
+
+                Uri sArtworkUri = Uri
+                        .parse("content://media/external/audio/albumart");
+                Uri albumArtUri = ContentUris.withAppendedId(sArtworkUri, albumId);
+
+
+                Bitmap bitmap = null;
+                try {
+                    bitmap = MediaStore.Images.Media.getBitmap(
+                            getActivity().getContentResolver(), albumArtUri);
+                    bitmap = Bitmap.createScaledBitmap(bitmap, 30, 30, true);
+
+                } catch (FileNotFoundException exception) {
+                    exception.printStackTrace();
+                    bitmap = BitmapFactory.decodeResource(getResources(),
+                            R.mipmap.ic_launcher);
+                } catch (IOException e) {
+
+                    e.printStackTrace();
+                }
+
 
                 // Save to audioList
-                audioList.add(new Audio(data, title, album, artist));
+                audioList.add(new Audio(data, title, album, artist, duration,albumId,albumArtUri));
             }
         }
 

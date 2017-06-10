@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:tools="http://schemas.android.com/tools"
-    android:background="@color/white"
+    android:background="@color/app_white_smoke"
     android:orientation="vertical">
 
     <RelativeLayout
@@ -17,20 +17,20 @@
             android:id="@+id/song_background"
             android:layout_width="@dimen/seventy"
             android:layout_height="@dimen/seventy"
-           android:layout_margin="@dimen/ten"
+
             android:background="@color/grey" />
 
         <TextView
             android:id="@+id/song_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/twenty"
+            android:layout_marginLeft="@dimen/five"
             android:layout_marginRight="@dimen/fifty"
-            android:layout_marginTop="@dimen/fifteen"
+            android:layout_marginTop="@dimen/ten"
             android:layout_toRightOf="@id/song_background"
             tools:text="Fresh Red South African apples (BlueBand)"
-            android:textColor="#07983d"
-            android:textStyle="bold" />
+            android:textColor="@color/black"
+             />
 
 
         <TextView
@@ -38,14 +38,31 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/song_title"
-            android:layout_marginLeft="@dimen/twenty"
+            android:layout_marginLeft="@dimen/five"
             android:layout_marginRight="@dimen/twenty"
             android:layout_marginTop="@dimen/five"
             android:layout_toRightOf="@id/song_background"
             tools:text="RS 18999ml/ 180ml" />
 
-
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="3:11"
+            android:layout_centerVertical="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="@dimen/five"
+            />
     </RelativeLayout>
+<View
+    android:layout_width="match_parent"
+    android:layout_height="1dp"
+    android:background="@color/greyish_white"
+    android:layout_marginLeft="@dimen/five"
+    android:layout_marginRight="@dimen/five"
+
+    />
+
+
 
 
 </LinearLayout>

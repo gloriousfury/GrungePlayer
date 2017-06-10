@@ -97,7 +97,7 @@ public class AllSongsAdapter extends RecyclerView.Adapter<AllSongsAdapter.ViewHo
         holder.artist.setText(song_list.get(position).getArtist());
 
 
-//        Picasso.with(context).load(song_list.get(position).getProductImage()).into(holder.productImage);
+        Picasso.with(context).load(song_list.get(position).getProductImage()).into(holder.productImage);
 
     }
 
