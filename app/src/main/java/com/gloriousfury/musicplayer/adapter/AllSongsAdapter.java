@@ -100,8 +100,8 @@ public class AllSongsAdapter extends RecyclerView.Adapter<AllSongsAdapter.ViewHo
         holder.song_title.setText(song_list.get(position).getTitle());
         holder.artist.setText(song_list.get(position).getArtist());
 
-        Uri albumArtUri =  Uri.parse(song_list.get(position).getAlbumArtUriString());
-        Picasso.with(context).load(albumArtUri).resize(120,120).into(holder.song_background);
+//        Uri albumArtUri =  Uri.parse(song_list.get(position).getAlbumArtUriString());
+//        Picasso.with(context).load(albumArtUri).resize(120,120).into(holder.song_background);
 
     }
 

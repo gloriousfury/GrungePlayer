@@ -35,6 +35,11 @@ public class AlbumsList_Adapter extends RecyclerView.Adapter<AlbumsList_Adapter.
 
 
 
+    public AlbumsList_Adapter(Context context){
+        this.context = context;
+
+    }
+
     public AlbumsList_Adapter(Context context, List<AlbumLists> albumLists) {
 
         this.context = context;
@@ -121,6 +126,13 @@ public class AlbumsList_Adapter extends RecyclerView.Adapter<AlbumsList_Adapter.
         recyclerView.setAdapter(adapter);
 
 
+    }
+
+
+    public void setAlbumData(ArrayList<AlbumLists> albumlist){
+
+        this.albumLists = albumlist;
+        notifyDataSetChanged();
     }
 
     @Override

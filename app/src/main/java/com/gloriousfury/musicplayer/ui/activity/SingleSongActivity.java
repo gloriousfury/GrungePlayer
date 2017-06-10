@@ -107,7 +107,7 @@ public class SingleSongActivity extends AppCompatActivity  implements SeekBar.On
             artist.setText(song_artist);
             if(albumArtUri!= null){
 
-//                Picasso.with(this).load(albumArtUri).into(songBackground);
+                Picasso.with(this).load(albumArtUri).into(songBackground);
 
 
             }
