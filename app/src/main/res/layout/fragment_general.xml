@@ -7,12 +7,11 @@
    >
 
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-
-        tools:context="com.taiyeoloriade.androidplayground.activity.MainActivity">
+        >
 
         <View
             android:layout_width="match_parent"
@@ -21,14 +20,19 @@
         <android.support.v7.widget.RecyclerView
             android:id="@+id/recyclerView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content"
+            android:paddingBottom="@dimen/seventy"
+            >
 
 
         </android.support.v7.widget.RecyclerView>
 
 
 
-    </LinearLayout>
+
+
+
+    </RelativeLayout>
 
 
 </android.support.design.widget.CoordinatorLayout>

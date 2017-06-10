@@ -39,14 +39,31 @@
 
             </android.support.design.widget.AppBarLayout>
 
+
+            <LinearLayout
+                android:id="@+id/mini_layout"
+
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/containerView"
+                android:layout_alignParentBottom="true"
+                >
+                <include layout="@layout/view_mini_player"
+
+                    />
+
+            </LinearLayout>
+
             <FrameLayout
                 android:orientation="vertical"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:id="@+id/containerView"
-                android:layout_below="@id/appBar">
-            </FrameLayout>
+                android:layout_below="@id/appBar"
+                android:paddingBottom="@dimen/seventy"
 
+                >
+            </FrameLayout>
 
         </RelativeLayout>
 

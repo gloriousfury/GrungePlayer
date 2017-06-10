@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:layout_margin="@dimen/five"
+    >
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:weightSum="10"
+        android:orientation="horizontal"
+
+        >
+
+        <RelativeLayout
+            android:id="@+id/view_1"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/one_hundred"
+            android:layout_margin="@dimen/five"
+            android:layout_weight="5"
+            >
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:alpha="0.5"
+                android:background="@color/third_color" />
+
+            <ImageView
+                android:id="@+id/view_icon"
+                android:layout_width="@dimen/thirty_five"
+                android:layout_height="@dimen/thirty_five"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="@dimen/twenty"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="All Songs"
+                android:textColor="@color/white"
+                android:layout_below="@id/view_icon"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="@dimen/ten"
+
+
+                />
+
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/one_hundred"
+            android:layout_margin="@dimen/five"
+            android:layout_weight="5"
+            >
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:alpha="0.5"
+                android:background="@color/pink" />
+            <ImageView
+                android:id="@+id/view_icon2"
+                android:layout_width="@dimen/thirty_five"
+                android:layout_height="@dimen/thirty_five"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="@dimen/twenty"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Recently Added"
+                android:textColor="@color/white"
+                android:layout_below="@id/view_icon2"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="@dimen/ten"
+
+
+                />
+
+
+        </RelativeLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:weightSum="10"
+        android:orientation="horizontal">
+
+        <RelativeLayout
+            android:id="@+id/view_3"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/one_hundred"
+            android:layout_margin="@dimen/five"
+            android:layout_weight="5"
+            >
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:alpha="0.5"
+                android:background="@color/third_color" />
+
+            <ImageView
+                android:id="@+id/view_icon3"
+                android:layout_width="@dimen/thirty_five"
+                android:layout_height="@dimen/thirty_five"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="@dimen/twenty"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Most Played"
+                android:textColor="@color/white"
+                android:layout_below="@id/view_icon3"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="@dimen/ten"
+
+
+                />
+
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/one_hundred"
+            android:layout_margin="@dimen/five"
+            android:layout_weight="5"
+            >
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:alpha="0.5"
+                android:background="@color/pink" />
+            <ImageView
+                android:id="@+id/view_icon4"
+                android:layout_width="@dimen/thirty_five"
+                android:layout_height="@dimen/thirty_five"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="@dimen/twenty"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="My Favorites"
+                android:textColor="@color/white"
+                android:layout_below="@id/view_icon4"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="@dimen/ten"
+
+
+                />
+
+
+        </RelativeLayout>
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        >
+        <ImageButton
+            android:layout_width="@dimen/fifty"
+            android:layout_height="@dimen/fifty"
+            android:layout_margin="@dimen/five"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="@dimen/ten"
+            android:text="New Playlist"
+            />
+
+
+
+    </LinearLayout>
+
+
+    <android.support.v7.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/ten"
+        >
+
+
+    </android.support.v7.widget.RecyclerView>
+
+
+
+</LinearLayout>
