@@ -63,10 +63,13 @@ public class ScrollFragmentContainer extends Fragment {
         @Override
         public Fragment getItem(int position) {
             if(position == 0){
-                return AllSongsFragment.newInstance();
+                return LibraryFragment.newInstance();
             } else if(position == 1) {
+                return AllSongsFragment.newInstance();
+            }else if(position == 2) {
                 return AlbumsFragment.newInstance();
-            } else {
+            }
+            else {
                 return AllSongsFragment.newInstance();
             }
         }
@@ -74,15 +77,19 @@ public class ScrollFragmentContainer extends Fragment {
         @Override
         public int getCount() {
             // Show 3 total pages.
-            return 2;
+            return 3;
         }
 
         @Override
         public CharSequence getPageTitle(int position) {
             switch (position) {
+
                 case 0:
-                    return "All Songs";
+
+                    return "Library";
                 case 1:
+                    return "All Songs";
+                case 2:
                     return "Albums";
 
             }
