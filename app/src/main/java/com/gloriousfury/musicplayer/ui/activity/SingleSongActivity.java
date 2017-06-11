@@ -82,6 +82,22 @@ public class SingleSongActivity extends AppCompatActivity  implements SeekBar.On
         ButterKnife.bind(this);
         mediaPlayerService = new MediaPlayerService();
         currentMediaPlayer = MediaPlayerService.getMediaPlayerInstance();
+        seekBar.setOnSeekBarChangeListener(this);
+        long totalDuration = currentMediaPlayer.getDuration();
+        long currentDuration = currentMediaPlayer.getCurrentPosition();
+
+        // Displaying Total Duration time
+        songTotalDuration.setText(""+ Timer.milliSecondsToTimer(totalDuration));
+
+
+        // Displaying time completed playing
+        songCurrentDuration.setText(""+Timer.milliSecondsToTimer(currentDuration));
+
+        seekBar.setProgress(0);
+        seekBar.setMax(100);
+
+        // Updating progress bar
+        updateProgressBar();
 
 //        if (currentMediaPlayer.isPlaying()) {
 //            playPauseView.setImageDrawable(ContextCompat
@@ -164,6 +180,12 @@ public class SingleSongActivity extends AppCompatActivity  implements SeekBar.On
             playPauseView.setImageDrawable(ContextCompat
                     .getDrawable(SingleSongActivity.this,R.drawable.ic_pause_circle_filled_black_24dp));
             mediaPlayerService.resumeMedia(currentMediaPlayer);
+            // set Progress bar values
+            seekBar.setProgress(0);
+            seekBar.setMax(100);
+
+            // Updating progress bar
+            updateProgressBar();
         }
 
 
@@ -185,7 +207,7 @@ public class SingleSongActivity extends AppCompatActivity  implements SeekBar.On
             // Displaying Total Duration time
             songTotalDuration.setText(""+ Timer.milliSecondsToTimer(totalDuration));
 
-            Toast.makeText(SingleSongActivity.this,songTotalDuration.getText().toString(),Toast.LENGTH_LONG).show();
+
             // Displaying time completed playing
             songCurrentDuration.setText(""+Timer.milliSecondsToTimer(currentDuration));
 

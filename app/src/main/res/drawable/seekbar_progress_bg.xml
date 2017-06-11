@@ -9,6 +9,7 @@
             android:dither="false"
             android:filter="false"
             android:gravity="left"
+
         />
         </clip>
     </item>
