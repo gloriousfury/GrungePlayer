@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(com.gloriousfury.musicplayer.R.layout.activity_main);
+        setContentView(R.layout.activity_library);
 
         if (ContextCompat.checkSelfPermission(this,
                 android.Manifest.permission.READ_EXTERNAL_STORAGE)
@@ -67,36 +67,36 @@ public class MainActivity extends AppCompatActivity {
                     REQUEST_STORAGE_PERMISSION);
 
         }
-//        } else if (ContextCompat.checkSelfPermission(this,
-//                Manifest.permission.MEDIA_CONTENT_CONTROL) !=
-//                PackageManager.PERMISSION_GRANTED) {
-//            ActivityCompat.requestPermissions(this,
-//                    new String[]{Manifest.permission.MEDIA_CONTENT_CONTROL},
-//                    REQUEST_MEDIA_PERMISSION);
-//
-//
-//        }
-//
-        else {
-            // Launch the camera if the permission exists
-            loadAudio();
-//play the first audio in the ArrayList
-            playAudio(audioList.get(0).getData());
+        else if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.MEDIA_CONTENT_CONTROL) !=
+                PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.MEDIA_CONTENT_CONTROL},
+                    REQUEST_MEDIA_PERMISSION);
+
 
         }
+
+//        else {
+            // Launch the camera if the permission exists
+//            loadAudio();
+////play the first audio in the ArrayList
+//            playAudio(audioList.get(0).getData());
+
+
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+//        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+//        fab.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+//                        .setAction("Action", null).show();
+//            }
+//        });
 
 
     }

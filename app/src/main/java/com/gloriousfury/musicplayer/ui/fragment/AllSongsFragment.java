@@ -26,6 +26,7 @@ import com.gloriousfury.musicplayer.R;
 import com.gloriousfury.musicplayer.adapter.AllSongsAdapter;
 import com.gloriousfury.musicplayer.model.Audio;
 import com.gloriousfury.musicplayer.ui.activity.MainActivity;
+import com.gloriousfury.musicplayer.utils.StorageUtil;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -55,23 +56,30 @@ public class AllSongsFragment extends Fragment implements View.OnClickListener {
     RecyclerView recyclerView;
     ArrayList<Audio> audioList;
     boolean serviceBound = false;
+    StorageUtil storage;
 
+    AllSongsAdapter adapter;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_general, container, false);
-
+        storage  = new StorageUtil(getContext());
+        audioList = storage.loadAllAudio();
         recyclerView = (RecyclerView) v.findViewById(R.id.recyclerView);
         recyclerView.setHasFixedSize(true);
-
 
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext());
 
         recyclerView.setLayoutManager(layoutManager);
 
+        if (audioList != null) {
+            adapter = new AllSongsAdapter(getActivity(), audioList);
 
-        AllSongsAdapter adapter = new AllSongsAdapter(getActivity(), loadAudio());
+        }else {
+
+            Toast.makeText(getActivity(),"Not loaded yet", Toast.LENGTH_LONG).show();
+        }
 
 
         recyclerView.setAdapter(adapter);
@@ -130,6 +138,8 @@ public class AllSongsFragment extends Fragment implements View.OnClickListener {
 
 
         cursor.close();
+
+
         return audioList;
     }
 

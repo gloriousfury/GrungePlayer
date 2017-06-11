@@ -66,11 +66,12 @@ public class ScrollFragmentContainer extends Fragment {
                 return LibraryFragment.newInstance();
             } else if(position == 1) {
                 return AllSongsFragment.newInstance();
-            }else if(position == 2) {
+            }
+            else if(position == 2) {
                 return AlbumsFragment.newInstance();
             }
             else {
-                return AllSongsFragment.newInstance();
+                return BasicFragment.newInstance();
             }
         }
 

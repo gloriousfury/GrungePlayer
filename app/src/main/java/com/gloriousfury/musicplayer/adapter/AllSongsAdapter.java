@@ -4,7 +4,6 @@ package com.gloriousfury.musicplayer.adapter;
  * Created by OLORIAKE KEHINDE on 11/16/2016.
  */
 
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -15,22 +14,18 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.gloriousfury.musicplayer.R;
 import com.gloriousfury.musicplayer.model.Audio;
-import com.gloriousfury.musicplayer.model.StorageUtil;
+import com.gloriousfury.musicplayer.utils.StorageUtil;
 import com.gloriousfury.musicplayer.service.MediaPlayerService;
-import com.gloriousfury.musicplayer.ui.activity.MainActivity;
 import com.gloriousfury.musicplayer.ui.activity.SingleSongActivity;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import static com.gloriousfury.musicplayer.ui.activity.MainActivity.Broadcast_PLAY_NEW_AUDIO;
 
@@ -100,8 +95,8 @@ public class AllSongsAdapter extends RecyclerView.Adapter<AllSongsAdapter.ViewHo
         holder.song_title.setText(song_list.get(position).getTitle());
         holder.artist.setText(song_list.get(position).getArtist());
 
-//        Uri albumArtUri =  Uri.parse(song_list.get(position).getAlbumArtUriString());
-//        Picasso.with(context).load(albumArtUri).resize(120,120).into(holder.song_background);
+        Uri albumArtUri =  Uri.parse(song_list.get(position).getAlbumArtUriString());
+        Picasso.with(context).load(albumArtUri).resize(120,120).into(holder.song_background);
 
     }
 

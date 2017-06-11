@@ -93,7 +93,7 @@ public class AlbumsList_Adapter extends RecyclerView.Adapter<AlbumsList_Adapter.
     public void onBindViewHolder(final ViewHolder viewHolder, final int position) {
 
 //            changeBackgroundColor(position, viewHolder);
-        ArrayList<Audio> dropDowns = albumLists.get(position).getAlbums();
+        ArrayList<Audio> singleAlbumList = albumLists.get(position).getAlbums();
 
 
 //        viewHolder.firstlayout.setBackgroundColor(ContextCompat.getColor(context, albumLists.get(position).getBackgroundColor()));
@@ -103,7 +103,7 @@ public class AlbumsList_Adapter extends RecyclerView.Adapter<AlbumsList_Adapter.
 //        viewHolder.cardView.setBackgroundColor(ContextCompat.getColor(context,albumLists.get(position).getBackgroundColor()));
 
 
-        renderAlbumList(dropDowns, viewHolder.albumLists_recycler_view);
+        renderAlbumList(singleAlbumList, viewHolder.albumLists_recycler_view);
 
 
     }

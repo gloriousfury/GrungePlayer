@@ -30,6 +30,7 @@ import com.gloriousfury.musicplayer.adapter.AlbumsList_Adapter;
 import com.gloriousfury.musicplayer.adapter.AllSongsAdapter;
 import com.gloriousfury.musicplayer.model.AlbumLists;
 import com.gloriousfury.musicplayer.model.Audio;
+import com.gloriousfury.musicplayer.utils.StorageUtil;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -41,7 +42,7 @@ import java.util.ArrayList;
  */
 
 public class AlbumsFragment extends Fragment implements
-        LoaderManager.LoaderCallbacks<Cursor> {
+        LoaderManager.LoaderCallbacks<ArrayList<AlbumLists>> {
 
 
     public AlbumsFragment() {
@@ -68,6 +69,8 @@ public class AlbumsFragment extends Fragment implements
     boolean serviceBound = false;
     Cursor cursor;
     private static final int TASK_LOADER_ID = 0;
+    StorageUtil storage;
+    ArrayList<Audio> retrievedAudioList;
 
     public AlphabetIndexer mAlphabetIndexer;
 
@@ -76,9 +79,10 @@ public class AlbumsFragment extends Fragment implements
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_general, container, false);
-
+        storage = new StorageUtil(getActivity());
         recyclerView = (RecyclerView) v.findViewById(R.id.recyclerView);
         recyclerView.setHasFixedSize(true);
+        retrievedAudioList = storage.loadAllAudio();
 
 
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext());
@@ -86,13 +90,14 @@ public class AlbumsFragment extends Fragment implements
         recyclerView.setLayoutManager(layoutManager);
 
 
-        adapter = new AlbumsList_Adapter(getActivity());
-
+        adapter = new AlbumsList_Adapter(getActivity(), prepareData1(retrievedAudioList));
 
         recyclerView.setAdapter(adapter);
 
         Context context = getActivity();
-        getActivity().getSupportLoaderManager().initLoader(TASK_LOADER_ID, null, this);
+
+
+
 
         return v;
     }
@@ -153,7 +158,6 @@ public class AlbumsFragment extends Fragment implements
     }
 
 
-
     public ArrayList<AlbumLists> prepareData1(ArrayList<Audio> audio_list) {
 
         ArrayList<AlbumLists> exampleList = new ArrayList<>();
@@ -170,19 +174,19 @@ public class AlbumsFragment extends Fragment implements
 
             ArrayList<Audio> newArrayList = new ArrayList<>();
             ArrayList<Audio> ashArrayList = new ArrayList<>();
-            for (int k = 0; k < audioList.size(); k++) {
+            for (int k = 0; k < audio_list.size(); k++) {
 
-                if (audioList.get(k).getAlbum() != null) {
-                    String firstLetter = audioList.get(k).getAlbum().substring(0, 1);
+                if (audio_list.get(k).getAlbum() != null) {
+                    String firstLetter = audio_list.get(k).getAlbum().substring(0, 1);
 
 
                     Audio newAudio;
 
                     if (firstLetter.equalsIgnoreCase(alphabet)) {
-                        newAudio = audioList.get(k);
+                        newAudio = audio_list.get(k);
                         newArrayList.add(newAudio);
                     } else {
-                        newAudio = audioList.get(k);
+                        newAudio = audio_list.get(k);
                         ashArrayList.add(newAudio);
 
                     }
@@ -201,20 +205,24 @@ public class AlbumsFragment extends Fragment implements
     }
 
     @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+    public Loader<ArrayList<AlbumLists>> onCreateLoader(int id, Bundle args) {
 
-        return new AsyncTaskLoader<Cursor>(getActivity()) {
+        return new AsyncTaskLoader<ArrayList<AlbumLists>>(getActivity()) {
 
             // Initialize a Cursor, this will hold all the task data
             Cursor cursor = null;
             ArrayList<AlbumLists> albumList = new ArrayList<>();
+            ArrayList<Audio> retrievedAudioList;
 
             // onStartLoading() is called when a loader first starts loading data
             @Override
             protected void onStartLoading() {
-                if (cursor != null) {
+                retrievedAudioList = storage.loadAllAudio();
+
+                if (retrievedAudioList != null) {
+
                     // Delivers any previously loaded data immediately
-                    deliverResult(cursor);
+                    deliverResult(prepareData1(retrievedAudioList));
                 } else {
                     // Force a new load
                     forceLoad();
@@ -223,63 +231,14 @@ public class AlbumsFragment extends Fragment implements
 
             // loadInBackground() performs asynchronous loading of data
             @Override
-            public Cursor loadInBackground() {
-                // Will implement to load data
+            public ArrayList<AlbumLists> loadInBackground() {
 
-                // COMPLETED (5) Query and load all task data in the background; sort by priority
-                // [Hint] use a try/catch block to catch any errors in loading data
-                ContentResolver contentResolver = getActivity().getContentResolver();
-
-                Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
-                String selection = MediaStore.Audio.Media.IS_MUSIC + "!= 0";
-                String sortOrder = MediaStore.Audio.Media.TITLE + " ASC";
-                Cursor cursor = contentResolver.query(uri, null, selection, null, sortOrder);
-
-                if (cursor != null && cursor.getCount() > 0) {
-                    audioList = new ArrayList<>();
-                    while (cursor.moveToNext()) {
-                        String data = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA));
-                        String title = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE));
-                        String album = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM));
-                        String artist = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST));
-                        Long albumId = cursor.getLong(cursor
-                                .getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID));
-
-                        int duration = cursor.getInt(cursor
-                                .getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
-
-                        Uri sArtworkUri = Uri
-                                .parse("content://media/external/audio/albumart");
-                        Uri albumArtUri = ContentUris.withAppendedId(sArtworkUri, albumId);
-
-
-                        Bitmap bitmap = null;
-                        try {
-                            bitmap = MediaStore.Images.Media.getBitmap(
-                                    getActivity().getContentResolver(), albumArtUri);
-                            bitmap = Bitmap.createScaledBitmap(bitmap, 30, 30, true);
-
-                        } catch (FileNotFoundException exception) {
-                            exception.printStackTrace();
-                            bitmap = BitmapFactory.decodeResource(getResources(),
-                                    R.mipmap.ic_launcher);
-                        } catch (IOException e) {
-
-                            e.printStackTrace();
-                        }
-
-
-                        // Save to audioList
-                        audioList.add(new Audio(data, title, album, artist, duration, albumId, albumArtUri.toString()));
-                    }
-                }
-
-
-                return cursor;
+                retrievedAudioList = storage.loadAllAudio();
+                return prepareData1(retrievedAudioList);
             }
 
             // deliverResult sends the result of the load, a Cursor, to the registered listener
-            public void deliverResult(Cursor data) {
+            public void deliverResult(ArrayList<AlbumLists> data) {
 
                 super.deliverResult(data);
             }
@@ -287,15 +246,15 @@ public class AlbumsFragment extends Fragment implements
     }
 
     @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        albumList = prepareData1(audioList);
-        adapter = new AlbumsList_Adapter(getActivity(),albumList);
+    public void onLoadFinished(Loader<ArrayList<AlbumLists>> loader, ArrayList<AlbumLists> data) {
+
+        adapter = new AlbumsList_Adapter(getActivity(), data);
         recyclerView.setAdapter(adapter);
 //        adapter.setAlbumData(albumList);
     }
 
     @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
+    public void onLoaderReset(Loader<ArrayList<AlbumLists>> loader) {
         adapter.setAlbumData(null);
     }
 }

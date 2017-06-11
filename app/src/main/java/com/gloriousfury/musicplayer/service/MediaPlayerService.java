@@ -25,7 +25,7 @@ import android.util.Log;
 
 import com.gloriousfury.musicplayer.R;
 import com.gloriousfury.musicplayer.model.Audio;
-import com.gloriousfury.musicplayer.model.StorageUtil;
+import com.gloriousfury.musicplayer.utils.StorageUtil;
 import com.gloriousfury.musicplayer.ui.activity.MainActivity;
 import com.gloriousfury.musicplayer.utils.PlaybackStatus;
 

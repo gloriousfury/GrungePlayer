@@ -6,11 +6,14 @@
     android:layout_height="match_parent"
     android:weightSum="100">
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="45"
         >
+
+
+
 
     <ImageView
         android:id="@+id/song_background"
@@ -19,9 +22,16 @@
         android:scaleType="fitXY"
         />
 
+        <ImageView
+            android:id="@+id/close_activity"
+            android:layout_width="@dimen/thirty"
+            android:layout_height="@dimen/thirty"
+            android:src="@drawable/ic_keyboard_arrow_down_white_24dp"
+            android:layout_margin="@dimen/five"
+            />
 
 
-    </LinearLayout>
+    </RelativeLayout>
 
 
     <RelativeLayout

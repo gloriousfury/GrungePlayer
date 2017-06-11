@@ -1,17 +1,29 @@
 package com.gloriousfury.musicplayer.ui.activity;
 
 import android.Manifest;
+import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AlertDialog;
+import android.text.TextUtils;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -22,19 +34,35 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import com.gloriousfury.musicplayer.R;
+import com.gloriousfury.musicplayer.adapter.AlbumsList_Adapter;
+import com.gloriousfury.musicplayer.model.AlbumLists;
+import com.gloriousfury.musicplayer.model.Audio;
 import com.gloriousfury.musicplayer.service.MediaPlayerService;
 import com.gloriousfury.musicplayer.ui.fragment.ScrollFragmentContainer;
+import com.gloriousfury.musicplayer.utils.StorageUtil;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.URL;
+import java.util.ArrayList;
 
 
 public class LibraryActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener,
+        LoaderManager.LoaderCallbacks<ArrayList<Audio>> {
 
     FragmentManager mFragmentManager;
     FragmentTransaction mFragmentTransaction;
+    ArrayList<Audio> audioList;
+    ArrayList<Audio> retrievedAudioList = new ArrayList<>();
+    StorageUtil storage;
+    private static final int TASK_LOADER_ID = 0;
     private static final int REQUEST_STORAGE_PERMISSION = 1;
     private static final int REQUEST_MEDIA_PERMISSION = 2;
+
     AlertDialog locationDialog = null;
 
     @Override
@@ -42,7 +70,6 @@ public class LibraryActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_library);
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-
 
         if (ContextCompat.checkSelfPermission(this,
                 android.Manifest.permission.READ_EXTERNAL_STORAGE)
@@ -62,15 +89,24 @@ public class LibraryActivity extends AppCompatActivity
                     REQUEST_STORAGE_PERMISSION);
 
         }
+        else if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.MEDIA_CONTENT_CONTROL) !=
+                PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.MEDIA_CONTENT_CONTROL},
+                    REQUEST_MEDIA_PERMISSION);
 
+
+        }
+
+
+        storage = new StorageUtil(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-
-
         mFragmentManager = getSupportFragmentManager();
         mFragmentTransaction = mFragmentManager.beginTransaction();
-        mFragmentTransaction.replace(R.id.containerView,new ScrollFragmentContainer()).commit();
+        mFragmentTransaction.replace(R.id.containerView, new ScrollFragmentContainer()).commit();
 
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -82,11 +118,135 @@ public class LibraryActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-
-
-
+        getSupportLoaderManager().initLoader(TASK_LOADER_ID, null, this);
 
     }
+
+
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        // Called when you request permission to read and write to external storage
+        switch (requestCode) {
+            case REQUEST_STORAGE_PERMISSION: {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // If you get permission, launch the camera
+                    getSupportLoaderManager().initLoader(TASK_LOADER_ID, null, this);
+                } else {
+                    // If you do not get permission, show a Toast
+                    Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show();
+                }
+                break;
+            }
+        }
+    }
+
+
+
+
+
+    @Override
+    public Loader<ArrayList<Audio>> onCreateLoader(int id, Bundle args) {
+
+        return new AsyncTaskLoader<ArrayList<Audio>>(this) {
+
+            // Initialize a Cursor, this will hold all the task data
+            Cursor cursor = null;
+
+
+            // onStartLoading() is called when a loader first starts loading data
+            @Override
+            protected void onStartLoading() {
+                retrievedAudioList =  storage.loadAllAudio();
+                if ( retrievedAudioList != null) {
+                    // Delivers any previously loaded data immediately
+                    deliverResult( retrievedAudioList);
+                } else {
+                    // Force a new load
+                    forceLoad();
+                }
+            }
+
+            // loadInBackground() performs asynchronous loading of data
+            @Override
+            public ArrayList<Audio> loadInBackground() {
+                // Will implement to load data
+
+                // COMPLETED (5) Query and load all task data in the background; sort by priority
+                // [Hint] use a try/catch block to catch any errors in loading data
+                ContentResolver contentResolver = getContentResolver();
+
+                Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+                String selection = MediaStore.Audio.Media.IS_MUSIC + "!= 0";
+                String sortOrder = MediaStore.Audio.Media.TITLE + " ASC";
+                Cursor cursor = contentResolver.query(uri, null, selection, null, sortOrder);
+
+                if (cursor != null && cursor.getCount() > 0) {
+                    audioList = new ArrayList<>();
+                    while (cursor.moveToNext()) {
+                        String data = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA));
+                        String title = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE));
+                        String album = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM));
+                        String artist = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST));
+                        Long albumId = cursor.getLong(cursor
+                                .getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID));
+
+                        int duration = cursor.getInt(cursor
+                                .getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
+
+                        Uri sArtworkUri = Uri
+                                .parse("content://media/external/audio/albumart");
+                        Uri albumArtUri = ContentUris.withAppendedId(sArtworkUri, albumId);
+
+
+                        Bitmap bitmap = null;
+                        try {
+                            bitmap = MediaStore.Images.Media.getBitmap(
+                                    getContentResolver(), albumArtUri);
+                            bitmap = Bitmap.createScaledBitmap(bitmap, 30, 30, true);
+
+                        } catch (FileNotFoundException exception) {
+                            exception.printStackTrace();
+                            bitmap = BitmapFactory.decodeResource(getResources(),
+                                    R.mipmap.ic_launcher);
+                        } catch (IOException e) {
+
+                            e.printStackTrace();
+                        }
+
+
+                        // Save to audioList
+                        audioList.add(new Audio(data, title, album, artist, duration, albumId, albumArtUri.toString()));
+                    }
+                }
+
+
+                return audioList;
+            }
+
+            // deliverResult sends the result of the load, a Cursor, to the registered listener
+            public void deliverResult(ArrayList<Audio> data) {
+
+                super.deliverResult(data);
+            }
+        };
+    }
+
+    @Override
+    public void onLoadFinished(Loader<ArrayList<Audio>> loader, ArrayList<Audio> data) {
+        storage.storeAllAudio(data);
+    }
+
+
+
+    @Override
+    public void onLoaderReset(Loader<ArrayList<Audio>> loader) {
+        audioList = null;
+    }
+
 
 
 
