@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+
+        >
+
+
+        <android.support.v7.widget.CardView
+            android:id="@+id/img_background_view"
+            android:layout_width="@dimen/one_fifty"
+            android:layout_height="@dimen/one_fifty"
+            android:layout_margin="@dimen/twenty"
+            app:cardCornerRadius="@dimen/ten">
+
+            <ImageView
+                android:id="@+id/song_background"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@color/grey" />
+
+
+        </android.support.v7.widget.CardView>
+
+        <TextView
+            android:id="@+id/album_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/twenty_five"
+            android:layout_toRightOf="@id/img_background_view"
+            android:textSize="25sp"
+            android:textStyle="bold"
+            tools:text="Ayo" />
+
+
+        <TextView
+            android:id="@+id/artist"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/album_name"
+            android:layout_marginTop="@dimen/five"
+            android:layout_toRightOf="@id/img_background_view"
+            android:textColor="@color/pink"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            tools:text="Wizkid" />
+
+
+        <TextView
+            android:id="@+id/song_year"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/artist"
+            android:layout_marginTop="@dimen/five"
+            android:layout_toRightOf="@id/img_background_view"
+            android:textColor="@color/light_grey"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            tools:text="2014" />
+
+
+
+        <TextView
+            android:id="@+id/no_of_songs"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/song_year"
+            android:layout_marginTop="@dimen/five"
+            android:layout_toRightOf="@id/img_background_view"
+            android:textColor="@color/light_grey"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            tools:text="14 Songs" />
+
+        <TextView
+            android:id="@+id/play_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/no_of_songs"
+            android:layout_marginTop="@dimen/five"
+            android:layout_toRightOf="@id/img_background_view"
+            android:textColor="@color/light_grey"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            tools:text="1 Hour , 50 Minutes" />
+
+        <ImageView
+
+            android:id="@+id/img_play_pause"
+            android:layout_width="@dimen/thirty_five"
+            android:layout_height="@dimen/thirty_five"
+            android:src="@drawable/ic_play_circle_filled_white_black_24dp"
+            android:layout_below="@id/play_time"
+            android:layout_toRightOf="@id/img_background_view"
+            android:layout_alignBaseline="@id/img_background_view"
+            android:baselineAlignBottom="true"
+
+            />
+
+
+    </RelativeLayout>
+
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="@dimen/twenty"
+        >
+
+
+
+
+    </android.support.v7.widget.RecyclerView>
+
+</LinearLayout>

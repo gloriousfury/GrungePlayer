@@ -39,6 +39,7 @@ import android.widget.Toast;
 import com.gloriousfury.musicplayer.R;
 import com.gloriousfury.musicplayer.adapter.AlbumsList_Adapter;
 import com.gloriousfury.musicplayer.model.AlbumLists;
+import com.gloriousfury.musicplayer.model.Albums;
 import com.gloriousfury.musicplayer.model.Audio;
 import com.gloriousfury.musicplayer.service.MediaPlayerService;
 import com.gloriousfury.musicplayer.ui.fragment.ScrollFragmentContainer;
@@ -57,7 +58,9 @@ public class LibraryActivity extends AppCompatActivity
     FragmentManager mFragmentManager;
     FragmentTransaction mFragmentTransaction;
     ArrayList<Audio> audioList;
+    ArrayList<Albums> albumList;
     ArrayList<Audio> retrievedAudioList = new ArrayList<>();
+    ArrayList<AlbumLists> retrievedAlbumsList = new ArrayList<>();
     StorageUtil storage;
     private static final int TASK_LOADER_ID = 0;
     private static final int REQUEST_STORAGE_PERMISSION = 1;
@@ -161,7 +164,8 @@ public class LibraryActivity extends AppCompatActivity
             @Override
             protected void onStartLoading() {
                 retrievedAudioList =  storage.loadAllAudio();
-                if ( retrievedAudioList != null) {
+                retrievedAlbumsList =  storage.loadAllAlbums();
+                if ( retrievedAudioList != null&& retrievedAlbumsList!=null) {
                     // Delivers any previously loaded data immediately
                     deliverResult( retrievedAudioList);
                 } else {
@@ -174,7 +178,7 @@ public class LibraryActivity extends AppCompatActivity
             @Override
             public ArrayList<Audio> loadInBackground() {
                 // Will implement to load data
-
+                getListOfAlbums();
                 // COMPLETED (5) Query and load all task data in the background; sort by priority
                 // [Hint] use a try/catch block to catch any errors in loading data
                 ContentResolver contentResolver = getContentResolver();
@@ -186,6 +190,7 @@ public class LibraryActivity extends AppCompatActivity
 
                 if (cursor != null && cursor.getCount() > 0) {
                     audioList = new ArrayList<>();
+
                     while (cursor.moveToNext()) {
                         String data = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA));
                         String title = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE));
@@ -220,6 +225,7 @@ public class LibraryActivity extends AppCompatActivity
 
                         // Save to audioList
                         audioList.add(new Audio(data, title, album, artist, duration, albumId, albumArtUri.toString()));
+
                     }
                 }
 
@@ -245,6 +251,122 @@ public class LibraryActivity extends AppCompatActivity
     @Override
     public void onLoaderReset(Loader<ArrayList<Audio>> loader) {
         audioList = null;
+    }
+
+
+    public ArrayList<Albums> getListOfAlbums() {
+
+        String where = null;
+
+        final Uri uri = MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI;
+        final String _id = MediaStore.Audio.Albums._ID;
+        final String album_name = MediaStore.Audio.Albums.ALBUM;
+        final String artist = MediaStore.Audio.Albums.ARTIST;
+        final String albumart = MediaStore.Audio.Albums.ALBUM_ART;
+        final String tracks = MediaStore.Audio.Albums.NUMBER_OF_SONGS;
+
+        final String[] columns = { _id, album_name, artist, albumart, tracks };
+        Cursor cursor = getContentResolver().query(uri, columns, where,
+                null, null);
+
+
+        // add playlsit to
+
+        if (cursor != null && cursor.getCount() > 0) {
+
+            albumList= new ArrayList<>();
+            while (cursor.moveToNext()) {
+                String album = cursor.getString(cursor.getColumnIndex(album_name));
+                Long albumId = cursor.getLong(cursor
+                        .getColumnIndexOrThrow(_id));
+                String album_artist= cursor.getString(cursor.getColumnIndex(artist));
+//               int album_art = cursor.getInt(cursor.getColumnIndex(artist));
+                int noOfTracks = cursor.getInt(cursor.getColumnIndex(tracks));
+
+                Uri sArtworkUri = Uri
+                        .parse("content://media/external/audio/albumart");
+                Uri albumArtUri = ContentUris.withAppendedId(sArtworkUri, albumId);
+
+
+                Bitmap bitmap = null;
+                try {
+                    bitmap = MediaStore.Images.Media.getBitmap(
+                            getContentResolver(), albumArtUri);
+                    bitmap = Bitmap.createScaledBitmap(bitmap, 30, 30, true);
+
+                } catch (FileNotFoundException exception) {
+                    exception.printStackTrace();
+                    bitmap = BitmapFactory.decodeResource(getResources(),
+                            R.mipmap.ic_launcher);
+                } catch (IOException e) {
+
+                    e.printStackTrace();
+                }
+
+
+                // Save to audioList
+                albumList.add(new Albums( album, album_artist,noOfTracks, albumId, albumArtUri.toString()));
+
+            }
+        }
+
+
+      storage.storeAllAlbums(prepareData(albumList));
+
+        cursor.close();
+
+        return albumList;
+    }
+
+
+
+
+
+
+    public ArrayList<AlbumLists> prepareData(ArrayList<Albums> album_list) {
+
+        ArrayList<AlbumLists> exampleList = new ArrayList<>();
+
+        String[] title = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
+                "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"};
+
+        for (int i = 0; i < title.length; i++) {
+            String alphabet = title[i];
+
+
+            AlbumLists exampleItem = new AlbumLists();
+
+
+            ArrayList<Albums> newArrayList = new ArrayList<>();
+            ArrayList<Albums> ashArrayList = new ArrayList<>();
+            for (int k = 0; k < album_list.size(); k++) {
+
+                if (album_list.get(k).getAlbum() != null) {
+                    String firstLetter = album_list.get(k).getAlbum().substring(0, 1);
+
+
+                    Albums newAlbums;
+
+                    if (firstLetter.equalsIgnoreCase(alphabet)) {
+                        newAlbums = album_list.get(k);
+                        newArrayList.add(newAlbums);
+                    } else {
+                        newAlbums = album_list.get(k);
+                        ashArrayList.add(newAlbums);
+
+                    }
+                }
+
+            }
+            exampleItem.setAlbums(newArrayList);
+            exampleItem.setAlphabet(title[i]);
+
+            exampleList.add(exampleItem);
+
+
+        }
+
+        return exampleList;
     }
 
 

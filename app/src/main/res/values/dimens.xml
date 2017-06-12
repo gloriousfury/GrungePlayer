@@ -32,10 +32,9 @@
     <dimen name="buttonwidthlong">225dp</dimen>
     <dimen name="buttonwidth">100dp</dimen>
 
-    <dimen name="logoPadding"> 125dp</dimen>
+    <dimen name="logoPadding">125dp</dimen>
     <dimen name="underlogoPadding">100dp</dimen>
     <dimen name="logo_height">75dp</dimen>
-
 
 
     <dimen name="viewHeight">10sp</dimen>
@@ -45,7 +44,6 @@
     <dimen name="vertical_margin">30dp</dimen>
     <dimen name="buttonmargin">15dp</dimen>
     <dimen name="buttontextsize">15sp</dimen>
-
 
 
     <dimen name="item_offset">10dp</dimen>
@@ -71,7 +69,6 @@
 
 
     <dimen name="toolbar_height">56dp</dimen>
-
 
 
     <dimen name="recycleview_mycourses_height">200dp</dimen>
@@ -156,7 +153,6 @@
     <dimen name="four_hundred">400dp</dimen>
     <dimen name="four_twenty_five">425dp</dimen>
     <dimen name="four_fifty">450dp</dimen>
-
 
 
     <dimen name="card_image_height">125dp</dimen>

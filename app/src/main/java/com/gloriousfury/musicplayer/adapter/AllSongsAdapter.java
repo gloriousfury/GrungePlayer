@@ -35,6 +35,7 @@ public class AllSongsAdapter extends RecyclerView.Adapter<AllSongsAdapter.ViewHo
     private ArrayList<Audio> song_list;
     boolean serviceBound = false;
     private MediaPlayerService player;
+    String SONG = "single_audio";
     String SONG_TITLE = "song_title";
     String SONG_ARTIST = "song_artist";
     String ALBUM_ART_URI = "song_album_art_uri";
@@ -72,11 +73,12 @@ public class AllSongsAdapter extends RecyclerView.Adapter<AllSongsAdapter.ViewHo
         @Override
         public void onClick(View v) {
             int adapterposition =getAdapterPosition();
+
+            Audio singleSong = song_list.get(adapterposition);
             playAudio(adapterposition);
             Intent openSingleSongActivity = new Intent(context, SingleSongActivity.class);
-            openSingleSongActivity.putExtra(SONG_TITLE,song_list.get(getAdapterPosition()).getTitle());
-            openSingleSongActivity.putExtra(SONG_ARTIST,song_list.get(getAdapterPosition()).getArtist());
-            openSingleSongActivity.putExtra(ALBUM_ART_URI,song_list.get(getAdapterPosition()).getAlbumArtUriString());
+            openSingleSongActivity.putExtra(SONG,singleSong);
+
             context.startActivity(openSingleSongActivity);
 
         }
@@ -95,8 +97,11 @@ public class AllSongsAdapter extends RecyclerView.Adapter<AllSongsAdapter.ViewHo
         holder.song_title.setText(song_list.get(position).getTitle());
         holder.artist.setText(song_list.get(position).getArtist());
 
-        Uri albumArtUri =  Uri.parse(song_list.get(position).getAlbumArtUriString());
-        Picasso.with(context).load(albumArtUri).resize(120,120).into(holder.song_background);
+
+        if(song_list.get(position).getAlbumArtUriString()!=null) {
+            Uri albumArtUri = Uri.parse(song_list.get(position).getAlbumArtUriString());
+            Picasso.with(context).load(albumArtUri).resize(120, 120).into(holder.song_background);
+        }
 
     }
 

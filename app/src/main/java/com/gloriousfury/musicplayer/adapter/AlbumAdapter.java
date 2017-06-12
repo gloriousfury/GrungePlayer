@@ -8,6 +8,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.net.Uri;
 import android.os.IBinder;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -18,10 +19,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.gloriousfury.musicplayer.R;
+import com.gloriousfury.musicplayer.model.Albums;
 import com.gloriousfury.musicplayer.model.Audio;
+import com.gloriousfury.musicplayer.ui.activity.AlbumActivity;
 import com.gloriousfury.musicplayer.utils.StorageUtil;
 import com.gloriousfury.musicplayer.service.MediaPlayerService;
 import com.gloriousfury.musicplayer.ui.activity.SingleSongActivity;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
@@ -30,22 +34,22 @@ import static com.gloriousfury.musicplayer.ui.activity.MainActivity.Broadcast_PL
 
 public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.ViewHolder> {
     Context context;
-    private ArrayList<Audio> song_list;
+    private ArrayList<Albums> album_list;
     boolean serviceBound = false;
     private MediaPlayerService player;
-    String SONG_TITLE = "song_title";
-    String SONG_ARTIST = "song_artist";
+    String ALBUM_TITLE = "album_title";
+    String ALBUM_ARTIST = "ALBUM_ARTIST";
 
 
-    public AlbumAdapter(Context context, ArrayList<Audio> song_list) {
+    public AlbumAdapter(Context context, ArrayList<Albums> album_list) {
         this.context = context;
-        this.song_list = song_list;
+        this.album_list = album_list;
 
 
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        TextView album_title,artist;
+        TextView album_title, artist;
         ImageView song_background;
 
 
@@ -63,16 +67,15 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.ViewHolder> 
             song_background = (ImageView) view.findViewById(R.id.song_background);
 
 
-
         }
 
         @Override
         public void onClick(View v) {
-            int adapterposition =getAdapterPosition();
-            playAudio(adapterposition);
-            Intent openSingleSongActivity = new Intent(context, SingleSongActivity.class);
-            openSingleSongActivity.putExtra(SONG_TITLE,song_list.get(getAdapterPosition()).getTitle());
-            openSingleSongActivity.putExtra(SONG_ARTIST,song_list.get(getAdapterPosition()).getArtist());
+            int adapterposition = getAdapterPosition();
+
+            Intent openSingleSongActivity = new Intent(context, AlbumActivity.class);
+            openSingleSongActivity.putExtra(ALBUM_TITLE, album_list.get(getAdapterPosition()).getAlbum());
+            openSingleSongActivity.putExtra(ALBUM_ARTIST, album_list.get(getAdapterPosition()).getArtist());
             context.startActivity(openSingleSongActivity);
 
         }
@@ -88,20 +91,20 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.ViewHolder> 
     public void onBindViewHolder(ViewHolder holder, int position) {
 
 
-        holder.album_title.setText(song_list.get(position).getAlbum());
-        holder.artist.setText(song_list.get(position).getArtist());
-
-
-//        Picasso.with(context).load(song_list.get(position).getProductImage()).into(holder.productImage);
+        holder.album_title.setText(album_list.get(position).getAlbum());
+        holder.artist.setText(album_list.get(position).getArtist());
+        Uri albumArtUri = Uri.parse(album_list.get(position).getAlbumArtUriString());
+        Picasso.with(context).load(albumArtUri).resize(120, 120).into(holder.song_background);
+//        Picasso.with(context).load(album_list.get(position).getProductImage()).into(holder.productImage);
 
     }
 
     @Override
     public int getItemCount() {
 
-        if(song_list!=null){
-            return song_list.size();
-        }else{
+        if (album_list != null) {
+            return album_list.size();
+        } else {
 
             return 0;
         }
@@ -109,48 +112,6 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.ViewHolder> 
     }
 
 
-
-
-    private ServiceConnection serviceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            // We've bound to LocalService, cast the IBinder and get LocalService instance
-            MediaPlayerService.LocalBinder binder = (MediaPlayerService.LocalBinder) service;
-            player = binder.getService();
-            serviceBound = true;
-
-            Toast.makeText(context, "Service Bound", Toast.LENGTH_SHORT).show();
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            serviceBound = false;
-        }
-    };
-
-
-    private void playAudio(int audioIndex) {
-        //Check is service is active
-        if (!serviceBound) {
-            //Store Serializable audioList to SharedPreferences
-            StorageUtil storage = new StorageUtil(context);
-            storage.storeAudio(song_list);
-            storage.storeAudioIndex(audioIndex);
-
-            Intent playerIntent = new Intent(context, MediaPlayerService.class);
-            context.startService(playerIntent);
-            context.bindService(playerIntent, serviceConnection, Context.BIND_AUTO_CREATE);
-        } else {
-            //Store the new audioIndex to SharedPreferences
-            StorageUtil storage = new StorageUtil(context);
-            storage.storeAudioIndex(audioIndex);
-
-            //Service is active
-            //Send a broadcast to the service -> PLAY_NEW_AUDIO
-            Intent broadcastIntent = new Intent(Broadcast_PLAY_NEW_AUDIO);
-            context.sendBroadcast(broadcastIntent);
-        }
-    }
 }
 
 

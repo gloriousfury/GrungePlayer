@@ -22,7 +22,7 @@ public class AlbumLists {
     private String alphabet_letter;
     @SerializedName("Data")
     @Expose
-    private ArrayList<Audio> data;
+    private ArrayList<Albums> data;
 
 
 
@@ -36,7 +36,7 @@ public class AlbumLists {
         this.alphabet_letter = alphabet_letter;
     }
 
-    public AlbumLists(String alphabet_letter, ArrayList<Audio> data ) {
+    public AlbumLists(String alphabet_letter, ArrayList<Albums> data ) {
         this.data = data;
         this.alphabet_letter = alphabet_letter;
     }
@@ -93,7 +93,7 @@ public class AlbumLists {
     }
 
 
-    public ArrayList<Audio> getAlbums() {
+    public ArrayList<Albums> getAlbums() {
         return data;
     }
 
@@ -102,7 +102,7 @@ public class AlbumLists {
      * @param data
      * The Data
      */
-    public void setAlbums(ArrayList<Audio> data) {
+    public void setAlbums(ArrayList<Albums> data) {
         this.data = data;
     }
 

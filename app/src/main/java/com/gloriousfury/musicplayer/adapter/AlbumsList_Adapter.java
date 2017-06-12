@@ -15,7 +15,8 @@ import android.widget.TextView;
 
 import com.gloriousfury.musicplayer.R;
 import com.gloriousfury.musicplayer.model.AlbumLists;
-import com.gloriousfury.musicplayer.model.Audio;
+import com.gloriousfury.musicplayer.model.Albums;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -93,7 +94,7 @@ public class AlbumsList_Adapter extends RecyclerView.Adapter<AlbumsList_Adapter.
     public void onBindViewHolder(final ViewHolder viewHolder, final int position) {
 
 //            changeBackgroundColor(position, viewHolder);
-        ArrayList<Audio> singleAlbumList = albumLists.get(position).getAlbums();
+        ArrayList<Albums> singleAlbumList = albumLists.get(position).getAlbums();
 
 
 //        viewHolder.firstlayout.setBackgroundColor(ContextCompat.getColor(context, albumLists.get(position).getBackgroundColor()));
@@ -111,7 +112,7 @@ public class AlbumsList_Adapter extends RecyclerView.Adapter<AlbumsList_Adapter.
 
 
 
-    private void renderAlbumList(ArrayList<Audio> dropDowns, RecyclerView recyclerView) {
+    private void renderAlbumList(ArrayList<Albums> dropDowns, RecyclerView recyclerView) {
 
 
 

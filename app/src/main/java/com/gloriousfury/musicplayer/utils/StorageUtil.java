@@ -3,6 +3,8 @@ package com.gloriousfury.musicplayer.utils;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.gloriousfury.musicplayer.model.AlbumLists;
+import com.gloriousfury.musicplayer.model.Albums;
 import com.gloriousfury.musicplayer.model.Audio;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -16,6 +18,9 @@ public class StorageUtil {
 
     private final String ALL_MUSIC_STORAGE = " com.gloriousfury.MusicPlayer.ALL_MUSIC_STORAGE";
     private final String ALL_MUSIC_STORAGE_KEY= "allAudioArrayList";
+
+    private final String ALL_ALBUMS_STORAGE = " com.gloriousfury.MusicPlayer.ALL_ALBUMS_STORAGE";
+    private final String ALL_ALBUMS_STORAGE_KEY= "allAlbumsArrayList";
     private SharedPreferences preferences;
     private Context context;
 
@@ -43,6 +48,28 @@ public class StorageUtil {
         editor.putString(ALL_MUSIC_STORAGE_KEY, json);
         editor.apply();
     }
+
+
+    public void storeAllAlbums(ArrayList<AlbumLists> arrayList) {
+        preferences = context.getSharedPreferences(ALL_ALBUMS_STORAGE, Context.MODE_PRIVATE);
+
+        SharedPreferences.Editor editor = preferences.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(arrayList);
+        editor.putString(ALL_ALBUMS_STORAGE_KEY, json);
+        editor.apply();
+    }
+
+
+    public ArrayList<AlbumLists> loadAllAlbums() {
+        preferences = context.getSharedPreferences(ALL_ALBUMS_STORAGE, Context.MODE_PRIVATE);
+        Gson gson = new Gson();
+        String json = preferences.getString(ALL_ALBUMS_STORAGE_KEY, null);
+        Type type = new TypeToken<ArrayList<AlbumLists>>() {
+        }.getType();
+        return gson.fromJson(json, type);
+    }
+
 
     public ArrayList<Audio> loadAudio() {
         preferences = context.getSharedPreferences(STORAGE, Context.MODE_PRIVATE);
