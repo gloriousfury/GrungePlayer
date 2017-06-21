@@ -15,6 +15,7 @@ import android.media.session.MediaSessionManager;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.support.annotation.NonNull;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.MediaSessionCompat;
@@ -22,9 +23,11 @@ import android.support.v7.app.NotificationCompat;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.gloriousfury.musicplayer.R;
 import com.gloriousfury.musicplayer.model.Audio;
+import com.gloriousfury.musicplayer.ui.activity.SingleSongActivity;
 import com.gloriousfury.musicplayer.utils.StorageUtil;
 import com.gloriousfury.musicplayer.ui.activity.MainActivity;
 import com.gloriousfury.musicplayer.utils.PlaybackStatus;
@@ -58,6 +61,9 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     public static final String ACTION_NEXT = "com.gloriousfury.musicplayer.ACTION_NEXT";
     public static final String ACTION_STOP = "com.gloriousfury.musicplayer.ACTION_STOP";
 
+
+    Context context;
+
     //MediaSession
     private MediaSessionManager mediaSessionManager;
     private MediaSessionCompat mediaSession;
@@ -68,12 +74,46 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
 
 
-    public static MediaPlayer getMediaPlayerInstance() {
+    public Context getContext(){
+        if(context== null){
+            return getApplicationContext();
+
+        }else {
+
+            return  context;
+        }
+
+    }
+    public MediaPlayerService(){
+
+
+    }
+
+
+
+    public MediaPlayerService(Context context){
+
+        this.context= context;
+    }
+
+    public  MediaPlayer getMediaPlayerInstance() {
         if (mediaPlayer == null) {
             mediaPlayer = new MediaPlayer();
         }
+
         return mediaPlayer;
     }
+
+
+
+//    public  MediaPlayer getMediaPlayerInstance2(Context context) {
+//        if (mediaPlayer == null) {
+//            mediaPlayer = new MediaPlayer();
+//        }
+//        this.context = context;
+//        return mediaPlayer;
+//    }
+
 
     @Override
     public void onCreate() {
@@ -95,7 +135,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     private void initMediaPlayer() {
         mediaPlayer = new MediaPlayer();
         //Set up MediaPlayer event listeners
-        mediaPlayer.setOnCompletionListener(this);
+//        mediaPlayer.setOnCompletionListener(this);
         mediaPlayer.setOnErrorListener(this);
         mediaPlayer.setOnPreparedListener(this);
         mediaPlayer.setOnBufferingUpdateListener(this);
@@ -122,7 +162,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         }
     }
 
-    private void stopMedia() {
+    public void stopMedia() {
         if (mediaPlayer == null) return;
         if (mediaPlayer.isPlaying()) {
             mediaPlayer.stop();
@@ -164,13 +204,16 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     public void onCompletion(MediaPlayer mp) {
         //Invoked when playback of a media source has completed.
 
-            StorageUtil storage = new StorageUtil(getApplicationContext());
+            StorageUtil storage = new StorageUtil(getContext());
             audioList = storage.loadAudio();
             audioIndex = storage.loadAudioIndex();
         if(audioIndex<=audioList.size()){
-            skipToNext(audioList,audioIndex,getApplicationContext(),mediaPlayer);
-            updateMetaData();
+            Toast.makeText(getContext(),"I came here but some reason didn't play",Toast.LENGTH_LONG).show();
+            skipToNext(audioList,audioIndex,getContext(),mediaPlayer);
+
+            updateMetaData(mediaSession,activeAudio);
         }else {
+            Toast.makeText(getContext(),"The list said I shouldn't play",Toast.LENGTH_LONG).show();
             stopMedia();
             //stop the service
             stopSelf();
@@ -341,7 +384,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             stopMedia();
             mediaPlayer.reset();
             initMediaPlayer();
-            updateMetaData();
+            updateMetaData(mediaSession, activeAudio);
             buildNotification(PlaybackStatus.PLAYING);
         }
     };
@@ -355,9 +398,9 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     private void initMediaSession() throws RemoteException {
         if (mediaSessionManager != null) return; //mediaSessionManager exists
 
-        mediaSessionManager = (MediaSessionManager) getSystemService(Context.MEDIA_SESSION_SERVICE);
+        mediaSessionManager = (MediaSessionManager) getSystemService(getContext().MEDIA_SESSION_SERVICE);
         // Create a new MediaSession
-        mediaSession = new MediaSessionCompat(getApplicationContext(), "AudioPlayer");
+        mediaSession = new MediaSessionCompat(getContext(), "AudioPlayer");
         //Get MediaSessions transport controls
         transportControls = mediaSession.getController().getTransportControls();
         //set MediaSession -> ready to receive media commands
@@ -367,7 +410,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         mediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
 
         //Set mediaSession's MetaData
-        updateMetaData();
+        updateMetaData(mediaSession, activeAudio);
 
         // Attach Callback to receive MediaSession updates
         mediaSession.setCallback(new MediaSessionCompat.Callback() {
@@ -389,11 +432,11 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             @Override
             public void onSkipToNext() {
                 super.onSkipToNext();
-                StorageUtil storage = new StorageUtil(getApplicationContext());
+                StorageUtil storage = new StorageUtil(getContext());
                 audioList = storage.loadAudio();
                 audioIndex = storage.loadAudioIndex();
-                skipToNext(audioList,audioIndex,getApplicationContext(),mediaPlayer);
-                updateMetaData();
+                skipToNext(audioList,audioIndex,getContext(),mediaPlayer);
+                updateMetaData(mediaSession, activeAudio);
                 buildNotification(PlaybackStatus.PLAYING);
             }
 
@@ -401,7 +444,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             public void onSkipToPrevious() {
                 super.onSkipToPrevious();
                 skipToPrevious(audioList,audioIndex,getApplicationContext(),mediaPlayer);
-                updateMetaData();
+                updateMetaData(mediaSession, activeAudio);
                 buildNotification(PlaybackStatus.PLAYING);
             }
 
@@ -420,9 +463,11 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         });
     }
 
-    private void updateMetaData() {
-        Bitmap albumArt = BitmapFactory.decodeResource(getResources(),
+    private void updateMetaData(MediaSessionCompat mediaSession,Audio activeAudio) {
+        Bitmap albumArt = BitmapFactory.decodeResource(getContext().getResources(),
                 R.mipmap.ic_launcher); //replace with medias albumArt
+
+
         // Update the current metadata
         mediaSession.setMetadata(new MediaMetadataCompat.Builder()
                 .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, albumArt)
@@ -465,7 +510,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         }
 
         //Update stored index
-        new StorageUtil(context).storeAudioIndex(audioIndex);
+        new StorageUtil(getContext()).storeAudioIndex(audioIndex);
 
         stopMedia();
         //reset mediaPlayer
@@ -576,7 +621,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     public int onStartCommand(Intent intent, int flags, int startId) {
         try {
             //Load data from SharedPreferences
-            StorageUtil storage = new StorageUtil(getApplicationContext());
+            StorageUtil storage = new StorageUtil(getContext());
             audioList = storage.loadAudio();
             audioIndex = storage.loadAudioIndex();
 

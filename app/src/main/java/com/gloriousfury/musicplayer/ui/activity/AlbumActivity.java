@@ -81,7 +81,7 @@ public class AlbumActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
+        mediaPlayerService = new MediaPlayerService(this);
 
         Bundle getAlbumData = getIntent().getExtras();
 
@@ -119,7 +119,7 @@ public class AlbumActivity extends AppCompatActivity {
 
     @OnClick(R.id.img_play_pause)
     public void playPause() {
-        currentMediaPlayer = MediaPlayerService.getMediaPlayerInstance();
+        currentMediaPlayer = mediaPlayerService.getMediaPlayerInstance();
 
         if (!serviceBound) {
             //Store Serializable audioList to SharedPreferences

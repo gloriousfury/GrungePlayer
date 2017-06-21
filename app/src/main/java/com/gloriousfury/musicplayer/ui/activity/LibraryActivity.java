@@ -82,7 +82,7 @@ public class LibraryActivity extends AppCompatActivity
             ActivityCompat.requestPermissions(this,
                     new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE},
                     REQUEST_STORAGE_PERMISSION);
-        }else  if (ContextCompat.checkSelfPermission(this,
+        } else if (ContextCompat.checkSelfPermission(this,
                 android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
 
@@ -91,8 +91,7 @@ public class LibraryActivity extends AppCompatActivity
                     new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                     REQUEST_STORAGE_PERMISSION);
 
-        }
-        else if (ContextCompat.checkSelfPermission(this,
+        } else if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.MEDIA_CONTENT_CONTROL) !=
                 PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,
@@ -126,8 +125,6 @@ public class LibraryActivity extends AppCompatActivity
     }
 
 
-
-
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
@@ -148,9 +145,6 @@ public class LibraryActivity extends AppCompatActivity
     }
 
 
-
-
-
     @Override
     public Loader<ArrayList<Audio>> onCreateLoader(int id, Bundle args) {
 
@@ -163,11 +157,13 @@ public class LibraryActivity extends AppCompatActivity
             // onStartLoading() is called when a loader first starts loading data
             @Override
             protected void onStartLoading() {
-                retrievedAudioList =  storage.loadAllAudio();
-                retrievedAlbumsList =  storage.loadAllAlbums();
-                if ( retrievedAudioList != null&& retrievedAlbumsList!=null) {
+                retrievedAudioList = storage.loadAllAudio();
+                retrievedAlbumsList = storage.loadAllAlbums();
+//                Toast.makeText(LibraryActivity.this, String.valueOf(retrievedAudioList.size()), Toast.LENGTH_LONG).show();
+
+                if (retrievedAudioList != null && retrievedAlbumsList != null) {
                     // Delivers any previously loaded data immediately
-                    deliverResult( retrievedAudioList);
+                    deliverResult(retrievedAudioList);
                 } else {
                     // Force a new load
                     forceLoad();
@@ -247,7 +243,6 @@ public class LibraryActivity extends AppCompatActivity
     }
 
 
-
     @Override
     public void onLoaderReset(Loader<ArrayList<Audio>> loader) {
         audioList = null;
@@ -265,7 +260,7 @@ public class LibraryActivity extends AppCompatActivity
         final String albumart = MediaStore.Audio.Albums.ALBUM_ART;
         final String tracks = MediaStore.Audio.Albums.NUMBER_OF_SONGS;
 
-        final String[] columns = { _id, album_name, artist, albumart, tracks };
+        final String[] columns = {_id, album_name, artist, albumart, tracks};
         Cursor cursor = getContentResolver().query(uri, columns, where,
                 null, null);
 
@@ -274,12 +269,12 @@ public class LibraryActivity extends AppCompatActivity
 
         if (cursor != null && cursor.getCount() > 0) {
 
-            albumList= new ArrayList<>();
+            albumList = new ArrayList<>();
             while (cursor.moveToNext()) {
                 String album = cursor.getString(cursor.getColumnIndex(album_name));
                 Long albumId = cursor.getLong(cursor
                         .getColumnIndexOrThrow(_id));
-                String album_artist= cursor.getString(cursor.getColumnIndex(artist));
+                String album_artist = cursor.getString(cursor.getColumnIndex(artist));
 //               int album_art = cursor.getInt(cursor.getColumnIndex(artist));
                 int noOfTracks = cursor.getInt(cursor.getColumnIndex(tracks));
 
@@ -305,22 +300,18 @@ public class LibraryActivity extends AppCompatActivity
 
 
                 // Save to audioList
-                albumList.add(new Albums( album, album_artist,noOfTracks, albumId, albumArtUri.toString()));
+                albumList.add(new Albums(album, album_artist, noOfTracks, albumId, albumArtUri.toString()));
 
             }
         }
 
 
-      storage.storeAllAlbums(prepareData(albumList));
+        storage.storeAllAlbums(prepareData(albumList));
 
         cursor.close();
 
         return albumList;
     }
-
-
-
-
 
 
     public ArrayList<AlbumLists> prepareData(ArrayList<Albums> album_list) {
@@ -368,11 +359,6 @@ public class LibraryActivity extends AppCompatActivity
 
         return exampleList;
     }
-
-
-
-
-
 
 
     @Override
