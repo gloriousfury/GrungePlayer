@@ -1,24 +1,31 @@
 package com.gloriousfury.musicplayer.ui.activity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.media.MediaMetadataCompat;
+import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.ImageView;
+import android.widget.MediaController;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.gloriousfury.musicplayer.R;
 import com.gloriousfury.musicplayer.model.Audio;
+import com.gloriousfury.musicplayer.service.AppMainServiceEvent;
+import com.gloriousfury.musicplayer.utils.MusicController;
 import com.gloriousfury.musicplayer.utils.StorageUtil;
 import com.gloriousfury.musicplayer.service.MediaPlayerService;
 import com.gloriousfury.musicplayer.utils.PlaybackStatus;
@@ -31,9 +38,10 @@ import java.util.ArrayList;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import de.greenrobot.event.EventBus;
 
 public class SingleSongActivity extends AppCompatActivity implements
-        SeekBar.OnSeekBarChangeListener, MediaPlayer.OnCompletionListener,MediaPlayer.OnErrorListener {
+        SeekBar.OnSeekBarChangeListener, MediaPlayer.OnErrorListener, MediaController.MediaPlayerControl {
 
     @BindView(R.id.artist)
     TextView artist;
@@ -73,6 +81,7 @@ public class SingleSongActivity extends AppCompatActivity implements
     String SONG_TITLE = "song_title";
     String SONG_ARTIST = "song_artist";
     String ALBUM_ART_URI = "song_album_art_uri";
+    String TAG = "singlesong";
     Audio audio;
     String SONG = "single_audio";
     private ArrayList<Audio> audioList;
@@ -87,6 +96,9 @@ public class SingleSongActivity extends AppCompatActivity implements
     private Handler mHandler = new Handler();
     long totalDuration;
     long currentDuration;
+    private MusicController controller;
+    boolean serviceBound = true;
+    EventBus bus = EventBus.getDefault();
 
 
     @Override
@@ -95,14 +107,12 @@ public class SingleSongActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_single_song);
         ButterKnife.bind(this);
         mediaPlayerService = new MediaPlayerService(this);
-        currentMediaPlayer =  mediaPlayerService.getMediaPlayerInstance();
-        mediaSession = new MediaSessionCompat(this, "AudioPlayer");
-        currentMediaPlayer.setOnCompletionListener(this);
-        currentMediaPlayer.setOnErrorListener(this);
+        currentMediaPlayer = mediaPlayerService.getMediaPlayerInstance();
+//        mediaSession = new MediaSessionCompat(this, "AudioPlayer");
+//        currentMediaPlayer.setOnCompletionListener(this);
+//        currentMediaPlayer.setOnErrorListener(this);
         seekBar.setOnSeekBarChangeListener(this);
-//        currentMediaPlayer.setOnPreparedListener(this);
-
-
+////        currentMediaPlayer.setOnPreparedListener(this);
 
 
 //        long totalDuration = currentMediaPlayer.getDuration();
@@ -111,6 +121,7 @@ public class SingleSongActivity extends AppCompatActivity implements
 
         // Updating progress bar
         updateProgressBar();
+        setController();
 
 //        if (currentMediaPlayer.isPlaying()) {
 //            playPauseView.setImageDrawable(ContextCompat
@@ -165,7 +176,7 @@ public class SingleSongActivity extends AppCompatActivity implements
 
     @OnClick(R.id.img_rewind)
     public void playPreviousSong() {
-        MediaPlayer currentMediaPlayer =mediaPlayerService.getMediaPlayerInstance();
+        MediaPlayer currentMediaPlayer = mediaPlayerService.getMediaPlayerInstance();
 
         audioList = storage.loadAudio();
         audioIndex = storage.loadAudioIndex();
@@ -211,8 +222,10 @@ public class SingleSongActivity extends AppCompatActivity implements
      */
     private Runnable mUpdateTimeTask = new Runnable() {
         public void run() {
-            long totalDuration = currentMediaPlayer.getDuration();
-            long currentDuration = currentMediaPlayer.getCurrentPosition();
+
+
+            long totalDuration = mediaPlayerService.getDur();
+            long currentDuration = mediaPlayerService.getCurrentDur();
 
             // Displaying Total Duration time
             songTotalDuration.setText(String.valueOf(Timer.milliSecondsToTimer(totalDuration)));
@@ -233,7 +246,44 @@ public class SingleSongActivity extends AppCompatActivity implements
         }
     };
 
-    private void updateMetaData(Audio activeAudio, MediaPlayer mediaPlayer) {
+
+    private void setController() {
+        //set the controller up
+
+        controller = new MusicController(this);
+
+        controller.setPrevNextListeners(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                playNext();
+            }
+        }, new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                playPrev();
+            }
+        });
+        controller.setMediaPlayer(this);
+        controller.setAnchorView(findViewById(R.id.relative_layout_anchor));
+        controller.setEnabled(true);
+
+
+    }
+
+
+    //play next
+    private void playNext() {
+        mediaPlayerService.playNext();
+        controller.show(0);
+    }
+
+    //play previous
+    private void playPrev() {
+        mediaPlayerService.playPrev();
+        controller.show(0);
+    }
+
+    private void updateMetaData(Audio activeAudio) {
 //        seekBar.setProgress(0);
 //        seekBar.setMax(100);
 //
@@ -248,7 +298,7 @@ public class SingleSongActivity extends AppCompatActivity implements
 
 
         Toast.makeText(this, "I came here o" + activeAudio.getTitle(), Toast.LENGTH_LONG).show();
-        mediaPlayer.setOnCompletionListener(this);
+//        mediaPlayer.setOnCompletionListener(this);
 
         String song_title = activeAudio.getTitle();
         String song_artist = activeAudio.getArtist();
@@ -290,7 +340,7 @@ public class SingleSongActivity extends AppCompatActivity implements
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
         mHandler.removeCallbacks(mUpdateTimeTask);
-        int totalDuration = currentMediaPlayer.getDuration();
+        int totalDuration = mediaPlayerService.getDur();
         int currentPosition = Timer.progressToTimer(seekBar.getProgress(), totalDuration);
 
         // forward or backward to certain seconds
@@ -328,30 +378,33 @@ public class SingleSongActivity extends AppCompatActivity implements
 //    }
 
 
-    @Override
-    public void onCompletion(MediaPlayer mediaPlayer) {
-        //Invoked when playback of a media source has completed.
-
-        StorageUtil storage = new StorageUtil(this);
-        audioList = storage.loadAudio();
-        audioIndex = storage.loadAudioIndex();
-        if(audioIndex<=audioList.size()){
-            activeAudio = audioList.get(audioIndex);
-//            Toast.makeText(this,"I came here but some reason didn't play",Toast.LENGTH_LONG).show();
-            mediaPlayerService.skipToNext(audioList, audioIndex, this, currentMediaPlayer);
-            Toast.makeText(this,String.valueOf(storage.loadAudioIndex()),Toast.LENGTH_LONG).show();
-            updateMetaData(activeAudio,mediaPlayer);
-        }else {
-            Toast.makeText(this,"The list said I shouldn't play",Toast.LENGTH_LONG).show();
-
-            mediaPlayerService.stopMedia();
-
-            //stop the service
-            mediaPlayerService.stopSelf();
-
-        }
-    }
-
+//    @Override
+//    public void onCompletion(MediaPlayer mediaPlayer) {
+//        //Invoked when playback of a media source has completed.
+//
+//        mediaPlayerService.onCompletion(mediaPlayer);
+//        audio = mediaPlayerService.getActiveAudio();
+//        updateMetaData(audio,mediaPlayer);
+//
+////        StorageUtil storage = new StorageUtil(this);
+////        audioList = storage.loadAudio();
+////        audioIndex = storage.loadAudioIndex();
+////        if (audioIndex <= audioList.size()) {
+////            activeAudio = audioList.get(audioIndex);
+//////            Toast.makeText(this,"I came here but some reason didn't play",Toast.LENGTH_LONG).show();
+////            mediaPlayerService.skipToNext(audioList, audioIndex, this, currentMediaPlayer);
+////            Toast.makeText(this, String.valueOf(storage.loadAudioIndex()), Toast.LENGTH_LONG).show();
+////            updateMetaData(activeAudio, mediaPlayer);
+////        } else {
+////            Toast.makeText(this, "The list said I shouldn't play", Toast.LENGTH_LONG).show();
+////
+////            mediaPlayerService.stopMedia();
+////
+////            //stop the service
+////            mediaPlayerService.stopSelf();
+////
+////        }
+//    }
 
 
     @Override
@@ -370,8 +423,106 @@ public class SingleSongActivity extends AppCompatActivity implements
         }
         return false;
     }
-//
-//    @Override
+
+    @Override
+    public void pause() {
+        mediaPlayerService.pausePlayer();
+    }
+
+    @Override
+    public void seekTo(int pos) {
+        mediaPlayerService.seek(pos);
+    }
+
+    @Override
+    public void start() {
+        mediaPlayerService.go();
+    }
+
+
+    @Override
+    public int getDuration() {
+        if (mediaPlayerService != null &&
+                serviceBound &&
+                mediaPlayerService.isPng())
+            return mediaPlayerService.getDur();
+        else return 0;
+    }
+
+    @Override
+    public int getCurrentPosition() {
+        if (mediaPlayerService != null && serviceBound && mediaPlayerService.isPng())
+            return mediaPlayerService.getPosn();
+        else return 0;
+    }
+
+    @Override
+    public boolean isPlaying() {
+        if (mediaPlayerService != null && serviceBound)
+            return mediaPlayerService.isPng();
+        return false;
+    }
+
+    @Override
+    public int getBufferPercentage() {
+        return 0;
+    }
+
+    @Override
+    public boolean canPause() {
+        return true;
+    }
+
+    @Override
+    public boolean canSeekBackward() {
+        return true;
+    }
+
+    @Override
+    public boolean canSeekForward() {
+        return true;
+    }
+
+    @Override
+    public int getAudioSessionId() {
+        return 0;
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        bus.register(this);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        bus.register(this);
+    }
+
+
+    public void onEventMainThread(AppMainServiceEvent event) {
+        Log.d(TAG, "onEventMainThread() called with: " + "event = [" + event + "]");
+        Intent i = event.getMainIntent();
+
+
+        if (event.getEventType() == AppMainServiceEvent.ONCOMPLETED_RESPONSE) {
+            if (i != null) {
+
+                Audio recievedAudio = i.getParcelableExtra(AppMainServiceEvent.RESPONSE_DATA);
+                updateMetaData(recievedAudio);
+
+            } else {
+
+                Toast statu = Toast.makeText(this, "Cant Retrieve data at the moment, Try again", Toast.LENGTH_LONG);
+                statu.show();
+            }
+
+
+        }
+    }
+
+    //    @Override
 //    public void onPrepared(MediaPlayer mediaPlayer) {
 //        mediaPlayer = mediaPlayerService.getMediaPlayerInstance();
 //        totalDuration = mediaPlayer.getDuration();
@@ -380,4 +531,5 @@ public class SingleSongActivity extends AppCompatActivity implements
 //        seekBar.setMax(100);
 //        updateProgressBar();
 //    }
+
 }

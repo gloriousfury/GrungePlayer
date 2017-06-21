@@ -35,6 +35,8 @@ import com.gloriousfury.musicplayer.utils.PlaybackStatus;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import de.greenrobot.event.EventBus;
+
 
 public class MediaPlayerService extends Service implements MediaPlayer.OnCompletionListener,
         MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener, MediaPlayer.OnSeekCompleteListener,
@@ -60,8 +62,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     public static final String ACTION_PREVIOUS = "com.gloriousfury.musicplayer.ACTION_PREVIOUS";
     public static final String ACTION_NEXT = "com.gloriousfury.musicplayer.ACTION_NEXT";
     public static final String ACTION_STOP = "com.gloriousfury.musicplayer.ACTION_STOP";
-
-
+    int duration;
+    AppMainServiceEvent event = new AppMainServiceEvent();
     Context context;
 
     //MediaSession
@@ -73,37 +75,35 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     private static final int NOTIFICATION_ID = 101;
 
 
-
-    public Context getContext(){
-        if(context== null){
+    public Context getContext() {
+        if (context == null) {
             return getApplicationContext();
 
-        }else {
+        } else {
 
-            return  context;
+            return context;
         }
 
     }
-    public MediaPlayerService(){
+
+    public MediaPlayerService() {
 
 
     }
 
 
+    public MediaPlayerService(Context context) {
 
-    public MediaPlayerService(Context context){
-
-        this.context= context;
+        this.context = context;
     }
 
-    public  MediaPlayer getMediaPlayerInstance() {
+    public MediaPlayer getMediaPlayerInstance() {
         if (mediaPlayer == null) {
             mediaPlayer = new MediaPlayer();
         }
 
         return mediaPlayer;
     }
-
 
 
 //    public  MediaPlayer getMediaPlayerInstance2(Context context) {
@@ -135,7 +135,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     private void initMediaPlayer() {
         mediaPlayer = new MediaPlayer();
         //Set up MediaPlayer event listeners
-//        mediaPlayer.setOnCompletionListener(this);
+        mediaPlayer.setOnCompletionListener(this);
         mediaPlayer.setOnErrorListener(this);
         mediaPlayer.setOnPreparedListener(this);
         mediaPlayer.setOnBufferingUpdateListener(this);
@@ -199,21 +199,25 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         //a media resource being streamed over the network.
     }
 
+    public void setList(ArrayList<Audio> theSongs) {
+        audioList = theSongs;
+    }
 
     @Override
     public void onCompletion(MediaPlayer mp) {
         //Invoked when playback of a media source has completed.
+        mp.reset();
+        StorageUtil storage = new StorageUtil(getContext());
+        audioList = storage.loadAudio();
+        audioIndex = storage.loadAudioIndex();
+        if (audioIndex <= audioList.size()) {
+            Toast.makeText(getContext(), "This is suppossed to be the next song", Toast.LENGTH_LONG).show();
+            skipToNext(audioList, audioIndex, getContext(), mp);
+            SingleSongActivity ex = new SingleSongActivity();
 
-            StorageUtil storage = new StorageUtil(getContext());
-            audioList = storage.loadAudio();
-            audioIndex = storage.loadAudioIndex();
-        if(audioIndex<=audioList.size()){
-            Toast.makeText(getContext(),"I came here but some reason didn't play",Toast.LENGTH_LONG).show();
-            skipToNext(audioList,audioIndex,getContext(),mediaPlayer);
-
-            updateMetaData(mediaSession,activeAudio);
-        }else {
-            Toast.makeText(getContext(),"The list said I shouldn't play",Toast.LENGTH_LONG).show();
+            updateMetaData(mediaSession, activeAudio);
+        } else {
+            Toast.makeText(getContext(), "The list said I shouldn't play", Toast.LENGTH_LONG).show();
             stopMedia();
             //stop the service
             stopSelf();
@@ -241,7 +245,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
     @Override
     public void onPrepared(MediaPlayer mp) {
-        //Invoked when the media source is ready for playback.
+        //Invoked when the media source is ready for playback
+        duration = mp.getDuration();
         playMedia();
     }
 
@@ -270,14 +275,14 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 mediaPlayer.setVolume(1.0f, 1.0f);
                 break;
             case AudioManager.AUDIOFOCUS_LOSS:
-                // Lost focus for an unbounded amount of time: stop playback and release media player
+                // Lost focus for an unbounded amount of time: stop playback and release media seek
                 if (mediaPlayer.isPlaying()) mediaPlayer.stop();
                 mediaPlayer.release();
                 mediaPlayer = null;
                 break;
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
                 // Lost focus for a short time, but we have to stop
-                // playback. We don't release the media player because playback
+                // playback. We don't release the media seek because playback
                 // is likely to resume
                 if (mediaPlayer.isPlaying()) mediaPlayer.pause();
                 break;
@@ -435,7 +440,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 StorageUtil storage = new StorageUtil(getContext());
                 audioList = storage.loadAudio();
                 audioIndex = storage.loadAudioIndex();
-                skipToNext(audioList,audioIndex,getContext(),mediaPlayer);
+                skipToNext(audioList, audioIndex, getContext(), mediaPlayer);
                 updateMetaData(mediaSession, activeAudio);
                 buildNotification(PlaybackStatus.PLAYING);
             }
@@ -443,7 +448,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             @Override
             public void onSkipToPrevious() {
                 super.onSkipToPrevious();
-                skipToPrevious(audioList,audioIndex,getApplicationContext(),mediaPlayer);
+                skipToPrevious(audioList, audioIndex, getApplicationContext(), mediaPlayer);
                 updateMetaData(mediaSession, activeAudio);
                 buildNotification(PlaybackStatus.PLAYING);
             }
@@ -463,7 +468,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         });
     }
 
-    private void updateMetaData(MediaSessionCompat mediaSession,Audio activeAudio) {
+    private void updateMetaData(MediaSessionCompat mediaSession, Audio activeAudio) {
         Bitmap albumArt = BitmapFactory.decodeResource(getContext().getResources(),
                 R.mipmap.ic_launcher); //replace with medias albumArt
 
@@ -483,9 +488,19 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             //if last in playlist
             audioIndex = 0;
             activeAudio = audioList.get(audioIndex);
+
+
+
+
         } else {
             //get next in playlist
             activeAudio = audioList.get(++audioIndex);
+            Intent responseIntent = new Intent();
+            responseIntent.putExtra(AppMainServiceEvent.RESPONSE_DATA, activeAudio);
+            event.setMainIntent(responseIntent);
+            event.setEventType(AppMainServiceEvent.ONCOMPLETED_RESPONSE);
+            EventBus.getDefault().post(event);
+
         }
 
         //Update stored index
@@ -596,6 +611,54 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     }
 
 
+    public Audio getActiveAudio() {
+        return activeAudio;
+    }
+
+    public int getPosn() {
+        return mediaPlayer.getCurrentPosition();
+    }
+
+    public int getDur() {
+        return duration;
+    }
+
+    public int getCurrentDur() {
+        return mediaPlayer.getCurrentPosition();
+    }
+
+
+    public boolean isPng() {
+        return mediaPlayer.isPlaying();
+    }
+
+    public void pausePlayer() {
+        mediaPlayer.pause();
+    }
+
+    public void seek(int posn) {
+        mediaPlayer.seekTo(posn);
+    }
+
+    public void go() {
+        mediaPlayer.start();
+    }
+
+
+    public void playNext() {
+        audioIndex++;
+        if (audioIndex != audioList.size())
+            audioIndex = 0;
+        playMedia();
+    }
+
+
+    public void playPrev() {
+        audioIndex--;
+        if (audioIndex != 0) audioIndex = audioList.size() - 1;
+        playMedia();
+    }
+
 
     private void handleIncomingActions(Intent playbackAction) {
         if (playbackAction == null || playbackAction.getAction() == null) return;
@@ -613,7 +676,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             transportControls.stop();
         }
     }
-
 
 
     //The system calls this method when an activity, requests the service be started
@@ -656,6 +718,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         handleIncomingActions(intent);
         return super.onStartCommand(intent, flags, startId);
     }
+
 
     @Override
     public void onDestroy() {
