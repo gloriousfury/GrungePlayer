@@ -63,6 +63,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     public static final String ACTION_NEXT = "com.gloriousfury.musicplayer.ACTION_NEXT";
     public static final String ACTION_STOP = "com.gloriousfury.musicplayer.ACTION_STOP";
     int duration;
+    Intent responseIntent = new Intent();
     AppMainServiceEvent event = new AppMainServiceEvent();
     Context context;
 
@@ -159,6 +160,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     private void playMedia() {
         if (!mediaPlayer.isPlaying()) {
             mediaPlayer.start();
+            duration = mediaPlayer.getDuration();
         }
     }
 
@@ -206,16 +208,15 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     @Override
     public void onCompletion(MediaPlayer mp) {
         //Invoked when playback of a media source has completed.
-        mp.reset();
+
         StorageUtil storage = new StorageUtil(getContext());
         audioList = storage.loadAudio();
         audioIndex = storage.loadAudioIndex();
         if (audioIndex <= audioList.size()) {
             Toast.makeText(getContext(), "This is suppossed to be the next song", Toast.LENGTH_LONG).show();
-            skipToNext(audioList, audioIndex, getContext(), mp);
-            SingleSongActivity ex = new SingleSongActivity();
+            skipToNext(audioList, audioIndex, getContext(), mediaPlayer);
 
-            updateMetaData(mediaSession, activeAudio);
+//            updateMetaData();
         } else {
             Toast.makeText(getContext(), "The list said I shouldn't play", Toast.LENGTH_LONG).show();
             stopMedia();
@@ -246,8 +247,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     @Override
     public void onPrepared(MediaPlayer mp) {
         //Invoked when the media source is ready for playback
-        duration = mp.getDuration();
         playMedia();
+
     }
 
 
@@ -389,7 +390,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             stopMedia();
             mediaPlayer.reset();
             initMediaPlayer();
-            updateMetaData(mediaSession, activeAudio);
+            updateMetaData();
             buildNotification(PlaybackStatus.PLAYING);
         }
     };
@@ -415,7 +416,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         mediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
 
         //Set mediaSession's MetaData
-        updateMetaData(mediaSession, activeAudio);
+        updateMetaData();
 
         // Attach Callback to receive MediaSession updates
         mediaSession.setCallback(new MediaSessionCompat.Callback() {
@@ -441,7 +442,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 audioList = storage.loadAudio();
                 audioIndex = storage.loadAudioIndex();
                 skipToNext(audioList, audioIndex, getContext(), mediaPlayer);
-                updateMetaData(mediaSession, activeAudio);
+                updateMetaData();
                 buildNotification(PlaybackStatus.PLAYING);
             }
 
@@ -449,7 +450,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             public void onSkipToPrevious() {
                 super.onSkipToPrevious();
                 skipToPrevious(audioList, audioIndex, getApplicationContext(), mediaPlayer);
-                updateMetaData(mediaSession, activeAudio);
+                updateMetaData();
                 buildNotification(PlaybackStatus.PLAYING);
             }
 
@@ -468,7 +469,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         });
     }
 
-    private void updateMetaData(MediaSessionCompat mediaSession, Audio activeAudio) {
+    private void updateMetaData() {
         Bitmap albumArt = BitmapFactory.decodeResource(getContext().getResources(),
                 R.mipmap.ic_launcher); //replace with medias albumArt
 
@@ -489,19 +490,15 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             audioIndex = 0;
             activeAudio = audioList.get(audioIndex);
 
-
-
-
         } else {
             //get next in playlist
             activeAudio = audioList.get(++audioIndex);
-            Intent responseIntent = new Intent();
-            responseIntent.putExtra(AppMainServiceEvent.RESPONSE_DATA, activeAudio);
-            event.setMainIntent(responseIntent);
-            event.setEventType(AppMainServiceEvent.ONCOMPLETED_RESPONSE);
-            EventBus.getDefault().post(event);
 
         }
+        responseIntent.putExtra(AppMainServiceEvent.RESPONSE_DATA, activeAudio);
+        event.setMainIntent(responseIntent);
+        event.setEventType(AppMainServiceEvent.ONCOMPLETED_RESPONSE);
+        EventBus.getDefault().post(event);
 
         //Update stored index
         new StorageUtil(context).storeAudioIndex(audioIndex);
@@ -510,6 +507,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         //reset mediaPlayer
         mediaPlayer.reset();
         initMediaPlayer();
+
     }
 
     public void skipToPrevious(ArrayList<Audio> audioList, int audioIndex, Context context, MediaPlayer mediaPlayer) {
@@ -519,6 +517,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             //set index to the last of audioList
             audioIndex = audioList.size() - 1;
             activeAudio = audioList.get(audioIndex);
+
         } else {
             //get previous in playlist
             activeAudio = audioList.get(--audioIndex);
@@ -531,6 +530,10 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         //reset mediaPlayer
         mediaPlayer.reset();
         initMediaPlayer();
+        responseIntent.putExtra(AppMainServiceEvent.RESPONSE_DATA, activeAudio);
+        event.setMainIntent(responseIntent);
+        event.setEventType(AppMainServiceEvent.ONCOMPLETED_RESPONSE);
+        EventBus.getDefault().post(event);
     }
 
 

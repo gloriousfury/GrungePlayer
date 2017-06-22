@@ -100,7 +100,6 @@ public class SingleSongActivity extends AppCompatActivity implements
     boolean serviceBound = true;
     EventBus bus = EventBus.getDefault();
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -108,16 +107,16 @@ public class SingleSongActivity extends AppCompatActivity implements
         ButterKnife.bind(this);
         mediaPlayerService = new MediaPlayerService(this);
         currentMediaPlayer = mediaPlayerService.getMediaPlayerInstance();
-//        mediaSession = new MediaSessionCompat(this, "AudioPlayer");
-//        currentMediaPlayer.setOnCompletionListener(this);
-//        currentMediaPlayer.setOnErrorListener(this);
+
         seekBar.setOnSeekBarChangeListener(this);
-////        currentMediaPlayer.setOnPreparedListener(this);
 
 
-//        long totalDuration = currentMediaPlayer.getDuration();
-//        long currentDuration = currentMediaPlayer.getCurrentPosition();
-//
+
+        // set Progress bar values
+        seekBar.setProgress(0);
+        seekBar.setMax(100);
+
+        Toast.makeText(this, String.valueOf(mediaPlayerService.getCurrentDur()),Toast.LENGTH_LONG).show();
 
         // Updating progress bar
         updateProgressBar();
@@ -351,60 +350,6 @@ public class SingleSongActivity extends AppCompatActivity implements
     }
 
 
-//    @Override
-//    public void onCompletion(MediaPlayer mediaPlayer) {
-//        currentMediaPlayer =mediaPlayerService.getMediaPlayerInstance();
-//
-//
-//        audioList = storage.loadAudio();
-//        audioIndex = storage.loadAudioIndex();
-//
-//        if (audioIndex == audioList.size() - 1) {
-//            //if last in playlist
-//            audioIndex = 0;
-////            new MediaPlayerService().skipToNext(audioList, audioIndex, this, currentMediaPlayer);
-//            activeAudio = audioList.get(audioIndex);
-//            updateMetaData(activeAudio, currentMediaPlayer);
-//        } else {
-//            //get next in playlist
-//            audioIndex++;
-////          new MediaPlayerService(this).skipToNext(audioList, audioIndex, this, currentMediaPlayer);
-////            mediaPlayerService.skipToNext(audioList, audioIndex, this, currentMediaPlayer);
-//            activeAudio = audioList.get(audioIndex);
-//            updateMetaData(activeAudio, currentMediaPlayer);
-//        }
-//
-//
-//    }
-
-
-//    @Override
-//    public void onCompletion(MediaPlayer mediaPlayer) {
-//        //Invoked when playback of a media source has completed.
-//
-//        mediaPlayerService.onCompletion(mediaPlayer);
-//        audio = mediaPlayerService.getActiveAudio();
-//        updateMetaData(audio,mediaPlayer);
-//
-////        StorageUtil storage = new StorageUtil(this);
-////        audioList = storage.loadAudio();
-////        audioIndex = storage.loadAudioIndex();
-////        if (audioIndex <= audioList.size()) {
-////            activeAudio = audioList.get(audioIndex);
-//////            Toast.makeText(this,"I came here but some reason didn't play",Toast.LENGTH_LONG).show();
-////            mediaPlayerService.skipToNext(audioList, audioIndex, this, currentMediaPlayer);
-////            Toast.makeText(this, String.valueOf(storage.loadAudioIndex()), Toast.LENGTH_LONG).show();
-////            updateMetaData(activeAudio, mediaPlayer);
-////        } else {
-////            Toast.makeText(this, "The list said I shouldn't play", Toast.LENGTH_LONG).show();
-////
-////            mediaPlayerService.stopMedia();
-////
-////            //stop the service
-////            mediaPlayerService.stopSelf();
-////
-////        }
-//    }
 
 
     @Override
@@ -497,9 +442,8 @@ public class SingleSongActivity extends AppCompatActivity implements
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        bus.register(this);
+        bus.unregister(this);
     }
-
 
     public void onEventMainThread(AppMainServiceEvent event) {
         Log.d(TAG, "onEventMainThread() called with: " + "event = [" + event + "]");

@@ -24,6 +24,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -34,6 +35,9 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.gloriousfury.musicplayer.R;
@@ -41,14 +45,20 @@ import com.gloriousfury.musicplayer.adapter.AlbumsList_Adapter;
 import com.gloriousfury.musicplayer.model.AlbumLists;
 import com.gloriousfury.musicplayer.model.Albums;
 import com.gloriousfury.musicplayer.model.Audio;
+import com.gloriousfury.musicplayer.service.AppMainServiceEvent;
 import com.gloriousfury.musicplayer.service.MediaPlayerService;
 import com.gloriousfury.musicplayer.ui.fragment.ScrollFragmentContainer;
 import com.gloriousfury.musicplayer.utils.StorageUtil;
+import com.squareup.picasso.Picasso;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import de.greenrobot.event.EventBus;
 
 
 public class LibraryActivity extends AppCompatActivity
@@ -58,20 +68,50 @@ public class LibraryActivity extends AppCompatActivity
     FragmentManager mFragmentManager;
     FragmentTransaction mFragmentTransaction;
     ArrayList<Audio> audioList;
+    private int audioIndex = -1;
     ArrayList<Albums> albumList;
     ArrayList<Audio> retrievedAudioList = new ArrayList<>();
     ArrayList<AlbumLists> retrievedAlbumsList = new ArrayList<>();
     StorageUtil storage;
+
+    Audio activeAudio,nextAudio;
     private static final int TASK_LOADER_ID = 0;
     private static final int REQUEST_STORAGE_PERMISSION = 1;
     private static final int REQUEST_MEDIA_PERMISSION = 2;
+    boolean serviceBound = true;
+    EventBus bus = EventBus.getDefault();
+    String TAG= "LibraryActivity";
 
-    AlertDialog locationDialog = null;
+    @BindView(R.id.artist)
+    TextView artist;
+
+
+    @BindView(R.id.next_artist)
+    TextView nextArtist;
+
+
+    @BindView(R.id.song_title)
+    TextView songTitle;
+
+    @BindView(R.id.next_song_title)
+    TextView  nextSongTitle;
+
+    @BindView(R.id.img_play_pause)
+    ImageView playPauseView;
+
+    @BindView(R.id.song_background)
+    ImageView songBackground;
+
+    @BindView(R.id.next_artist_view)
+    RelativeLayout nextSongView;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_library);
+        ButterKnife.bind(this);
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
         if (ContextCompat.checkSelfPermission(this,
@@ -103,6 +143,9 @@ public class LibraryActivity extends AppCompatActivity
 
 
         storage = new StorageUtil(this);
+        audioList = storage.loadAudio();
+        audioIndex = storage.loadAudioIndex();
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -110,6 +153,15 @@ public class LibraryActivity extends AppCompatActivity
         mFragmentTransaction = mFragmentManager.beginTransaction();
         mFragmentTransaction.replace(R.id.containerView, new ScrollFragmentContainer()).commit();
 
+
+
+
+
+        activeAudio = audioList.get(audioIndex);
+
+        nextAudio = audioList.get(audioIndex+1);
+
+        changeMiniPlayer(activeAudio,nextAudio);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -422,10 +474,118 @@ public class LibraryActivity extends AppCompatActivity
         return true;
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
+
+    public void onEventMainThread(AppMainServiceEvent event) {
+        Log.d(TAG, "onEventMainThread() called with: " + "event = [" + event + "]");
+        Intent i = event.getMainIntent();
+
+
+        if (event.getEventType() == AppMainServiceEvent.ONCOMPLETED_RESPONSE) {
+            if (i != null) {
+
+                Audio recievedAudio = i.getParcelableExtra(AppMainServiceEvent.RESPONSE_DATA);
+                updateMetaData(recievedAudio);
+
+            } else {
+
+                Toast statu = Toast.makeText(this, "Cant Retrieve data at the moment, Try again", Toast.LENGTH_LONG);
+                statu.show();
+            }
+
+
+        }
+    }
+
+    private void updateMetaData(Audio recievedAudio) {
+
+        audioList = storage.loadAudio();
+        audioIndex = storage.loadAudioIndex();
+
+        songTitle.setText(recievedAudio.getTitle());
+        artist.setText(recievedAudio.getArtist());
+
+        Uri albumArtUri = Uri.parse(recievedAudio.getAlbumArtUriString());
+
+        if (albumArtUri != null) {
+
+            Picasso.with(this).load(albumArtUri).into(songBackground);
+
+
+        }
+
 
 
     }
+
+    public void changeMiniPlayer(Audio activeAudio, Audio nextAudio){
+
+
+
+        songTitle.setText(activeAudio.getTitle());
+        artist.setText(activeAudio.getArtist());
+
+        Uri albumArtUri = Uri.parse(activeAudio.getAlbumArtUriString());
+
+        if (albumArtUri != null) {
+
+            Picasso.with(this).load(albumArtUri).into(songBackground);
+
+
+        }
+
+
+        nextSongTitle.setText(nextAudio.getTitle());
+        nextArtist.setText(nextAudio.getArtist());
+
+        Uri nextAlbumArtUri = Uri.parse(nextAudio.getAlbumArtUriString());
+
+//        if (albumArtUri != null) {
+//
+//            Picasso.with(this).load(albumArtUri).into(songBackground);
+//
+//
+//        }
+
+
+    }
+
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        bus.unregister(this);
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        bus.register(this);
+
+        audioList = storage.loadAudio();
+        audioIndex = storage.loadAudioIndex();
+        activeAudio = audioList.get(audioIndex);
+
+        nextAudio = audioList.get(audioIndex+1);
+
+        changeMiniPlayer(activeAudio,nextAudio);
+
+
+
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        bus.unregister(this);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        bus.unregister(this);
+    }
+
+
 }
