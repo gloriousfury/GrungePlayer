@@ -13,6 +13,7 @@ public class Albums implements Serializable {
     private int noOfSongs;
     private long albumId;
     private String albumArtString;
+    private int type;
 
     public Albums() {
 
@@ -82,6 +83,14 @@ public class Albums implements Serializable {
 
     public void setAlbumArtUriString(String albumArtString) {
         this.albumArtString= albumArtString;
+    }
+
+    public int getType() {
+        return type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
     }
 
 

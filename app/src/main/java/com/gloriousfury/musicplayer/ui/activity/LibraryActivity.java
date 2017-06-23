@@ -71,7 +71,7 @@ public class LibraryActivity extends AppCompatActivity
     private int audioIndex = -1;
     ArrayList<Albums> albumList;
     ArrayList<Audio> retrievedAudioList = new ArrayList<>();
-    ArrayList<AlbumLists> retrievedAlbumsList = new ArrayList<>();
+    ArrayList<Albums> retrievedAlbumsList = new ArrayList<>();
     StorageUtil storage;
 
     Audio activeAudio,nextAudio;
@@ -85,25 +85,25 @@ public class LibraryActivity extends AppCompatActivity
     @BindView(R.id.artist)
     TextView artist;
 
-
-    @BindView(R.id.next_artist)
-    TextView nextArtist;
+//
+//    @BindView(R.id.next_artist)
+//    TextView nextArtist;
 
 
     @BindView(R.id.song_title)
     TextView songTitle;
 
-    @BindView(R.id.next_song_title)
-    TextView  nextSongTitle;
+//    @BindView(R.id.next_song_title)
+//    TextView  nextSongTitle;
 
     @BindView(R.id.img_play_pause)
     ImageView playPauseView;
 
     @BindView(R.id.song_background)
     ImageView songBackground;
-
-    @BindView(R.id.next_artist_view)
-    RelativeLayout nextSongView;
+//
+//    @BindView(R.id.next_artist_view)
+//    RelativeLayout nextSongView;
 
 
 
@@ -358,7 +358,7 @@ public class LibraryActivity extends AppCompatActivity
         }
 
 
-        storage.storeAllAlbums(prepareData(albumList));
+        storage.storeAllAlbums(albumList);
 
         cursor.close();
 
@@ -534,10 +534,10 @@ public class LibraryActivity extends AppCompatActivity
         }
 
 
-        nextSongTitle.setText(nextAudio.getTitle());
-        nextArtist.setText(nextAudio.getArtist());
-
-        Uri nextAlbumArtUri = Uri.parse(nextAudio.getAlbumArtUriString());
+//        nextSongTitle.setText(nextAudio.getTitle());
+//        nextArtist.setText(nextAudio.getArtist());
+//
+//        Uri nextAlbumArtUri = Uri.parse(nextAudio.getAlbumArtUriString());
 
 //        if (albumArtUri != null) {
 //

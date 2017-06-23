@@ -50,7 +50,7 @@ public class StorageUtil {
     }
 
 
-    public void storeAllAlbums(ArrayList<AlbumLists> arrayList) {
+    public void storeAllAlbums(ArrayList<Albums> arrayList) {
         preferences = context.getSharedPreferences(ALL_ALBUMS_STORAGE, Context.MODE_PRIVATE);
 
         SharedPreferences.Editor editor = preferences.edit();
@@ -61,11 +61,11 @@ public class StorageUtil {
     }
 
 
-    public ArrayList<AlbumLists> loadAllAlbums() {
+    public ArrayList<Albums> loadAllAlbums() {
         preferences = context.getSharedPreferences(ALL_ALBUMS_STORAGE, Context.MODE_PRIVATE);
         Gson gson = new Gson();
         String json = preferences.getString(ALL_ALBUMS_STORAGE_KEY, null);
-        Type type = new TypeToken<ArrayList<AlbumLists>>() {
+        Type type = new TypeToken<ArrayList<Albums>>() {
         }.getType();
         return gson.fromJson(json, type);
     }
