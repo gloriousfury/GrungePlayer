@@ -29,8 +29,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.gloriousfury.musicplayer.R;
-import com.gloriousfury.musicplayer.adapter.AllSongsAdapter;
+import com.gloriousfury.musicplayer.adapter.AlbumSongsAdapter;
+import com.gloriousfury.musicplayer.model.Albums;
 import com.gloriousfury.musicplayer.model.Audio;
+import com.gloriousfury.musicplayer.service.AppMainServiceEvent;
 import com.gloriousfury.musicplayer.service.MediaPlayerService;
 import com.gloriousfury.musicplayer.utils.StorageUtil;
 
@@ -41,6 +43,7 @@ import java.util.ArrayList;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import de.greenrobot.event.EventBus;
 
 import static com.gloriousfury.musicplayer.ui.activity.MainActivity.Broadcast_PLAY_NEW_AUDIO;
 
@@ -66,12 +69,17 @@ public class AlbumActivity extends AppCompatActivity {
     String ALBUM_ARTIST = "ALBUM_ARTIST";
 
     ArrayList<Audio> albumAudioList;
-    AllSongsAdapter adapter;
+    AlbumSongsAdapter adapter;
     MediaPlayerService mediaPlayerService;
     MediaPlayer currentMediaPlayer;
     StorageUtil storage;
     boolean serviceBound = false;
     private MediaPlayerService player;
+    String TAG = "AlbumActivity";
+    EventBus bus = EventBus.getDefault();
+    ArrayList<Audio> audioList;
+    private int audioIndex = -1;
+    Audio activeAudio;
 
 
     @Override
@@ -102,7 +110,7 @@ public class AlbumActivity extends AppCompatActivity {
             recyclerView.setLayoutManager(layoutManager);
 
 
-            adapter = new AllSongsAdapter(this, albumAudioList);
+            adapter = new AlbumSongsAdapter(this, albumAudioList);
 
 
             recyclerView.setAdapter(adapter);
@@ -203,7 +211,7 @@ public class AlbumActivity extends AppCompatActivity {
                 }
 
 
-                adapter = new AllSongsAdapter(this, albumAudioList);
+                adapter = new AlbumSongsAdapter(this, albumAudioList);
 
 
                 recyclerView.setAdapter(adapter);
@@ -212,6 +220,73 @@ public class AlbumActivity extends AppCompatActivity {
         }
         return albumAudioList;
     }
+
+
+    public void onEventMainThread(AppMainServiceEvent event) {
+        Log.d(TAG, "onEventMainThread() called with: " + "event = [" + event + "]");
+        Intent i = event.getMainIntent();
+
+
+        if (event.getEventType() == AppMainServiceEvent.ONCOMPLETED_RESPONSE) {
+            if (i != null) {
+
+                Audio recievedAudio = i.getParcelableExtra(AppMainServiceEvent.RESPONSE_DATA);
+
+
+            } else {
+
+                Toast statu = Toast.makeText(this, "Cant Retrieve data at the moment, Try again", Toast.LENGTH_LONG);
+                statu.show();
+            }
+
+
+        }
+    }
+
+
+
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        bus.unregister(this);
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        bus.register(this);
+
+
+        if (audioList != null && audioIndex != -1) {
+            audioList = storage.loadAudio();
+            audioIndex = storage.loadAudioIndex();
+            activeAudio = audioList.get(audioIndex);
+
+//
+//            if(audioList)
+//            nextAudio = audioList.get(audioIndex + 1);
+
+//            changeMiniPlayer(activeAudio, nextAudio);
+
+        }
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        bus.unregister(this);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        bus.unregister(this);
+    }
+
+
 
 
 

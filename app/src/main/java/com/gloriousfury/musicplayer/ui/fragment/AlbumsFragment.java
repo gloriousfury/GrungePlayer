@@ -1,42 +1,26 @@
 package com.gloriousfury.musicplayer.ui.fragment;
 
-import android.content.ContentResolver;
-import android.content.ContentUris;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.AsyncTaskLoader;
-import android.support.v4.content.Loader;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AlphabetIndexer;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
-import android.widget.SectionIndexer;
 import android.widget.Toast;
 
 import com.gloriousfury.musicplayer.R;
 import com.gloriousfury.musicplayer.adapter.AlbumAdapter;
-import com.gloriousfury.musicplayer.adapter.AlbumAdapter2;
-import com.gloriousfury.musicplayer.adapter.AlbumsList_Adapter;
-import com.gloriousfury.musicplayer.adapter.AllSongsAdapter;
 import com.gloriousfury.musicplayer.model.AlbumLists;
 import com.gloriousfury.musicplayer.model.Albums;
-import com.gloriousfury.musicplayer.model.Audio;
 import com.gloriousfury.musicplayer.utils.StorageUtil;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -69,15 +53,12 @@ public class AlbumsFragment extends Fragment {
     ArrayList<Albums> albumsArray;
     ArrayList<AlbumLists> albumListArray;
     ArrayList<Albums> albumList;
-    AlbumAdapter2 adapter;
-    AlbumsList_Adapter albumsList_adapter;
+    AlbumAdapter adapter;
     boolean serviceBound = false;
-    Cursor cursor;
-    private static final int TASK_LOADER_ID = 0;
     StorageUtil storage;
     ArrayList<Albums> retrievedAlbumList;
 
-    public AlphabetIndexer mAlphabetIndexer;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -95,7 +76,7 @@ public class AlbumsFragment extends Fragment {
         recyclerView.setLayoutManager(layoutManager);
 
 
-        adapter = new AlbumAdapter2(getActivity(),addAlphabets(sortList(retrievedAlbumList)));
+        adapter = new AlbumAdapter(getActivity(),addAlphabets(sortList(retrievedAlbumList)));
 
         recyclerView.setAdapter(adapter);
 
@@ -128,8 +109,8 @@ public class AlbumsFragment extends Fragment {
         customList.add(firstAlbum);
         for (i = 0; i < list.size() - 1; i++) {
             Albums teamMember = new Albums();
-            char name1 = list.get(i).getAlbum().charAt(0);
-            char name2 = list.get(i + 1).getAlbum().charAt(0);
+            char name1 = list.get(i).getAlbum().toUpperCase().charAt(0);
+            char name2 = list.get(i + 1).getAlbum().toUpperCase().charAt(0);
             if (name1 == name2) {
                 list.get(i).setType(2);
                 customList.add(list.get(i));
@@ -137,7 +118,7 @@ public class AlbumsFragment extends Fragment {
                 list.get(i).setType(2);
                 customList.add(list.get(i));
                 teamMember.setAlbum(String.valueOf(name2));
-                Toast.makeText(getActivity(),String.valueOf(name2),Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getActivity(),String.valueOf(name2),Toast.LENGTH_SHORT).show();
                 teamMember.setType(1);
                 customList.add(teamMember);
             }
@@ -146,8 +127,6 @@ public class AlbumsFragment extends Fragment {
         customList.add(list.get(i));
         return customList;
     }
-
-
 
 
 

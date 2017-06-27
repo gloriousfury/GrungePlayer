@@ -1,52 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_marginTop="1dp"
     android:background="@color/white"
-    android:orientation="vertical"
-    android:layout_margin="@dimen/ten"
-    >
+    android:orientation="vertical">
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        >
-
+        android:layout_height="@dimen/ninety">
 
 
         <ImageView
             android:id="@+id/song_background"
-            android:layout_width="@dimen/one_hundred"
+            android:layout_width="match_parent"
             android:layout_height="@dimen/one_hundred"
-            android:background="@color/grey" />
+            android:background="@color/pink"
+            android:scaleType="centerCrop" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:alpha="0.5"
+            android:background="@color/black"
+
+            />
+
 
         <TextView
             android:id="@+id/artist"
-            android:layout_width="wrap_content"
+            android:layout_width="@dimen/one_fifty"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/song_background"
-            android:layout_marginLeft="@dimen/five"
-            android:layout_marginTop="@dimen/three"
-           android:maxLines="1"
-            tools:text="Adele"
-            android:textSize="13sp"
-            />
+            android:layout_centerHorizontal="true"
+            android:textAlignment="center"
+            android:layout_marginTop="@dimen/five"
+            android:maxLines="1"
+            android:textColor="@color/white"
+            android:textSize="15sp"
+            tools:text="Adele" />
+
 
         <TextView
             android:id="@+id/album_name"
-            android:layout_width="wrap_content"
+            android:layout_width="@dimen/two_hundred"
             android:layout_height="wrap_content"
             android:layout_below="@+id/artist"
-            android:layout_marginLeft="@dimen/five"
-            android:layout_marginTop="@dimen/three"
-            android:layout_marginBottom="@dimen/five"
-            android:textSize="8sp"
-            tools:text="Hello"
+            android:layout_centerHorizontal="true"
+            android:textAlignment="center"
+            android:layout_marginTop="@dimen/five"
             android:maxLines="1"
-            />
+            android:textColor="@color/white"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            tools:text="Hello by Lala land" />
 
 
+        <TextView
+            android:id="@+id/no_of_songs"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/album_name"
+            android:layout_centerHorizontal="true"
+            android:layout_marginLeft="@dimen/five"
+            android:layout_marginTop="@dimen/five"
+
+            android:maxLines="1"
+            android:textColor="@color/white"
+            android:textSize="15sp"
+            tools:text="7 Songs" />
 
 
     </RelativeLayout>

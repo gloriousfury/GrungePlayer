@@ -1,16 +1,8 @@
 package com.gloriousfury.musicplayer.ui.fragment;
 
-import android.content.ContentResolver;
-import android.content.ContentUris;
-import android.content.Context;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,13 +12,10 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.gloriousfury.musicplayer.R;
-import com.gloriousfury.musicplayer.adapter.AlbumsList_Adapter;
 import com.gloriousfury.musicplayer.model.AlbumLists;
 import com.gloriousfury.musicplayer.model.Albums;
 import com.gloriousfury.musicplayer.model.Audio;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 
 

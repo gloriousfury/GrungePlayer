@@ -3,7 +3,6 @@ package com.gloriousfury.musicplayer.ui.activity;
 import android.Manifest;
 import android.content.ContentResolver;
 import android.content.ContentUris;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -13,8 +12,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -22,10 +19,7 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
-import android.support.v7.app.AlertDialog;
-import android.text.TextUtils;
 import android.util.Log;
-import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -36,24 +30,20 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.gloriousfury.musicplayer.R;
-import com.gloriousfury.musicplayer.adapter.AlbumsList_Adapter;
 import com.gloriousfury.musicplayer.model.AlbumLists;
 import com.gloriousfury.musicplayer.model.Albums;
 import com.gloriousfury.musicplayer.model.Audio;
 import com.gloriousfury.musicplayer.service.AppMainServiceEvent;
-import com.gloriousfury.musicplayer.service.MediaPlayerService;
 import com.gloriousfury.musicplayer.ui.fragment.ScrollFragmentContainer;
 import com.gloriousfury.musicplayer.utils.StorageUtil;
 import com.squareup.picasso.Picasso;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 
 import butterknife.BindView;
@@ -74,13 +64,13 @@ public class LibraryActivity extends AppCompatActivity
     ArrayList<Albums> retrievedAlbumsList = new ArrayList<>();
     StorageUtil storage;
 
-    Audio activeAudio,nextAudio;
+    Audio activeAudio, nextAudio;
     private static final int TASK_LOADER_ID = 0;
     private static final int REQUEST_STORAGE_PERMISSION = 1;
     private static final int REQUEST_MEDIA_PERMISSION = 2;
     boolean serviceBound = true;
     EventBus bus = EventBus.getDefault();
-    String TAG= "LibraryActivity";
+    String TAG = "LibraryActivity";
 
     @BindView(R.id.artist)
     TextView artist;
@@ -104,7 +94,6 @@ public class LibraryActivity extends AppCompatActivity
 //
 //    @BindView(R.id.next_artist_view)
 //    RelativeLayout nextSongView;
-
 
 
     @Override
@@ -152,16 +141,16 @@ public class LibraryActivity extends AppCompatActivity
         mFragmentManager = getSupportFragmentManager();
         mFragmentTransaction = mFragmentManager.beginTransaction();
         mFragmentTransaction.replace(R.id.containerView, new ScrollFragmentContainer()).commit();
-
-
-
-
-
-        activeAudio = audioList.get(audioIndex);
-
-        nextAudio = audioList.get(audioIndex+1);
-
-        changeMiniPlayer(activeAudio,nextAudio);
+//
+//
+//        if (audioList != null && audioIndex != -1) {
+//            activeAudio = audioList.get(audioIndex);
+//
+//            nextAudio = audioList.get(audioIndex + 1);
+//
+//            changeMiniPlayer(activeAudio, nextAudio);
+//
+//        }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -514,24 +503,22 @@ public class LibraryActivity extends AppCompatActivity
         }
 
 
-
     }
 
-    public void changeMiniPlayer(Audio activeAudio, Audio nextAudio){
-
-
-
-        songTitle.setText(activeAudio.getTitle());
-        artist.setText(activeAudio.getArtist());
-
-        Uri albumArtUri = Uri.parse(activeAudio.getAlbumArtUriString());
-
-        if (albumArtUri != null) {
-
-            Picasso.with(this).load(albumArtUri).into(songBackground);
-
-
-        }
+//    public void changeMiniPlayer(Audio activeAudio, Audio nextAudio) {
+//
+//
+//        songTitle.setText(activeAudio.getTitle());
+//        artist.setText(activeAudio.getArtist());
+//
+//        Uri albumArtUri = Uri.parse(activeAudio.getAlbumArtUriString());
+//
+//        if (albumArtUri != null) {
+//
+//            Picasso.with(this).load(albumArtUri).into(songBackground);
+//
+//
+//        }
 
 
 //        nextSongTitle.setText(nextAudio.getTitle());
@@ -547,7 +534,7 @@ public class LibraryActivity extends AppCompatActivity
 //        }
 
 
-    }
+//    }
 
 
     @Override
@@ -562,16 +549,19 @@ public class LibraryActivity extends AppCompatActivity
         super.onResume();
         bus.register(this);
 
-        audioList = storage.loadAudio();
-        audioIndex = storage.loadAudioIndex();
-        activeAudio = audioList.get(audioIndex);
 
-        nextAudio = audioList.get(audioIndex+1);
+        if (audioList != null && audioIndex != -1) {
+            audioList = storage.loadAudio();
+            audioIndex = storage.loadAudioIndex();
+            activeAudio = audioList.get(audioIndex);
 
-        changeMiniPlayer(activeAudio,nextAudio);
+//            
+//            if(audioList)
+//            nextAudio = audioList.get(audioIndex + 1);
 
+//            changeMiniPlayer(activeAudio, nextAudio);
 
-
+        }
 
     }
 

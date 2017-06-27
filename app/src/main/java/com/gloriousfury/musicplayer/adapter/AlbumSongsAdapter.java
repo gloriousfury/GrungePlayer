@@ -20,10 +20,9 @@ import android.widget.Toast;
 
 import com.gloriousfury.musicplayer.R;
 import com.gloriousfury.musicplayer.model.Audio;
-import com.gloriousfury.musicplayer.utils.StorageUtil;
 import com.gloriousfury.musicplayer.service.MediaPlayerService;
 import com.gloriousfury.musicplayer.ui.activity.SingleSongActivity;
-import com.gloriousfury.musicplayer.utils.Timer;
+import com.gloriousfury.musicplayer.utils.StorageUtil;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -31,7 +30,7 @@ import java.util.ArrayList;
 import static com.gloriousfury.musicplayer.ui.activity.MainActivity.Broadcast_PLAY_NEW_AUDIO;
 
 
-public class AllSongsAdapter extends RecyclerView.Adapter<AllSongsAdapter.ViewHolder> {
+public class AlbumSongsAdapter extends RecyclerView.Adapter<AlbumSongsAdapter.ViewHolder> {
     Context context;
     private ArrayList<Audio> song_list;
     boolean serviceBound = false;
@@ -42,7 +41,7 @@ public class AllSongsAdapter extends RecyclerView.Adapter<AllSongsAdapter.ViewHo
     String ALBUM_ART_URI = "song_album_art_uri";
 
 
-    public AllSongsAdapter(Context context, ArrayList<Audio> song_list) {
+    public AlbumSongsAdapter(Context context, ArrayList<Audio> song_list) {
         this.context = context;
         this.song_list = song_list;
 
@@ -50,7 +49,7 @@ public class AllSongsAdapter extends RecyclerView.Adapter<AllSongsAdapter.ViewHo
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        TextView song_title, artist, duration;
+        TextView song_title,artist;
         ImageView song_background;
 
 
@@ -63,24 +62,22 @@ public class AllSongsAdapter extends RecyclerView.Adapter<AllSongsAdapter.ViewHo
 
             song_title = (TextView) view.findViewById(R.id.song_title);
             artist = (TextView) view.findViewById(R.id.artist);
-            duration = (TextView) view.findViewById(R.id.song_duration);
 
 
             song_background = (ImageView) view.findViewById(R.id.song_background);
+
 
 
         }
 
         @Override
         public void onClick(View v) {
-            int adapterposition = getAdapterPosition();
+            int adapterposition =getAdapterPosition();
 
             Audio singleSong = song_list.get(adapterposition);
+            song_title.setTextSize(20);
             playAudio(adapterposition);
-            Intent openSingleSongActivity = new Intent(context, SingleSongActivity.class);
-            openSingleSongActivity.putExtra(SONG, singleSong);
 
-            context.startActivity(openSingleSongActivity);
 
         }
     }
@@ -98,9 +95,8 @@ public class AllSongsAdapter extends RecyclerView.Adapter<AllSongsAdapter.ViewHo
         holder.song_title.setText(song_list.get(position).getTitle());
         holder.artist.setText(song_list.get(position).getArtist());
 
-        String duration = String.valueOf(Timer.milliSecondsToTimer(song_list.get(position).getDuration()));
-        holder.duration.setText(duration);
-        if (song_list.get(position).getAlbumArtUriString() != null) {
+
+        if(song_list.get(position).getAlbumArtUriString()!=null) {
             Uri albumArtUri = Uri.parse(song_list.get(position).getAlbumArtUriString());
             Picasso.with(context).load(albumArtUri).resize(120, 120).into(holder.song_background);
         }
@@ -110,9 +106,9 @@ public class AllSongsAdapter extends RecyclerView.Adapter<AllSongsAdapter.ViewHo
     @Override
     public int getItemCount() {
 
-        if (song_list != null) {
+        if(song_list!=null){
             return song_list.size();
-        } else {
+        }else{
 
             return 0;
         }
@@ -145,7 +141,7 @@ public class AllSongsAdapter extends RecyclerView.Adapter<AllSongsAdapter.ViewHo
             storage.storeAudio(song_list);
             storage.storeAudioIndex(audioIndex);
 
-            Toast.makeText(context, String.valueOf(storage.loadAudioIndex()), Toast.LENGTH_LONG).show();
+            Toast.makeText(context,String.valueOf(storage.loadAudioIndex()),Toast.LENGTH_LONG).show();
             Intent playerIntent = new Intent(context, MediaPlayerService.class);
             context.startService(playerIntent);
             context.bindService(playerIntent, serviceConnection, Context.BIND_AUTO_CREATE);

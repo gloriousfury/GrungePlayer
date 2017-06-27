@@ -46,6 +46,7 @@
             tools:text="RS 18999ml/ 180ml" />
 
         <TextView
+            android:id="@+id/song_duration"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="3:11"

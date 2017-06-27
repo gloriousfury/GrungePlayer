@@ -233,12 +233,16 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         switch (what) {
             case MediaPlayer.MEDIA_ERROR_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK:
                 Log.d("MediaPlayer Error", "MEDIA ERROR NOT VALID FOR PROGRESSIVE PLAYBACK " + extra);
+                Toast.makeText(getContext(), "MEDIA ERROR NOT VALID FOR PROGRESSIVE PLAYBACK ", Toast.LENGTH_LONG).show();
                 break;
             case MediaPlayer.MEDIA_ERROR_SERVER_DIED:
                 Log.d("MediaPlayer Error", "MEDIA ERROR SERVER DIED " + extra);
+                Toast.makeText(getContext(), "MEDIA ERROR SERVER DIED ", Toast.LENGTH_LONG).show();
                 break;
             case MediaPlayer.MEDIA_ERROR_UNKNOWN:
                 Log.d("MediaPlayer Error", "MEDIA ERROR UNKNOWN " + extra);
+                Toast.makeText(getContext(), "EDIA ERROR UNKNOWN ", Toast.LENGTH_LONG).show();
+
                 break;
         }
         return false;
