@@ -41,7 +41,7 @@ import butterknife.OnClick;
 import de.greenrobot.event.EventBus;
 
 public class SingleSongActivity extends AppCompatActivity implements
-        SeekBar.OnSeekBarChangeListener, MediaPlayer.OnErrorListener, MediaController.MediaPlayerControl {
+        SeekBar.OnSeekBarChangeListener,MediaController.MediaPlayerControl {
 
     @BindView(R.id.artist)
     TextView artist;
@@ -140,10 +140,8 @@ public class SingleSongActivity extends AppCompatActivity implements
             audio = getSongData.getParcelableExtra(SONG);
             String song_title = audio.getTitle();
             String song_artist = audio.getArtist();
-
+            totalDuration = audio.getDuration();
             Uri albumArtUri = Uri.parse(audio.getAlbumArtUriString());
-
-
             songTitle.setText(song_title);
             artist.setText(song_artist);
             if (albumArtUri != null) {
@@ -223,7 +221,7 @@ public class SingleSongActivity extends AppCompatActivity implements
         public void run() {
 
 
-            long totalDuration = mediaPlayerService.getDur();
+//            long totalDuration = mediaPlayerService.getDur();
             long currentDuration = mediaPlayerService.getCurrentDur();
 
             // Displaying Total Duration time
@@ -350,25 +348,6 @@ public class SingleSongActivity extends AppCompatActivity implements
     }
 
 
-
-
-    @Override
-    public boolean onError(MediaPlayer mp, int what, int extra) {
-        //Invoked when there has been an error during an asynchronous operation
-        switch (what) {
-            case MediaPlayer.MEDIA_ERROR_NOT_VALID_FOR_PROGRESSIVE_PLAYBACK:
-                Log.d("MediaPlayer Error", "MEDIA ERROR NOT VALID FOR PROGRESSIVE PLAYBACK " + extra);
-                break;
-            case MediaPlayer.MEDIA_ERROR_SERVER_DIED:
-                Log.d("MediaPlayer Error", "MEDIA ERROR SERVER DIED " + extra);
-                break;
-            case MediaPlayer.MEDIA_ERROR_UNKNOWN:
-                Log.d("MediaPlayer Error", "MEDIA ERROR UNKNOWN " + extra);
-                break;
-        }
-        return false;
-    }
-
     @Override
     public void pause() {
         mediaPlayerService.pausePlayer();
@@ -465,15 +444,5 @@ public class SingleSongActivity extends AppCompatActivity implements
 
         }
     }
-
-    //    @Override
-//    public void onPrepared(MediaPlayer mediaPlayer) {
-//        mediaPlayer = mediaPlayerService.getMediaPlayerInstance();
-//        totalDuration = mediaPlayer.getDuration();
-//        currentDuration = mediaPlayer.getCurrentPosition();
-//        seekBar.setProgress(0);
-//        seekBar.setMax(100);
-//        updateProgressBar();
-//    }
 
 }

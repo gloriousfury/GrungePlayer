@@ -499,14 +499,14 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             activeAudio = audioList.get(++audioIndex);
 
         }
+
+
+        //Update stored index
+        new StorageUtil(context).storeAudioIndex(audioIndex);
         responseIntent.putExtra(AppMainServiceEvent.RESPONSE_DATA, activeAudio);
         event.setMainIntent(responseIntent);
         event.setEventType(AppMainServiceEvent.ONCOMPLETED_RESPONSE);
         EventBus.getDefault().post(event);
-
-        //Update stored index
-        new StorageUtil(context).storeAudioIndex(audioIndex);
-
         stopMedia();
         //reset mediaPlayer
         mediaPlayer.reset();

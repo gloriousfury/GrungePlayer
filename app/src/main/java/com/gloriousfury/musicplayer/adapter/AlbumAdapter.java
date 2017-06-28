@@ -30,6 +30,7 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.ViewHolder> 
     private MediaPlayerService player;
     String ALBUM_TITLE = "album_title";
     String ALBUM_ARTIST = "ALBUM_ARTIST";
+    String ALBUM_ART_URI = "album_art_uri";
     int TYPE_ALPHABET = 1;
     int TYPE_ALBUM = 2;
 
@@ -68,6 +69,7 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.ViewHolder> 
 
             Intent openSingleSongActivity = new Intent(context, AlbumActivity.class);
             openSingleSongActivity.putExtra(ALBUM_TITLE, album_list.get(getAdapterPosition()).getAlbum());
+            openSingleSongActivity.putExtra(ALBUM_ARTIST, album_list.get(getAdapterPosition()).getArtist());
             openSingleSongActivity.putExtra(ALBUM_ARTIST, album_list.get(getAdapterPosition()).getArtist());
             context.startActivity(openSingleSongActivity);
 
@@ -122,6 +124,7 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.ViewHolder> 
             Intent openAlbumActivity = new Intent(context,AlbumActivity.class);
             openAlbumActivity.putExtra(ALBUM_TITLE, album_list.get(getAdapterPosition()).getAlbum());
             openAlbumActivity.putExtra(ALBUM_ARTIST, album_list.get(getAdapterPosition()).getArtist());
+            openAlbumActivity.putExtra(ALBUM_ART_URI, album_list.get(getAdapterPosition()).getAlbumArtUriString());
             context.startActivity(openAlbumActivity);
         }
     }

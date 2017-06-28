@@ -63,13 +63,13 @@ public class ScrollFragmentContainer extends Fragment {
         @Override
         public Fragment getItem(int position) {
             if(position == 0){
-                return LibraryFragment.newInstance();
-            } else if(position == 1) {
                 return AllSongsFragment.newInstance();
-            }
-            else if(position == 2) {
+            } else if(position == 1) {
                 return AlbumsFragment.newInstance();
             }
+//            else if(position == 2) {
+//                return AlbumsFragment.newInstance();
+//            }
             else {
                 return BasicFragment.newInstance();
             }
@@ -87,11 +87,11 @@ public class ScrollFragmentContainer extends Fragment {
 
                 case 0:
 
-                    return "Library";
-                case 1:
                     return "All Songs";
-                case 2:
+                case 1:
                     return "Albums";
+//                case 2:
+//                    return "Albums";
 
             }
             return null;

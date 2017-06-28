@@ -37,6 +37,7 @@ public class AllSongsAdapter extends RecyclerView.Adapter<AllSongsAdapter.ViewHo
     boolean serviceBound = false;
     private MediaPlayerService player;
     String SONG = "single_audio";
+    String SONG_DURATION = "song_duration";
     String SONG_TITLE = "song_title";
     String SONG_ARTIST = "song_artist";
     String ALBUM_ART_URI = "song_album_art_uri";

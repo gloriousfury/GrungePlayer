@@ -23,6 +23,7 @@ import com.gloriousfury.musicplayer.model.Audio;
 import com.gloriousfury.musicplayer.service.MediaPlayerService;
 import com.gloriousfury.musicplayer.ui.activity.SingleSongActivity;
 import com.gloriousfury.musicplayer.utils.StorageUtil;
+import com.gloriousfury.musicplayer.utils.Timer;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -33,12 +34,16 @@ import static com.gloriousfury.musicplayer.ui.activity.MainActivity.Broadcast_PL
 public class AlbumSongsAdapter extends RecyclerView.Adapter<AlbumSongsAdapter.ViewHolder> {
     Context context;
     private ArrayList<Audio> song_list;
+    private Audio activeAudio = new Audio();
     boolean serviceBound = false;
     private MediaPlayerService player;
     String SONG = "single_audio";
     String SONG_TITLE = "song_title";
     String SONG_ARTIST = "song_artist";
     String ALBUM_ART_URI = "song_album_art_uri";
+    int activeAudioIndex = -1;
+    int formerAudioIndex = -1;
+    String actionMode = null;
 
 
     public AlbumSongsAdapter(Context context, ArrayList<Audio> song_list) {
@@ -49,7 +54,7 @@ public class AlbumSongsAdapter extends RecyclerView.Adapter<AlbumSongsAdapter.Vi
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        TextView song_title,artist;
+        TextView song_title, artist, duration;
         ImageView song_background;
 
 
@@ -62,21 +67,21 @@ public class AlbumSongsAdapter extends RecyclerView.Adapter<AlbumSongsAdapter.Vi
 
             song_title = (TextView) view.findViewById(R.id.song_title);
             artist = (TextView) view.findViewById(R.id.artist);
-
-
+            duration = (TextView) view.findViewById(R.id.song_duration);
             song_background = (ImageView) view.findViewById(R.id.song_background);
-
 
 
         }
 
         @Override
         public void onClick(View v) {
-            int adapterposition =getAdapterPosition();
+            int adapterposition = getAdapterPosition();
 
+            activeAudioIndex = adapterposition;
             Audio singleSong = song_list.get(adapterposition);
+            activeAudio = singleSong;
             song_title.setTextSize(20);
-            playAudio(adapterposition);
+            playAudio(activeAudioIndex);
 
 
         }
@@ -84,31 +89,40 @@ public class AlbumSongsAdapter extends RecyclerView.Adapter<AlbumSongsAdapter.Vi
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_allsongs, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_albumsongs, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
 
+        String title = song_list.get(position).getTitle();
 
-        holder.song_title.setText(song_list.get(position).getTitle());
+        holder.song_title.setText(title);
         holder.artist.setText(song_list.get(position).getArtist());
+        String duration = String.valueOf(Timer.milliSecondsToTimer(song_list.get(position).getDuration()));
+        holder.duration.setText(duration);
 
 
-        if(song_list.get(position).getAlbumArtUriString()!=null) {
-            Uri albumArtUri = Uri.parse(song_list.get(position).getAlbumArtUriString());
-            Picasso.with(context).load(albumArtUri).resize(120, 120).into(holder.song_background);
+        if (activeAudio.getTitle()!= null) {
+            if (title.contentEquals(activeAudio.getTitle())) {
+                holder.song_title.setTextSize(20);
+
+            } else {
+                holder.song_title.setTextSize(15);
+
+            }
         }
 
     }
 
+
     @Override
     public int getItemCount() {
 
-        if(song_list!=null){
+        if (song_list != null) {
             return song_list.size();
-        }else{
+        } else {
 
             return 0;
         }
@@ -141,7 +155,7 @@ public class AlbumSongsAdapter extends RecyclerView.Adapter<AlbumSongsAdapter.Vi
             storage.storeAudio(song_list);
             storage.storeAudioIndex(audioIndex);
 
-            Toast.makeText(context,String.valueOf(storage.loadAudioIndex()),Toast.LENGTH_LONG).show();
+            Toast.makeText(context, String.valueOf(storage.loadAudioIndex()), Toast.LENGTH_LONG).show();
             Intent playerIntent = new Intent(context, MediaPlayerService.class);
             context.startService(playerIntent);
             context.bindService(playerIntent, serviceConnection, Context.BIND_AUTO_CREATE);
@@ -156,6 +170,20 @@ public class AlbumSongsAdapter extends RecyclerView.Adapter<AlbumSongsAdapter.Vi
             context.sendBroadcast(broadcastIntent);
         }
     }
+
+
+    public void setAdapterData(int audioIndex) {
+        Toast.makeText(context, "Set Adapter was called", Toast.LENGTH_LONG).show();
+        formerAudioIndex = activeAudioIndex;
+        activeAudioIndex = audioIndex;
+        notifyItemChanged(formerAudioIndex);
+        activeAudio = song_list.get(activeAudioIndex);
+        notifyItemChanged(activeAudioIndex);
+
+
+    }
+
+
 }
 
 

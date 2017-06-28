@@ -35,6 +35,7 @@ import com.gloriousfury.musicplayer.model.Audio;
 import com.gloriousfury.musicplayer.service.AppMainServiceEvent;
 import com.gloriousfury.musicplayer.service.MediaPlayerService;
 import com.gloriousfury.musicplayer.utils.StorageUtil;
+import com.squareup.picasso.Picasso;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -53,6 +54,9 @@ public class AlbumActivity extends AppCompatActivity {
     TextView artist;
 
 
+//    @BindView(R.id.toolbar)
+//    Toolbar toolbar;
+
     @BindView(R.id.album_name)
     TextView albumTitle;
 
@@ -65,8 +69,10 @@ public class AlbumActivity extends AppCompatActivity {
     @BindView(R.id.recyclerView)
     RecyclerView recyclerView;
 
+
     String ALBUM_TITLE = "album_title";
     String ALBUM_ARTIST = "ALBUM_ARTIST";
+    String ALBUM_ART_URI = "album_art_uri";
 
     ArrayList<Audio> albumAudioList;
     AlbumSongsAdapter adapter;
@@ -87,22 +93,38 @@ public class AlbumActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_single_album);
         ButterKnife.bind(this);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+
+//        setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle("Grunge Player");
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+
+        storage = new StorageUtil(this);
         mediaPlayerService = new MediaPlayerService(this);
+
 
         Bundle getAlbumData = getIntent().getExtras();
 
         if (getAlbumData != null) {
             String AlbumTitle = getAlbumData.getString(ALBUM_TITLE);
             String AlbumArtist = getAlbumData.getString(ALBUM_ARTIST);
+            String AlbumUri = getAlbumData.getString(ALBUM_ART_URI);
 
+            if (AlbumUri != null) {
+                Uri albumArtUri = Uri.parse(AlbumUri);
+                Picasso.with(this).load(albumArtUri).into(songBackground);
+                Toast.makeText(this, albumArtUri.toString(), Toast.LENGTH_LONG);
+            }else{
+                Toast.makeText(this, "Album Art is non existence", Toast.LENGTH_LONG);
+
+            }
             albumTitle.setText(AlbumTitle);
             artist.setText(AlbumArtist);
+
             requestAlbumDetails(AlbumTitle);
 
             Toast.makeText(this, AlbumArtist + " " + AlbumTitle, Toast.LENGTH_LONG).show();
-            recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
+//            recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
             recyclerView.setHasFixedSize(true);
 
             RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
@@ -117,9 +139,6 @@ public class AlbumActivity extends AppCompatActivity {
 
 
         }
-
-
-
 
 
     }
@@ -230,7 +249,25 @@ public class AlbumActivity extends AppCompatActivity {
         if (event.getEventType() == AppMainServiceEvent.ONCOMPLETED_RESPONSE) {
             if (i != null) {
 
-                Audio recievedAudio = i.getParcelableExtra(AppMainServiceEvent.RESPONSE_DATA);
+//                Audio recievedAudio = i.getParcelableExtra(AppMainServiceEvent.RESPONSE_DATA);
+//
+//                audioList = storage.loadAllAudio();
+
+                Toast statu = Toast.makeText(this, "I came here, just so you know", Toast.LENGTH_LONG);
+                statu.show();
+                audioIndex = storage.loadAudioIndex();
+//                changeAdapterData();
+
+//                adapter = new AlbumSongsAdapter(this, albumAudioList, audioIndex);
+//
+//
+//                recyclerView.setAdapter(adapter);
+//
+//
+
+                Toast.makeText(this, String.valueOf(audioIndex),Toast.LENGTH_LONG).show();
+                adapter.setAdapterData(audioIndex);
+
 
 
             } else {
@@ -242,8 +279,6 @@ public class AlbumActivity extends AppCompatActivity {
 
         }
     }
-
-
 
 
     @Override
@@ -286,8 +321,12 @@ public class AlbumActivity extends AppCompatActivity {
         bus.unregister(this);
     }
 
+    public void changeAdapterData(){
+
+        recyclerView.setVisibility(View.INVISIBLE);
 
 
+    }
 
 
     private ServiceConnection serviceConnection = new ServiceConnection() {
