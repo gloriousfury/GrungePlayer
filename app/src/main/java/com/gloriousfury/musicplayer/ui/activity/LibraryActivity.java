@@ -8,8 +8,10 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -28,8 +30,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,8 +42,10 @@ import com.gloriousfury.musicplayer.model.AlbumLists;
 import com.gloriousfury.musicplayer.model.Albums;
 import com.gloriousfury.musicplayer.model.Audio;
 import com.gloriousfury.musicplayer.service.AppMainServiceEvent;
+import com.gloriousfury.musicplayer.service.MediaPlayerService;
 import com.gloriousfury.musicplayer.ui.fragment.ScrollFragmentContainer;
 import com.gloriousfury.musicplayer.utils.StorageUtil;
+import com.gloriousfury.musicplayer.utils.Timer;
 import com.squareup.picasso.Picasso;
 
 import java.io.FileNotFoundException;
@@ -53,7 +59,7 @@ import de.greenrobot.event.EventBus;
 
 public class LibraryActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
-        LoaderManager.LoaderCallbacks<ArrayList<Audio>> {
+        LoaderManager.LoaderCallbacks<ArrayList<Audio>>, View.OnClickListener {
 
     FragmentManager mFragmentManager;
     FragmentTransaction mFragmentTransaction;
@@ -63,7 +69,8 @@ public class LibraryActivity extends AppCompatActivity
     ArrayList<Audio> retrievedAudioList = new ArrayList<>();
     ArrayList<Albums> retrievedAlbumsList = new ArrayList<>();
     StorageUtil storage;
-
+    MediaPlayerService mediaPlayerService;
+    MediaPlayer currentMediaPlayer;
     Audio activeAudio, nextAudio;
     private static final int TASK_LOADER_ID = 0;
     private static final int REQUEST_STORAGE_PERMISSION = 1;
@@ -71,29 +78,33 @@ public class LibraryActivity extends AppCompatActivity
     boolean serviceBound = true;
     EventBus bus = EventBus.getDefault();
     String TAG = "LibraryActivity";
+    long totalDuration;
+    long currentDuration;
+    private Handler mHandler = new Handler();
 
     @BindView(R.id.artist)
     TextView artist;
-
-//
-//    @BindView(R.id.next_artist)
-//    TextView nextArtist;
 
 
     @BindView(R.id.song_title)
     TextView songTitle;
 
-//    @BindView(R.id.next_song_title)
-//    TextView  nextSongTitle;
+
+    @BindView(R.id.img_fast_foward)
+    ImageView nextSong;
+
+    @BindView(R.id.img_rewind)
+    ImageView previousSong;
+
 
     @BindView(R.id.img_play_pause)
     ImageView playPauseView;
 
+
     @BindView(R.id.song_background)
     ImageView songBackground;
-//
-//    @BindView(R.id.next_artist_view)
-//    RelativeLayout nextSongView;
+    @BindView(R.id.songProgressBar)
+    SeekBar seekBar;
 
 
     @Override
@@ -134,6 +145,16 @@ public class LibraryActivity extends AppCompatActivity
         storage = new StorageUtil(this);
         audioList = storage.loadAudio();
         audioIndex = storage.loadAudioIndex();
+        mediaPlayerService = new MediaPlayerService(this);
+        currentMediaPlayer = mediaPlayerService.getMediaPlayerInstance();
+        songBackground.setOnClickListener(this);
+        playPauseView.setOnClickListener(this);
+        nextSong.setOnClickListener(this);
+        previousSong.setOnClickListener(this);
+
+        seekBar.setProgress(0);
+        seekBar.setMax(100);
+
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -355,53 +376,6 @@ public class LibraryActivity extends AppCompatActivity
     }
 
 
-    public ArrayList<AlbumLists> prepareData(ArrayList<Albums> album_list) {
-
-        ArrayList<AlbumLists> exampleList = new ArrayList<>();
-
-        String[] title = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
-                "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"};
-
-        for (int i = 0; i < title.length; i++) {
-            String alphabet = title[i];
-
-
-            AlbumLists exampleItem = new AlbumLists();
-
-
-            ArrayList<Albums> newArrayList = new ArrayList<>();
-            ArrayList<Albums> ashArrayList = new ArrayList<>();
-            for (int k = 0; k < album_list.size(); k++) {
-
-                if (album_list.get(k).getAlbum() != null) {
-                    String firstLetter = album_list.get(k).getAlbum().substring(0, 1);
-
-
-                    Albums newAlbums;
-
-                    if (firstLetter.equalsIgnoreCase(alphabet)) {
-                        newAlbums = album_list.get(k);
-                        newArrayList.add(newAlbums);
-                    } else {
-                        newAlbums = album_list.get(k);
-                        ashArrayList.add(newAlbums);
-
-                    }
-                }
-
-            }
-            exampleItem.setAlbums(newArrayList);
-            exampleItem.setAlphabet(title[i]);
-
-            exampleList.add(exampleItem);
-
-
-        }
-
-        return exampleList;
-    }
-
-
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -493,6 +467,12 @@ public class LibraryActivity extends AppCompatActivity
         songTitle.setText(recievedAudio.getTitle());
         artist.setText(recievedAudio.getArtist());
 
+        seekBar.setProgress(0);
+        seekBar.setMax(100);
+
+//                 Updating progress bar
+        updateProgressBar();
+
         Uri albumArtUri = Uri.parse(recievedAudio.getAlbumArtUriString());
 
         if (albumArtUri != null) {
@@ -505,37 +485,61 @@ public class LibraryActivity extends AppCompatActivity
 
     }
 
-//    public void changeMiniPlayer(Audio activeAudio, Audio nextAudio) {
-//
-//
-//        songTitle.setText(activeAudio.getTitle());
-//        artist.setText(activeAudio.getArtist());
-//
-//        Uri albumArtUri = Uri.parse(activeAudio.getAlbumArtUriString());
-//
-//        if (albumArtUri != null) {
-//
-//            Picasso.with(this).load(albumArtUri).into(songBackground);
-//
-//
-//        }
+    public void changeMiniPlayer(Audio activeAudio) {
+        if (currentMediaPlayer.isPlaying()) {
+            totalDuration = activeAudio.getDuration();
+            updateProgressBar();
+
+        }
+
+        songTitle.setText(activeAudio.getTitle());
+        artist.setText(activeAudio.getArtist());
+        Uri albumArtUri = null;
+        if (activeAudio.getAlbumArtUriString() != null) {
+            albumArtUri = Uri.parse(activeAudio.getAlbumArtUriString());
+        }
+        if (albumArtUri != null) {
+
+            Picasso.with(this).load(albumArtUri).into(songBackground);
 
 
-//        nextSongTitle.setText(nextAudio.getTitle());
-//        nextArtist.setText(nextAudio.getArtist());
-//
-//        Uri nextAlbumArtUri = Uri.parse(nextAudio.getAlbumArtUriString());
-
-//        if (albumArtUri != null) {
-//
-//            Picasso.with(this).load(albumArtUri).into(songBackground);
-//
-//
-//        }
+        }
 
 
-//    }
+        if (albumArtUri != null) {
 
+            Picasso.with(this).load(albumArtUri).into(songBackground);
+
+
+        }
+
+
+    }
+
+    public void updateProgressBar() {
+        mHandler.postDelayed(mUpdateTimeTask, 100);
+    }
+
+    /**
+     * Background Runnable thread
+     */
+    private Runnable mUpdateTimeTask = new Runnable() {
+        public void run() {
+
+
+//            long totalDuration = mediaPlayerService.getDur();
+            long currentDuration = mediaPlayerService.getCurrentDur();
+            // Updating progress bar
+            int progress = (int) (Timer.getProgressPercentage(currentDuration, totalDuration));
+            //Log.d("Progress", ""+progress);
+            seekBar.setProgress(progress);
+
+            // Running this thread after 100 milliseconds
+            mHandler.postDelayed(this, 100);
+
+
+        }
+    };
 
     @Override
     protected void onDestroy() {
@@ -555,11 +559,7 @@ public class LibraryActivity extends AppCompatActivity
             audioIndex = storage.loadAudioIndex();
             activeAudio = audioList.get(audioIndex);
 
-//            
-//            if(audioList)
-//            nextAudio = audioList.get(audioIndex + 1);
-
-//            changeMiniPlayer(activeAudio, nextAudio);
+            changeMiniPlayer(activeAudio);
 
         }
 
@@ -578,4 +578,47 @@ public class LibraryActivity extends AppCompatActivity
     }
 
 
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.img_play_pause:
+//                currentMediaPlayer = mediaPlayerService.getMediaPlayerInstance();
+                if (currentMediaPlayer.isPlaying()) {
+
+                    playPauseView.setImageDrawable(ContextCompat
+                            .getDrawable(LibraryActivity.this, R.drawable.ic_play_circle_filled_white_black_24dp));
+
+                    mediaPlayerService.pauseMedia(currentMediaPlayer);
+
+                } else if (!currentMediaPlayer.isPlaying()) {
+
+                    playPauseView.setImageDrawable(ContextCompat
+                            .getDrawable(LibraryActivity.this, R.drawable.ic_pause_circle_filled_black_24dp));
+                    mediaPlayerService.resumeMedia(currentMediaPlayer);
+                }
+//                 set Progress bar values
+
+
+                break;
+
+            case R.id.img_fast_foward:
+
+//                currentMediaPlayer = mediaPlayerService.getMediaPlayerInstance();
+
+                audioList = storage.loadAudio();
+                audioIndex = storage.loadAudioIndex();
+                mediaPlayerService.skipToNext(audioList, audioIndex, this, currentMediaPlayer);
+                break;
+
+            case R.id.img_rewind:
+
+//             currentMediaPlayer = mediaPlayerService.getMediaPlayerInstance();
+
+                audioList = storage.loadAudio();
+                audioIndex = storage.loadAudioIndex();
+                mediaPlayerService.skipToPrevious(audioList, audioIndex, this, currentMediaPlayer);
+                break;
+
+        }
+    }
 }

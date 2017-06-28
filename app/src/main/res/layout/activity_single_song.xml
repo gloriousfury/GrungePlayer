@@ -13,25 +13,9 @@
 
 
         <ImageView
-            android:id="@+id/song_background_2"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/yellow"
-            android:scaleType="fitXY" />
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/black"
-            android:alpha="0.5"
-            />
-
-
-        <ImageView
             android:id="@+id/song_background"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_margin="@dimen/thirty"
-            android:background="@color/black"
             android:scaleType="fitXY" />
 
 
@@ -39,7 +23,7 @@
             android:id="@+id/close_activity"
             android:layout_width="@dimen/thirty"
             android:layout_height="@dimen/thirty"
-            android:layout_margin="@dimen/five"
+            android:layout_margin="@dimen/three"
             android:src="@drawable/ic_keyboard_arrow_down_white_24dp" />
 
 

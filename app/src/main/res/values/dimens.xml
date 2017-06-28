@@ -142,6 +142,7 @@
     <dimen name="one_fifty">150dp</dimen>
 
     <dimen name="one_seventy_five">175dp</dimen>
+    <dimen name="one_ninety">190dp</dimen>
     <dimen name="two_hundred">200dp</dimen>
     <dimen name="two_hundred_fifty">250dp</dimen>
     <dimen name="two_fifty">250dp</dimen>

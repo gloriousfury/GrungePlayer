@@ -22,6 +22,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.SeekBar;
@@ -40,6 +41,7 @@ import com.squareup.picasso.Picasso;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -50,10 +52,16 @@ import static com.gloriousfury.musicplayer.ui.activity.MainActivity.Broadcast_PL
 
 public class AlbumActivity extends AppCompatActivity {
 
+
     @BindView(R.id.artist)
     TextView artist;
 
 
+    @BindView(R.id.no_of_songs)
+    TextView noOfSongs;
+
+    @BindView(R.id.play_time)
+    TextView playTime;
 //    @BindView(R.id.toolbar)
 //    Toolbar toolbar;
 
@@ -114,7 +122,7 @@ public class AlbumActivity extends AppCompatActivity {
                 Uri albumArtUri = Uri.parse(AlbumUri);
                 Picasso.with(this).load(albumArtUri).into(songBackground);
                 Toast.makeText(this, albumArtUri.toString(), Toast.LENGTH_LONG);
-            }else{
+            } else {
                 Toast.makeText(this, "Album Art is non existence", Toast.LENGTH_LONG);
 
             }
@@ -232,6 +240,17 @@ public class AlbumActivity extends AppCompatActivity {
 
                 adapter = new AlbumSongsAdapter(this, albumAudioList);
 
+                if(albumAudioList.size()>1) {
+                    noOfSongs.setText(String.valueOf(albumAudioList.size()) + " Songs");
+
+
+                }else{
+                    noOfSongs.setText(String.valueOf(albumAudioList.size()) + " Song");
+
+
+                }
+                playTime.setText(getPlayTime(albumAudioList));
+
 
                 recyclerView.setAdapter(adapter);
 
@@ -265,9 +284,8 @@ public class AlbumActivity extends AppCompatActivity {
 //
 //
 
-                Toast.makeText(this, String.valueOf(audioIndex),Toast.LENGTH_LONG).show();
+                Toast.makeText(this, String.valueOf(audioIndex), Toast.LENGTH_LONG).show();
                 adapter.setAdapterData(audioIndex);
-
 
 
             } else {
@@ -321,9 +339,46 @@ public class AlbumActivity extends AppCompatActivity {
         bus.unregister(this);
     }
 
-    public void changeAdapterData(){
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                // API 5+ solution
+                onBackPressed();
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    public void changeAdapterData() {
 
         recyclerView.setVisibility(View.INVISIBLE);
+
+
+    }
+
+    public String getPlayTime(ArrayList<Audio> audioList) {
+
+        int duration = 0;
+        for (int i = 0; i < audioList.size() - 1; i++) {
+
+            duration += audioList.get(i).getDuration();
+        }
+
+        if(duration>3600000) {
+            String hms = String.format("%d Hr, %d mins", TimeUnit.MILLISECONDS.toHours(duration),
+                    TimeUnit.MILLISECONDS.toMinutes(duration) % TimeUnit.HOURS.toMinutes(1));
+//                TimeUnit.MILLISECONDS.toSeconds(duration) % TimeUnit.MINUTES.toSeconds(1));
+
+            return hms;
+        }else{
+            String hms = String.format("%d mins",  TimeUnit.MILLISECONDS.toMinutes(duration) % TimeUnit.HOURS.toMinutes(1));
+//
+            return  hms;
+        }
 
 
     }

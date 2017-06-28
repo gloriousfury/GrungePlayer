@@ -15,6 +15,7 @@ import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.MediaController;
@@ -55,6 +56,8 @@ public class SingleSongActivity extends AppCompatActivity implements
 
     @BindView(R.id.song_background)
     ImageView songBackground;
+
+
 
     @BindView(R.id.songCurrentDuration)
     TextView songCurrentDuration;
@@ -161,7 +164,7 @@ public class SingleSongActivity extends AppCompatActivity implements
 
     @OnClick(R.id.img_fast_foward)
     public void playNextSong() {
-        MediaPlayer currentMediaPlayer = mediaPlayerService.getMediaPlayerInstance();
+        currentMediaPlayer = mediaPlayerService.getMediaPlayerInstance();
 
         audioList = storage.loadAudio();
         audioIndex = storage.loadAudioIndex();
@@ -347,6 +350,19 @@ public class SingleSongActivity extends AppCompatActivity implements
         updateProgressBar();
     }
 
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                // API 5+ solution
+                onBackPressed();
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
 
     @Override
     public void pause() {
