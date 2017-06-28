@@ -2,27 +2,24 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/sixty"
+    android:layout_height="@dimen/seventy"
     android:clickable="true"
-
     android:orientation="horizontal">
 
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-
         android:background="@color/white">
 
         <SeekBar
             android:id="@+id/songProgressBar"
             android:layout_width="match_parent"
             android:layout_height="@dimen/five"
-
-            android:paddingLeft="6dp"
-            android:paddingRight="6dp"
-            android:progressDrawable="@drawable/seekbar_progress"
+            android:progressDrawable="@drawable/seekbar_progress2"
+           android:layout_marginLeft="-15dp"
             android:layout_alignParentTop="true"
+
            />
 
 

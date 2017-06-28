@@ -47,7 +47,8 @@
             android:paddingLeft="6dp"
             android:paddingRight="6dp"
             android:progressDrawable="@drawable/seekbar_progress"
-            android:thumb="@drawable/img_seekbar_tracker" />
+            android:thumb="@drawable/img_seekbar_tracker"
+            />
 
         <TextView
             android:id="@+id/songCurrentDuration"

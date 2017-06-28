@@ -78,7 +78,7 @@ public class LibraryActivity extends AppCompatActivity
     boolean serviceBound = true;
     EventBus bus = EventBus.getDefault();
     String TAG = "LibraryActivity";
-    long totalDuration;
+    int totalDuration;
     long currentDuration;
     private Handler mHandler = new Handler();
 
@@ -151,9 +151,6 @@ public class LibraryActivity extends AppCompatActivity
         playPauseView.setOnClickListener(this);
         nextSong.setOnClickListener(this);
         previousSong.setOnClickListener(this);
-
-        seekBar.setProgress(0);
-        seekBar.setMax(100);
 
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -486,8 +483,14 @@ public class LibraryActivity extends AppCompatActivity
     }
 
     public void changeMiniPlayer(Audio activeAudio) {
-        if (currentMediaPlayer.isPlaying()) {
+        if (isPlaying()) {
             totalDuration = activeAudio.getDuration();
+
+//            int currentPosition = Timer.progressToTimer(seekBar.getProgress(), totalDuration);
+//
+//            // forward or backward to certain seconds
+//            currentMediaPlayer.seekTo(currentPosition);
+
             updateProgressBar();
 
         }
@@ -526,7 +529,6 @@ public class LibraryActivity extends AppCompatActivity
     private Runnable mUpdateTimeTask = new Runnable() {
         public void run() {
 
-
 //            long totalDuration = mediaPlayerService.getDur();
             long currentDuration = mediaPlayerService.getCurrentDur();
             // Updating progress bar
@@ -548,12 +550,25 @@ public class LibraryActivity extends AppCompatActivity
 
     }
 
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        bus.register(this);
+        if (audioList != null && audioIndex != -1) {
+            audioList = storage.loadAudio();
+            audioIndex = storage.loadAudioIndex();
+            activeAudio = audioList.get(audioIndex);
+
+            changeMiniPlayer(activeAudio);
+        }
+
+
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
-        bus.register(this);
-
-
         if (audioList != null && audioIndex != -1) {
             audioList = storage.loadAudio();
             audioIndex = storage.loadAudioIndex();
@@ -620,5 +635,13 @@ public class LibraryActivity extends AppCompatActivity
                 break;
 
         }
+    }
+
+
+    public boolean isPlaying() {
+
+        if (mediaPlayerService != null && serviceBound)
+            return mediaPlayerService.isPng();
+        return false;
     }
 }
