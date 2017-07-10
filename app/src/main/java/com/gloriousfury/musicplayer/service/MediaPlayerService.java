@@ -34,6 +34,7 @@ import com.gloriousfury.musicplayer.utils.PlaybackStatus;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Random;
 
 import de.greenrobot.event.EventBus;
 
@@ -45,6 +46,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         AudioManager.OnAudioFocusChangeListener {
 
     public static MediaPlayer mediaPlayer;
+    String TAG = MediaPlayerService.class.getSimpleName();
     //path to the audio file
     private String mediaFile;
     private int resumePosition;
@@ -66,6 +68,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     Intent responseIntent = new Intent();
     AppMainServiceEvent event = new AppMainServiceEvent();
     Context context;
+    PlaybackStatus playbackStatus;
+    boolean shuffleState= false;
 
     //MediaSession
     private MediaSessionManager mediaSessionManager;
@@ -121,7 +125,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         super.onCreate();
 
         // Perform one-time setup procedures
-
+        StorageUtil storage = new StorageUtil(getContext());
+        shuffleState = storage.getShuffleSettings();
         // Manage incoming phone calls during playback.
         // Pause MediaPlayer on incoming call,
         // Resume on hangup.
@@ -130,6 +135,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         registerBecomingNoisyReceiver();
         //Listen for new Audio to play -- BroadcastReceiver
         register_playNewAudio();
+
 
     }
 
@@ -153,6 +159,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             e.printStackTrace();
             stopSelf();
         }
+
         mediaPlayer.prepareAsync();
     }
 
@@ -160,6 +167,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     private void playMedia() {
         if (!mediaPlayer.isPlaying()) {
             mediaPlayer.start();
+            playbackStatus = PlaybackStatus.PLAYING;
             duration = mediaPlayer.getDuration();
         }
     }
@@ -174,6 +182,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     public void pauseMedia(MediaPlayer mediaPlayer) {
         if (mediaPlayer.isPlaying()) {
             mediaPlayer.pause();
+            playbackStatus = PlaybackStatus.PAUSED;
             resumePosition = mediaPlayer.getCurrentPosition();
 
         }
@@ -214,9 +223,13 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         audioIndex = storage.loadAudioIndex();
         if (audioIndex <= audioList.size()) {
             Toast.makeText(getContext(), "This is suppossed to be the next song", Toast.LENGTH_LONG).show();
-            skipToNext(audioList, audioIndex, getContext(), mediaPlayer);
-
-//            updateMetaData();
+            shuffleState = storage.getShuffleSettings();
+            if(shuffleState){
+                shuffleToNext(audioList,audioIndex);
+            }else {
+                skipToNext(audioList, audioIndex, getContext(), mediaPlayer);
+            }
+            updateMetaData();
         } else {
             Toast.makeText(getContext(), "The list said I shouldn't play", Toast.LENGTH_LONG).show();
             stopMedia();
@@ -276,8 +289,12 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             case AudioManager.AUDIOFOCUS_GAIN:
                 // resume playback
                 if (mediaPlayer == null) initMediaPlayer();
-                else if (!mediaPlayer.isPlaying()) mediaPlayer.start();
-                mediaPlayer.setVolume(1.0f, 1.0f);
+                else if (!mediaPlayer.isPlaying() & isPlayBackSupposedToContinue()) {
+                    mediaPlayer.start();
+                    mediaPlayer.setVolume(1.0f, 1.0f);
+                }
+
+
                 break;
             case AudioManager.AUDIOFOCUS_LOSS:
                 // Lost focus for an unbounded amount of time: stop playback and release media seek
@@ -290,6 +307,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 // playback. We don't release the media seek because playback
                 // is likely to resume
                 if (mediaPlayer.isPlaying()) mediaPlayer.pause();
+
                 break;
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
                 // Lost focus for a short time, but it's ok to keep playing
@@ -445,7 +463,13 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 StorageUtil storage = new StorageUtil(getContext());
                 audioList = storage.loadAudio();
                 audioIndex = storage.loadAudioIndex();
-                skipToNext(audioList, audioIndex, getContext(), mediaPlayer);
+                shuffleState = storage.getShuffleSettings();
+                if(shuffleState){
+                    shuffleToNext(audioList,audioIndex);
+                }else{
+                    skipToNext(audioList, audioIndex, getContext(), mediaPlayer);
+                }
+
                 updateMetaData();
                 buildNotification(PlaybackStatus.PLAYING);
             }
@@ -494,10 +518,11 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             audioIndex = 0;
             activeAudio = audioList.get(audioIndex);
 
+
         } else {
             //get next in playlist
             activeAudio = audioList.get(++audioIndex);
-
+            Log.e(TAG,"Audio Index : " +audioIndex +"Active Audio: " +activeAudio.getTitle());
         }
 
 
@@ -510,9 +535,39 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         stopMedia();
         //reset mediaPlayer
         mediaPlayer.reset();
+        Log.e(TAG,"I also came here");
         initMediaPlayer();
 
     }
+
+    public void shuffleToNext(ArrayList<Audio> audioList, int audioIndex) {
+
+
+        Random rand = new Random();
+        audioIndex = rand.nextInt(audioList.size()-1);
+
+            //this should work for when repeat and shuffle is on
+//        else  if (audioIndex == audioList.size() - 1) {
+//            //if last in playlist
+//            audioIndex = 0;
+//            activeAudio = audioList.get(audioIndex);
+//
+//        } else {
+            //get next in playlist
+            activeAudio = audioList.get(audioIndex);
+        //Update stored index
+        new StorageUtil(context).storeAudioIndex(audioIndex);
+        responseIntent.putExtra(AppMainServiceEvent.RESPONSE_DATA, activeAudio);
+        event.setMainIntent(responseIntent);
+        event.setEventType(AppMainServiceEvent.ONCOMPLETED_RESPONSE);
+        EventBus.getDefault().post(event);
+        stopMedia();
+        //reset mediaPlayer
+        mediaPlayer.reset();
+        initMediaPlayer();
+
+    }
+
 
     public void skipToPrevious(ArrayList<Audio> audioList, int audioIndex, Context context, MediaPlayer mediaPlayer) {
 
@@ -619,6 +674,11 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
 
     public Audio getActiveAudio() {
+        //TODO Here I want to check for the ending of list stuff
+        StorageUtil storage = new StorageUtil(getContext());
+        audioList = storage.loadAudio();
+        audioIndex = storage.loadAudioIndex();
+        activeAudio = audioList.get(audioIndex);
         return activeAudio;
     }
 
@@ -749,5 +809,19 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         //clear cached playlist
         new StorageUtil(getApplicationContext()).clearCachedAudioPlaylist();
     }
+
+
+    public boolean isPlayBackSupposedToContinue() {
+        if (playbackStatus == PlaybackStatus.PLAYING) {
+            return true;
+        } else if (playbackStatus == PlaybackStatus.PAUSED) {
+
+            return false;
+        } else {
+
+            return false;
+        }
+    }
+
 
 }

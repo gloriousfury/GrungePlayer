@@ -54,6 +54,7 @@ import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import de.greenrobot.event.EventBus;
 
 
@@ -81,6 +82,7 @@ public class LibraryActivity extends AppCompatActivity
     int totalDuration;
     long currentDuration;
     private Handler mHandler = new Handler();
+    String SONG = "single_audio";
 
     @BindView(R.id.artist)
     TextView artist;
@@ -183,6 +185,19 @@ public class LibraryActivity extends AppCompatActivity
 
     }
 
+
+
+
+
+    @OnClick(R.id.song_background)
+    public void openSingleSong() {
+        Intent openSingleSongActivity = new Intent(this, SingleSongActivity.class);
+        openSingleSongActivity.putExtra(SONG, activeAudio);
+
+       startActivity(openSingleSongActivity);
+        Toast.makeText(this, "I just don't want to respond",Toast.LENGTH_LONG).show();
+
+    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
@@ -458,6 +473,7 @@ public class LibraryActivity extends AppCompatActivity
 
     private void updateMetaData(Audio recievedAudio) {
 
+        activeAudio = recievedAudio;
         audioList = storage.loadAudio();
         audioIndex = storage.loadAudioIndex();
 
@@ -632,6 +648,11 @@ public class LibraryActivity extends AppCompatActivity
                 audioList = storage.loadAudio();
                 audioIndex = storage.loadAudioIndex();
                 mediaPlayerService.skipToPrevious(audioList, audioIndex, this, currentMediaPlayer);
+                break;
+
+            case R.id.song_background:
+
+
                 break;
 
         }

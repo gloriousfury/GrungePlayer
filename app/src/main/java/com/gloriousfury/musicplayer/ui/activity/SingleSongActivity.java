@@ -42,7 +42,7 @@ import butterknife.OnClick;
 import de.greenrobot.event.EventBus;
 
 public class SingleSongActivity extends AppCompatActivity implements
-        SeekBar.OnSeekBarChangeListener,MediaController.MediaPlayerControl {
+        SeekBar.OnSeekBarChangeListener, MediaController.MediaPlayerControl {
 
     @BindView(R.id.artist)
     TextView artist;
@@ -56,7 +56,6 @@ public class SingleSongActivity extends AppCompatActivity implements
 
     @BindView(R.id.song_background)
     ImageView songBackground;
-
 
 
     @BindView(R.id.songCurrentDuration)
@@ -102,6 +101,7 @@ public class SingleSongActivity extends AppCompatActivity implements
     private MusicController controller;
     boolean serviceBound = true;
     EventBus bus = EventBus.getDefault();
+    boolean shuffleState;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -110,16 +110,15 @@ public class SingleSongActivity extends AppCompatActivity implements
         ButterKnife.bind(this);
         mediaPlayerService = new MediaPlayerService(this);
         currentMediaPlayer = mediaPlayerService.getMediaPlayerInstance();
-
+//        shuffleState = storage.getShuffleSettings();
         seekBar.setOnSeekBarChangeListener(this);
-
 
 
         // set Progress bar values
         seekBar.setProgress(0);
         seekBar.setMax(100);
 
-        Toast.makeText(this, String.valueOf(mediaPlayerService.getCurrentDur()),Toast.LENGTH_LONG).show();
+        Toast.makeText(this, String.valueOf(mediaPlayerService.getCurrentDur()), Toast.LENGTH_LONG).show();
 
         // Updating progress bar
         updateProgressBar();
@@ -168,8 +167,15 @@ public class SingleSongActivity extends AppCompatActivity implements
 
         audioList = storage.loadAudio();
         audioIndex = storage.loadAudioIndex();
+        activeAudio = mediaPlayerService.getActiveAudio();
+        shuffleState = storage.getShuffleSettings();
+        if(shuffleState){
+
+            mediaPlayerService.shuffleToNext(audioList, audioIndex);
+        }else {
         mediaPlayerService.skipToNext(audioList, audioIndex, this, currentMediaPlayer);
 
+        }
 
     }
 
@@ -209,6 +215,19 @@ public class SingleSongActivity extends AppCompatActivity implements
             updateProgressBar();
         }
 
+
+    }
+
+    @OnClick(R.id.shuffle)
+    public void shuffleSongs() {
+        shuffleState = storage.getShuffleSettings();
+        if (shuffleState) {
+            shuffleView.setImageResource(R.drawable.ic_fast_forward_black_24dp);
+            storage.setShuffle(false);
+        } else {
+            shuffleView.setImageResource(R.drawable.ic_shuffle_pink_24dp);
+            storage.setShuffle(true);
+        }
 
     }
 
@@ -431,7 +450,10 @@ public class SingleSongActivity extends AppCompatActivity implements
     @Override
     protected void onStart() {
         super.onStart();
+//        if (bus == null) {
+        Toast.makeText(this, "Bus was registered", Toast.LENGTH_LONG).show();
         bus.register(this);
+//        }
     }
 
     @Override
@@ -450,6 +472,7 @@ public class SingleSongActivity extends AppCompatActivity implements
 
                 Audio recievedAudio = i.getParcelableExtra(AppMainServiceEvent.RESPONSE_DATA);
                 updateMetaData(recievedAudio);
+                Toast statu = Toast.makeText(this, "Came to the onComplete", Toast.LENGTH_LONG);
 
             } else {
 

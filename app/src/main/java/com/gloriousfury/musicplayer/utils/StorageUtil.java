@@ -21,6 +21,7 @@ public class StorageUtil {
 
     private final String ALL_ALBUMS_STORAGE = " com.gloriousfury.MusicPlayer.ALL_ALBUMS_STORAGE";
     private final String ALL_ALBUMS_STORAGE_KEY= "allAlbumsArrayList";
+    public final String SHUFFLE_KEY = "shuffle";
     private SharedPreferences preferences;
     private Context context;
 
@@ -108,4 +109,17 @@ public class StorageUtil {
         editor.clear();
         editor.commit();
     }
+
+    public void   setShuffle(boolean shuffleSettings) {
+        preferences = context.getSharedPreferences(STORAGE, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putBoolean(SHUFFLE_KEY,shuffleSettings);
+        editor.apply();
+    }
+
+    public boolean  getShuffleSettings() {
+        preferences = context.getSharedPreferences(STORAGE, Context.MODE_PRIVATE);
+        return preferences.getBoolean(SHUFFLE_KEY,false);
+    }
+
 }
