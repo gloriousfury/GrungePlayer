@@ -2,6 +2,8 @@ package com.gloriousfury.musicplayer.ui.fragment;
 
 import android.content.ContentResolver;
 import android.content.ContentUris;
+import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -13,11 +15,13 @@ import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
@@ -25,6 +29,7 @@ import android.widget.Toast;
 import com.gloriousfury.musicplayer.R;
 import com.gloriousfury.musicplayer.adapter.AllSongsAdapter;
 import com.gloriousfury.musicplayer.model.Audio;
+import com.gloriousfury.musicplayer.service.AppMainServiceEvent;
 import com.gloriousfury.musicplayer.ui.activity.MainActivity;
 import com.gloriousfury.musicplayer.utils.StorageUtil;
 
@@ -33,12 +38,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
+import de.greenrobot.event.EventBus;
+
 
 /**
  * Created by OLORIAKE KEHINDE on 11/16/2016.
  */
 
-public class AllSongsFragment extends Fragment implements View.OnClickListener {
+public class AllSongsFragment extends Fragment {
 
 
     public static AllSongsFragment newInstance() {
@@ -54,31 +61,39 @@ public class AllSongsFragment extends Fragment implements View.OnClickListener {
     RelativeLayout settingsLayout;
     ImageView settingsImage;
     RecyclerView recyclerView;
-    ArrayList<Audio> audioList;
+    ArrayList<Audio> audioList = new ArrayList<>();
     boolean serviceBound = false;
     StorageUtil storage;
+    String TAG = "LibraryActivity";
+    ProgressBar progressBar;
+    EventBus bus = EventBus.getDefault();
 
     AllSongsAdapter adapter;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_general, container, false);
-        storage  = new StorageUtil(getContext());
-        audioList = storage.loadAllAudio();
+        storage = new StorageUtil(getContext());
+
+        progressBar = (ProgressBar) v.findViewById(R.id.progressBar);
         recyclerView = (RecyclerView) v.findViewById(R.id.recyclerView);
         recyclerView.setHasFixedSize(true);
 
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext());
 
         recyclerView.setLayoutManager(layoutManager);
-
+        audioList = storage.loadAllAudio();
+        adapter = new AllSongsAdapter(getActivity(), audioList);
         if (audioList != null) {
-            adapter = new AllSongsAdapter(getActivity(), audioList);
+            adapter.setAudioListData(audioList);
 
-        }else {
-
-            Toast.makeText(getActivity(),"Not loaded yet", Toast.LENGTH_LONG).show();
+        } else {
+            adapter.setAudioListData(audioList);
+            progressBar.setVisibility(View.VISIBLE);
+            recyclerView.setVisibility(View.INVISIBLE);
+            Toast.makeText(getActivity(), "Not loaded yet", Toast.LENGTH_LONG).show();
         }
 
 
@@ -131,7 +146,7 @@ public class AllSongsFragment extends Fragment implements View.OnClickListener {
 
 
                 // Save to audioList
-                audioList.add(new Audio(data, title, album, artist, duration,albumId,albumArtUri.toString()
+                audioList.add(new Audio(data, title, album, artist, duration, albumId, albumArtUri.toString()
                 ));
             }
         }
@@ -143,11 +158,38 @@ public class AllSongsFragment extends Fragment implements View.OnClickListener {
         return audioList;
     }
 
+    public void onEventMainThread(AppMainServiceEvent event) {
+        Log.d(TAG, "onEventMainThread() called with: " + "event = [" + event + "]");
+        Intent i = event.getMainIntent();
 
-    @Override
-    public void onClick(View v) {
+
+        if (event.getEventType() == AppMainServiceEvent.ONDATALOADED) {
+//            if (i != null) {
+                audioList = storage.loadAllAudio();
+                adapter.setAudioListData(audioList);
+                progressBar.setVisibility(View.INVISIBLE);
+                recyclerView.setVisibility(View.VISIBLE);
+
+
+
+
+        }
+    }
+
+    public void showAudioData() {
 
 
     }
 
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        bus.unregister(this);
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        bus.register(this);
+    }
 }

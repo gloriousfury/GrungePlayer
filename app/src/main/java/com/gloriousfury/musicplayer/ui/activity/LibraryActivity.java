@@ -33,6 +33,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -83,6 +84,8 @@ public class LibraryActivity extends AppCompatActivity
     long currentDuration;
     private Handler mHandler = new Handler();
     String SONG = "single_audio";
+    Intent responseIntent = new Intent();
+    AppMainServiceEvent event = new AppMainServiceEvent();
 
     @BindView(R.id.artist)
     TextView artist;
@@ -92,16 +95,17 @@ public class LibraryActivity extends AppCompatActivity
     TextView songTitle;
 
 
-    @BindView(R.id.img_fast_foward)
-    ImageView nextSong;
+//    @BindView(R.id.img_fast_foward)
+//    ImageView nextSong;
 
-    @BindView(R.id.img_rewind)
-    ImageView previousSong;
+//    @BindView(R.id.img_rewind)
+//    ImageView previousSong;
 
 
     @BindView(R.id.img_play_pause)
     ImageView playPauseView;
-
+    @BindView(R.id.relative_layout_mini_player)
+    RelativeLayout miniPlayerView;
 
     @BindView(R.id.song_background)
     ImageView songBackground;
@@ -116,32 +120,6 @@ public class LibraryActivity extends AppCompatActivity
         ButterKnife.bind(this);
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
-        if (ContextCompat.checkSelfPermission(this,
-                android.Manifest.permission.READ_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
-
-            // If you do not have permission, request it
-            ActivityCompat.requestPermissions(this,
-                    new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE},
-                    REQUEST_STORAGE_PERMISSION);
-        } else if (ContextCompat.checkSelfPermission(this,
-                android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
-
-            // If you do not have permission, request it
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                    REQUEST_STORAGE_PERMISSION);
-
-        } else if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.MEDIA_CONTENT_CONTROL) !=
-                PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.MEDIA_CONTENT_CONTROL},
-                    REQUEST_MEDIA_PERMISSION);
-
-
-        }
 
 
         storage = new StorageUtil(this);
@@ -151,8 +129,8 @@ public class LibraryActivity extends AppCompatActivity
         currentMediaPlayer = mediaPlayerService.getMediaPlayerInstance();
         songBackground.setOnClickListener(this);
         playPauseView.setOnClickListener(this);
-        nextSong.setOnClickListener(this);
-        previousSong.setOnClickListener(this);
+//        nextSong.setOnClickListener(this);
+//        previousSong.setOnClickListener(this);
 
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -181,21 +159,64 @@ public class LibraryActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        getSupportLoaderManager().initLoader(TASK_LOADER_ID, null, this);
+        if(checkPermissions()) {
+            startTasks();
 
+        }else{
+            checkPermissions();
+
+        }
     }
 
+    private void startTasks() {
+
+        getSupportLoaderManager().initLoader(TASK_LOADER_ID, null, this);
+    }
+
+    public boolean checkPermissions(){
+
+        if (ContextCompat.checkSelfPermission(this,
+                android.Manifest.permission.READ_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            // If you do not have permission, request it
+            ActivityCompat.requestPermissions(this,
+                    new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE},
+                    REQUEST_STORAGE_PERMISSION);
+        } else if (ContextCompat.checkSelfPermission(this,
+                android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            // If you do not have permission, request it
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    REQUEST_STORAGE_PERMISSION);
+
+        } else if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.MEDIA_CONTENT_CONTROL) !=
+                PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.MEDIA_CONTENT_CONTROL},
+                    REQUEST_MEDIA_PERMISSION);
 
 
+        }
 
+        if(ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_EXTERNAL_STORAGE)
+                == PackageManager.PERMISSION_GRANTED
+                &&
+                ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                == PackageManager.PERMISSION_GRANTED
+                &&(ContextCompat.checkSelfPermission(this,Manifest.permission.MEDIA_CONTENT_CONTROL) ==
+                PackageManager.PERMISSION_GRANTED
+                )){
+            startTasks();
+            return true;
 
-    @OnClick(R.id.song_background)
-    public void openSingleSong() {
-        Intent openSingleSongActivity = new Intent(this, SingleSongActivity.class);
-        openSingleSongActivity.putExtra(SONG, activeAudio);
-
-       startActivity(openSingleSongActivity);
-        Toast.makeText(this, "I just don't want to respond",Toast.LENGTH_LONG).show();
+        }
+        else {
+            return false;
+        }
 
     }
 
@@ -276,21 +297,21 @@ public class LibraryActivity extends AppCompatActivity
                                 .parse("content://media/external/audio/albumart");
                         Uri albumArtUri = ContentUris.withAppendedId(sArtworkUri, albumId);
 
-
-                        Bitmap bitmap = null;
-                        try {
-                            bitmap = MediaStore.Images.Media.getBitmap(
-                                    getContentResolver(), albumArtUri);
-                            bitmap = Bitmap.createScaledBitmap(bitmap, 30, 30, true);
-
-                        } catch (FileNotFoundException exception) {
-                            exception.printStackTrace();
-                            bitmap = BitmapFactory.decodeResource(getResources(),
-                                    R.mipmap.ic_launcher);
-                        } catch (IOException e) {
-
-                            e.printStackTrace();
-                        }
+//
+//                        Bitmap bitmap = null;
+//                        try {
+//                            bitmap = MediaStore.Images.Media.getBitmap(
+//                                    getContentResolver(), albumArtUri);
+//                            bitmap = Bitmap.createScaledBitmap(bitmap, 30, 30, true);
+//
+//                        } catch (FileNotFoundException exception) {
+//                            exception.printStackTrace();
+//                            bitmap = BitmapFactory.decodeResource(getResources(),
+//                                    R.mipmap.ic_launcher);
+//                        } catch (IOException e) {
+//
+//                            e.printStackTrace();
+//                        }
 
 
                         // Save to audioList
@@ -314,6 +335,14 @@ public class LibraryActivity extends AppCompatActivity
     @Override
     public void onLoadFinished(Loader<ArrayList<Audio>> loader, ArrayList<Audio> data) {
         storage.storeAllAudio(data);
+
+
+//        responseIntent.putExtra(AppMainServiceEvent.RESPONSE_DATA, activeAudio);
+        Log.d(TAG,"I sent in sometihing here");
+        event.setMainIntent(responseIntent);
+        event.setEventType(AppMainServiceEvent.ONDATALOADED);
+        EventBus.getDefault().post(event);
+
     }
 
 
@@ -480,6 +509,8 @@ public class LibraryActivity extends AppCompatActivity
         songTitle.setText(recievedAudio.getTitle());
         artist.setText(recievedAudio.getArtist());
 
+
+        Log.d(TAG,recievedAudio.getAlbumArtUriString());
         seekBar.setProgress(0);
         seekBar.setMax(100);
 
@@ -501,13 +532,16 @@ public class LibraryActivity extends AppCompatActivity
     public void changeMiniPlayer(Audio activeAudio) {
         if (isPlaying()) {
             totalDuration = activeAudio.getDuration();
-
+            playPauseView.setImageResource(R.drawable.ic_pause_black_24dp);
 //            int currentPosition = Timer.progressToTimer(seekBar.getProgress(), totalDuration);
 //
 //            // forward or backward to certain seconds
 //            currentMediaPlayer.seekTo(currentPosition);
 
             updateProgressBar();
+
+        }else if(!isPlaying() && serviceBound){
+            playPauseView.setImageResource(R.drawable.ic_play_arrow_black_24dp);
 
         }
 
@@ -524,13 +558,6 @@ public class LibraryActivity extends AppCompatActivity
 
         }
 
-
-        if (albumArtUri != null) {
-
-            Picasso.with(this).load(albumArtUri).into(songBackground);
-
-
-        }
 
 
     }
@@ -571,26 +598,44 @@ public class LibraryActivity extends AppCompatActivity
     protected void onStart() {
         super.onStart();
         bus.register(this);
-        if (audioList != null && audioIndex != -1) {
-            audioList = storage.loadAudio();
-            audioIndex = storage.loadAudioIndex();
-            activeAudio = audioList.get(audioIndex);
+        if(audioList==null){
+            miniPlayerView.setVisibility(View.GONE);
+            miniPlayerView.invalidate();
+        } else if (audioList != null && audioIndex != -1) {
+            if (audioList.size()==0 ) {
+                miniPlayerView.setVisibility(View.GONE);
+                miniPlayerView.invalidate();
+            }else {
+                miniPlayerView.setVisibility(View.VISIBLE);
+                audioList = storage.loadAudio();
+                audioIndex = storage.loadAudioIndex();
+                activeAudio = audioList.get(audioIndex);
 
-            changeMiniPlayer(activeAudio);
+                changeMiniPlayer(activeAudio);
+            }
+
         }
-
 
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if (audioList != null && audioIndex != -1) {
-            audioList = storage.loadAudio();
-            audioIndex = storage.loadAudioIndex();
-            activeAudio = audioList.get(audioIndex);
+        if(audioList==null){
+            miniPlayerView.setVisibility(View.GONE);
+            miniPlayerView.invalidate();
+        } else if (audioList != null && audioIndex != -1) {
+            if (audioList.size()==0 ) {
+                miniPlayerView.setVisibility(View.GONE);
+                miniPlayerView.invalidate();
+            }else {
+                miniPlayerView.setVisibility(View.VISIBLE);
+                audioList = storage.loadAudio();
+                audioIndex = storage.loadAudioIndex();
+                activeAudio = audioList.get(audioIndex);
 
-            changeMiniPlayer(activeAudio);
+                changeMiniPlayer(activeAudio);
+            }
 
         }
 
@@ -613,19 +658,30 @@ public class LibraryActivity extends AppCompatActivity
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.img_play_pause:
-//                currentMediaPlayer = mediaPlayerService.getMediaPlayerInstance();
-                if (currentMediaPlayer.isPlaying()) {
+                currentMediaPlayer = mediaPlayerService.getMediaPlayerInstance();
+                if (mediaPlayerService.isPng()) {
 
                     playPauseView.setImageDrawable(ContextCompat
-                            .getDrawable(LibraryActivity.this, R.drawable.ic_play_circle_filled_white_black_24dp));
+                            .getDrawable(LibraryActivity.this, R.drawable.ic_play_arrow_black_24dp));
 
                     mediaPlayerService.pauseMedia(currentMediaPlayer);
 
-                } else if (!currentMediaPlayer.isPlaying()) {
+                } else if (!mediaPlayerService.isPng()) {
 
-                    playPauseView.setImageDrawable(ContextCompat
-                            .getDrawable(LibraryActivity.this, R.drawable.ic_pause_circle_filled_black_24dp));
-                    mediaPlayerService.resumeMedia(currentMediaPlayer);
+                    if(!serviceBound) {
+                        playPauseView.setImageDrawable(ContextCompat
+                                .getDrawable(LibraryActivity.this, R.drawable.ic_pause_black_24dp));
+                        mediaPlayerService.resumeMedia(currentMediaPlayer);
+
+                        //TODO BUILD EXTERNAL PLAYER
+
+                        serviceBound=true;
+                    }else{
+                        playPauseView.setImageDrawable(ContextCompat
+                                .getDrawable(LibraryActivity.this, R.drawable.ic_pause_black_24dp));
+                        mediaPlayerService.resumeMedia(currentMediaPlayer);
+
+                    }
                 }
 //                 set Progress bar values
 
@@ -652,7 +708,11 @@ public class LibraryActivity extends AppCompatActivity
 
             case R.id.song_background:
 
-
+//                Intent openSingleSongActivity = new Intent(this, SingleSongActivity.class);
+//                openSingleSongActivity.putExtra(SONG, activeAudio);
+//
+//                startActivity(openSingleSongActivity);
+//                Toast.makeText(this, "I just don't want to respond",Toast.LENGTH_LONG).show();
                 break;
 
         }

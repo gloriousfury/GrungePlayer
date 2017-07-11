@@ -7,11 +7,13 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AlphabetIndexer;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
@@ -19,11 +21,15 @@ import com.gloriousfury.musicplayer.R;
 import com.gloriousfury.musicplayer.adapter.AlbumAdapter;
 import com.gloriousfury.musicplayer.model.AlbumLists;
 import com.gloriousfury.musicplayer.model.Albums;
+import com.gloriousfury.musicplayer.model.Audio;
+import com.gloriousfury.musicplayer.service.AppMainServiceEvent;
 import com.gloriousfury.musicplayer.utils.StorageUtil;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+
+import de.greenrobot.event.EventBus;
 
 
 /**
@@ -52,12 +58,14 @@ public class AlbumsFragment extends Fragment {
     RecyclerView recyclerView;
     ArrayList<Albums> albumsArray;
     ArrayList<AlbumLists> albumListArray;
-    ArrayList<Albums> albumList;
+    ArrayList<Albums> albumList = new ArrayList<>();
     AlbumAdapter adapter;
     boolean serviceBound = false;
     StorageUtil storage;
-    ArrayList<Albums> retrievedAlbumList;
-
+    ArrayList<Albums> retrievedAlbumList = new ArrayList<>();
+    EventBus bus = EventBus.getDefault();
+    String TAG = "AlbumFragments";
+    ProgressBar progressBar;
 
 
     @Override
@@ -66,6 +74,7 @@ public class AlbumsFragment extends Fragment {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_general, container, false);
         storage = new StorageUtil(getActivity());
+        progressBar = (ProgressBar) v.findViewById(R.id.progressBar);
         recyclerView = (RecyclerView) v.findViewById(R.id.recyclerView);
         recyclerView.setHasFixedSize(true);
         retrievedAlbumList = storage.loadAllAlbums();
@@ -75,9 +84,20 @@ public class AlbumsFragment extends Fragment {
 
         recyclerView.setLayoutManager(layoutManager);
 
+        adapter = new AlbumAdapter(getActivity(), retrievedAlbumList);
 
-        adapter = new AlbumAdapter(getActivity(),addAlphabets(sortList(retrievedAlbumList)));
+        if (retrievedAlbumList != null) {
+            adapter.setAudioListData(addAlphabets(sortList(retrievedAlbumList)));
 
+
+        } else {
+            adapter.setAudioListData(albumList);
+
+            progressBar.setVisibility(View.VISIBLE);
+            recyclerView.setVisibility(View.INVISIBLE);
+
+
+        }
         recyclerView.setAdapter(adapter);
 
         Context context = getActivity();
@@ -87,6 +107,17 @@ public class AlbumsFragment extends Fragment {
     }
 
 
+    public boolean checkIfDataIsReady() {
+
+        retrievedAlbumList = storage.loadAllAlbums();
+        if (retrievedAlbumList != null) {
+
+            return true;
+        } else {
+            Log.d(TAG, "I came here instead");
+            return false;
+        }
+    }
 
 
     ArrayList<Albums> sortList(ArrayList<Albums> list) {
@@ -128,12 +159,33 @@ public class AlbumsFragment extends Fragment {
         return customList;
     }
 
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        bus.unregister(this);
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        bus.register(this);
+    }
+
+    public void onEventMainThread(AppMainServiceEvent event) {
+        Log.d(TAG, "onEventMainThread() called with: " + "event = [" + event + "]");
+        Intent i = event.getMainIntent();
 
 
+        if (event.getEventType() == AppMainServiceEvent.ONDATALOADED) {
+//            if (i != null) {
+            retrievedAlbumList = storage.loadAllAlbums();
+            adapter.setAudioListData(addAlphabets(sortList(retrievedAlbumList)));
+            progressBar.setVisibility(View.INVISIBLE);
+            recyclerView.setVisibility(View.VISIBLE);
 
-    
-    
-    
-    
+
+        }
+    }
+
 
 }

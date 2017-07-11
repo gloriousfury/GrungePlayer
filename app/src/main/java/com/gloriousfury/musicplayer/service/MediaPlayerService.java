@@ -12,9 +12,11 @@ import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.session.MediaSessionManager;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
@@ -31,7 +33,9 @@ import com.gloriousfury.musicplayer.ui.activity.SingleSongActivity;
 import com.gloriousfury.musicplayer.utils.StorageUtil;
 import com.gloriousfury.musicplayer.ui.activity.MainActivity;
 import com.gloriousfury.musicplayer.utils.PlaybackStatus;
+import com.squareup.picasso.Picasso;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
@@ -69,7 +73,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     AppMainServiceEvent event = new AppMainServiceEvent();
     Context context;
     PlaybackStatus playbackStatus;
-    boolean shuffleState= false;
+    boolean shuffleState = false;
 
     //MediaSession
     private MediaSessionManager mediaSessionManager;
@@ -224,9 +228,9 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         if (audioIndex <= audioList.size()) {
             Toast.makeText(getContext(), "This is suppossed to be the next song", Toast.LENGTH_LONG).show();
             shuffleState = storage.getShuffleSettings();
-            if(shuffleState){
-                shuffleToNext(audioList,audioIndex);
-            }else {
+            if (shuffleState) {
+                shuffleToNext(audioList, audioIndex);
+            } else {
                 skipToNext(audioList, audioIndex, getContext(), mediaPlayer);
             }
             updateMetaData();
@@ -399,7 +403,9 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         public void onReceive(Context context, Intent intent) {
 
             //Get the new media index form SharedPreferences
-            audioIndex = new StorageUtil(getApplicationContext()).loadAudioIndex();
+            StorageUtil storageUtil = new StorageUtil(context);
+            audioList = storageUtil.loadAudio();
+            audioIndex = storageUtil.loadAudioIndex();
             if (audioIndex != -1 && audioIndex < audioList.size()) {
                 //index is in a valid range
                 activeAudio = audioList.get(audioIndex);
@@ -464,9 +470,9 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 audioList = storage.loadAudio();
                 audioIndex = storage.loadAudioIndex();
                 shuffleState = storage.getShuffleSettings();
-                if(shuffleState){
-                    shuffleToNext(audioList,audioIndex);
-                }else{
+                if (shuffleState) {
+                    shuffleToNext(audioList, audioIndex);
+                } else {
                     skipToNext(audioList, audioIndex, getContext(), mediaPlayer);
                 }
 
@@ -498,10 +504,28 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     }
 
     private void updateMetaData() {
-        Bitmap albumArt = BitmapFactory.decodeResource(getContext().getResources(),
-                R.mipmap.ic_launcher); //replace with medias albumArt
+//        Bitmap albumArt = BitmapFactory.decodeResource(getContext().getResources(),
+//                R.mipmap.ic_launcher); //replace with medias albumArt
+        Uri albumArtUri = null;
 
+        if (activeAudio.getAlbumArtUriString() != null) {
+            albumArtUri = Uri.parse(activeAudio.getAlbumArtUriString());
 
+        }
+        Bitmap albumArt = null;
+        try {
+            albumArt = MediaStore.Images.Media.getBitmap(
+                    getContentResolver(), albumArtUri);
+            albumArt = Bitmap.createScaledBitmap(albumArt, 30, 30, true);
+
+        } catch (FileNotFoundException exception) {
+            exception.printStackTrace();
+            albumArt = BitmapFactory.decodeResource(getResources(),
+                    R.mipmap.ic_launcher);
+        } catch (IOException e) {
+
+            e.printStackTrace();
+        }
         // Update the current metadata
         mediaSession.setMetadata(new MediaMetadataCompat.Builder()
                 .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, albumArt)
@@ -522,7 +546,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         } else {
             //get next in playlist
             activeAudio = audioList.get(++audioIndex);
-            Log.e(TAG,"Audio Index : " +audioIndex +"Active Audio: " +activeAudio.getTitle());
+            Log.e(TAG, "Audio Index : " + audioIndex + "Active Audio: " + activeAudio.getTitle());
         }
 
 
@@ -535,7 +559,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         stopMedia();
         //reset mediaPlayer
         mediaPlayer.reset();
-        Log.e(TAG,"I also came here");
+        Log.e(TAG, "I also came here");
         initMediaPlayer();
 
     }
@@ -544,17 +568,17 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
 
         Random rand = new Random();
-        audioIndex = rand.nextInt(audioList.size()-1);
+        audioIndex = rand.nextInt(audioList.size() - 1);
 
-            //this should work for when repeat and shuffle is on
+        //this should work for when repeat and shuffle is on
 //        else  if (audioIndex == audioList.size() - 1) {
 //            //if last in playlist
 //            audioIndex = 0;
 //            activeAudio = audioList.get(audioIndex);
 //
 //        } else {
-            //get next in playlist
-            activeAudio = audioList.get(audioIndex);
+        //get next in playlist
+        activeAudio = audioList.get(audioIndex);
         //Update stored index
         new StorageUtil(context).storeAudioIndex(audioIndex);
         responseIntent.putExtra(AppMainServiceEvent.RESPONSE_DATA, activeAudio);

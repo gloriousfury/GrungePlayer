@@ -8,8 +8,12 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.IBinder;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -99,11 +103,25 @@ public class AllSongsAdapter extends RecyclerView.Adapter<AllSongsAdapter.ViewHo
         holder.song_title.setText(song_list.get(position).getTitle());
         holder.artist.setText(song_list.get(position).getArtist());
 
+
+        int backgroundColor = (ContextCompat.getColor(context,R.color.colorPrimaryDark));
+
+
+
+
+
+
         String duration = String.valueOf(Timer.milliSecondsToTimer(song_list.get(position).getDuration()));
         holder.duration.setText(duration);
         if (song_list.get(position).getAlbumArtUriString() != null) {
             Uri albumArtUri = Uri.parse(song_list.get(position).getAlbumArtUriString());
             Picasso.with(context).load(albumArtUri).resize(120, 120).into(holder.song_background);
+        }else{
+
+            Drawable mDrawable = ContextCompat.getDrawable(context, R.drawable.background_danger);
+            mDrawable.setColorFilter(backgroundColor, PorterDuff.Mode.MULTIPLY);
+            holder.song_background.setImageDrawable(mDrawable);
+
         }
 
     }
@@ -116,6 +134,15 @@ public class AllSongsAdapter extends RecyclerView.Adapter<AllSongsAdapter.ViewHo
         } else {
 
             return 0;
+        }
+
+    }
+
+    public void setAudioListData(ArrayList<Audio> songArraylist) {
+        if (songArraylist != null) {
+            this.song_list = songArraylist;
+            notifyDataSetChanged();
+
         }
 
     }

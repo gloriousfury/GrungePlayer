@@ -23,7 +23,7 @@ public class Audio implements Parcelable {
     }
 
 
-    public Audio(String data, String title, String artist, int duration,long albumId) {
+    public Audio(String data, String title, String artist, int duration,long albumId,String albumArtString) {
         this.data = data;
         this.title = title;
         this.album = album;

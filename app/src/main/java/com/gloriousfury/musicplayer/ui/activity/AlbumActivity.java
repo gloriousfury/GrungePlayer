@@ -229,8 +229,12 @@ public class AlbumActivity extends AppCompatActivity {
                         int duration = cursor.getInt(cursor
                                 .getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
 
+                        Uri sArtworkUri = Uri
+                                .parse("content://media/external/audio/albumart");
+                        Uri albumArtUri = ContentUris.withAppendedId(sArtworkUri, albumId);
 
-                        albumAudioList.add(new Audio(data, title, artist, duration, albumId));
+
+                        albumAudioList.add(new Audio(data, title, artist, duration, albumId, albumArtUri.toString()));
                         Log.v("Vipul",
                                 cursor.getString(cursor
                                         .getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME)));
@@ -240,11 +244,11 @@ public class AlbumActivity extends AppCompatActivity {
 
                 adapter = new AlbumSongsAdapter(this, albumAudioList);
 
-                if(albumAudioList.size()>1) {
+                if (albumAudioList.size() > 1) {
                     noOfSongs.setText(String.valueOf(albumAudioList.size()) + " Songs");
 
 
-                }else{
+                } else {
                     noOfSongs.setText(String.valueOf(albumAudioList.size()) + " Song");
 
 
@@ -363,21 +367,27 @@ public class AlbumActivity extends AppCompatActivity {
     public String getPlayTime(ArrayList<Audio> audioList) {
 
         int duration = 0;
-        for (int i = 0; i < audioList.size() - 1; i++) {
+        if (audioList.size() >= 0) {
+            for (int i = 0; i < audioList.size() - 1; i++) {
 
-            duration += audioList.get(i).getDuration();
+                duration += audioList.get(i).getDuration();
+            }
+
+        } else if (audioList.size() == 1) {
+            duration = audioList.get(0).getDuration();
         }
 
-        if(duration>3600000) {
+
+        if (duration > 3600000) {
             String hms = String.format("%d Hr, %d mins", TimeUnit.MILLISECONDS.toHours(duration),
                     TimeUnit.MILLISECONDS.toMinutes(duration) % TimeUnit.HOURS.toMinutes(1));
 //                TimeUnit.MILLISECONDS.toSeconds(duration) % TimeUnit.MINUTES.toSeconds(1));
 
             return hms;
-        }else{
-            String hms = String.format("%d mins",  TimeUnit.MILLISECONDS.toMinutes(duration) % TimeUnit.HOURS.toMinutes(1));
+        } else {
+            String hms = String.format("%d mins", TimeUnit.MILLISECONDS.toMinutes(duration) % TimeUnit.HOURS.toMinutes(1));
 //
-            return  hms;
+            return hms;
         }
 
 

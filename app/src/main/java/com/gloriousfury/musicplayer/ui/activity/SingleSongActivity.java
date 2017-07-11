@@ -47,7 +47,8 @@ public class SingleSongActivity extends AppCompatActivity implements
     @BindView(R.id.artist)
     TextView artist;
 
-
+    @BindView(R.id.close_activity)
+    ImageView closeActivity;
     @BindView(R.id.song_title)
     TextView songTitle;
 
@@ -161,6 +162,11 @@ public class SingleSongActivity extends AppCompatActivity implements
 
     }
 
+    @OnClick(R.id.close_activity)
+    public void closeActivity() {
+        onBackPressed();
+    }
+
     @OnClick(R.id.img_fast_foward)
     public void playNextSong() {
         currentMediaPlayer = mediaPlayerService.getMediaPlayerInstance();
@@ -169,11 +175,11 @@ public class SingleSongActivity extends AppCompatActivity implements
         audioIndex = storage.loadAudioIndex();
         activeAudio = mediaPlayerService.getActiveAudio();
         shuffleState = storage.getShuffleSettings();
-        if(shuffleState){
+        if (shuffleState) {
 
             mediaPlayerService.shuffleToNext(audioList, audioIndex);
-        }else {
-        mediaPlayerService.skipToNext(audioList, audioIndex, this, currentMediaPlayer);
+        } else {
+            mediaPlayerService.skipToNext(audioList, audioIndex, this, currentMediaPlayer);
 
         }
 
@@ -222,7 +228,7 @@ public class SingleSongActivity extends AppCompatActivity implements
     public void shuffleSongs() {
         shuffleState = storage.getShuffleSettings();
         if (shuffleState) {
-            shuffleView.setImageResource(R.drawable.ic_fast_forward_black_24dp);
+            shuffleView.setImageResource(R.drawable.ic_shuffle_black_24dp);
             storage.setShuffle(false);
         } else {
             shuffleView.setImageResource(R.drawable.ic_shuffle_pink_24dp);
@@ -246,10 +252,16 @@ public class SingleSongActivity extends AppCompatActivity implements
 //            long totalDuration = mediaPlayerService.getDur();
             long currentDuration = mediaPlayerService.getCurrentDur();
 
-            // Displaying Total Duration time
-            songTotalDuration.setText(String.valueOf(Timer.milliSecondsToTimer(totalDuration)));
 
+            if (!currentMediaPlayer.isPlaying()) {
+                songCurrentDuration.setText("0.00");
+//                Toast.makeText(SingleSongActivity.this, "I came here o", Toast.LENGTH_LONG).show();
 
+            } else {
+                // Displaying Total Duration time
+                songTotalDuration.setText(String.valueOf(Timer.milliSecondsToTimer(totalDuration)));
+//                Toast.makeText(SingleSongActivity.this, "I didnt come here o", Toast.LENGTH_LONG).show();
+            }
             // Displaying time completed playing
             songCurrentDuration.setText(String.valueOf(Timer.milliSecondsToTimer(currentDuration)));
 
@@ -316,7 +328,6 @@ public class SingleSongActivity extends AppCompatActivity implements
 //        songCurrentDuration.setText("" + Timer.milliSecondsToTimer(currentDuration));
 
 
-        Toast.makeText(this, "I came here o" + activeAudio.getTitle(), Toast.LENGTH_LONG).show();
 //        mediaPlayer.setOnCompletionListener(this);
 
         String song_title = activeAudio.getTitle();
@@ -451,7 +462,9 @@ public class SingleSongActivity extends AppCompatActivity implements
     protected void onStart() {
         super.onStart();
 //        if (bus == null) {
-        Toast.makeText(this, "Bus was registered", Toast.LENGTH_LONG).show();
+        currentMediaPlayer = mediaPlayerService.getMediaPlayerInstance();
+
+        songCurrentDuration.setText("0.00");
         bus.register(this);
 //        }
     }

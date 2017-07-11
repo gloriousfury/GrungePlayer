@@ -67,9 +67,9 @@ public class ScrollFragmentContainer extends Fragment {
             } else if(position == 1) {
                 return AlbumsFragment.newInstance();
             }
-//            else if(position == 2) {
-//                return AlbumsFragment.newInstance();
-//            }
+            else if(position == 2) {
+                return PlaylistFragments.newInstance();
+            }
             else {
                 return BasicFragment.newInstance();
             }
@@ -90,8 +90,8 @@ public class ScrollFragmentContainer extends Fragment {
                     return "All Songs";
                 case 1:
                     return "Albums";
-//                case 2:
-//                    return "Albums";
+                case 2:
+                    return "Playlists";
 
             }
             return null;

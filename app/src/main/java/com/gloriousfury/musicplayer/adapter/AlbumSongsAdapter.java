@@ -24,6 +24,7 @@ import com.gloriousfury.musicplayer.service.MediaPlayerService;
 import com.gloriousfury.musicplayer.ui.activity.SingleSongActivity;
 import com.gloriousfury.musicplayer.utils.StorageUtil;
 import com.gloriousfury.musicplayer.utils.Timer;
+import com.gloriousfury.musicplayer.utils.Utils;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -35,7 +36,7 @@ public class AlbumSongsAdapter extends RecyclerView.Adapter<AlbumSongsAdapter.Vi
     Context context;
     private ArrayList<Audio> song_list;
     private Audio activeAudio = new Audio();
-    boolean serviceBound = false;
+    boolean serviceBound;
     private MediaPlayerService player;
     String SONG = "single_audio";
     String SONG_TITLE = "song_title";
@@ -44,6 +45,8 @@ public class AlbumSongsAdapter extends RecyclerView.Adapter<AlbumSongsAdapter.Vi
     int activeAudioIndex = -1;
     int formerAudioIndex = -1;
     String actionMode = null;
+    MediaPlayerService  mediaPlayerService;
+
 
 
     public AlbumSongsAdapter(Context context, ArrayList<Audio> song_list) {
@@ -64,7 +67,14 @@ public class AlbumSongsAdapter extends RecyclerView.Adapter<AlbumSongsAdapter.Vi
             view.setOnClickListener(this);
 //            title = (TextView) view.findViewById(menu_item);
 
+            mediaPlayerService = new MediaPlayerService(context);
 
+            if(mediaPlayerService.isPng()){
+                Utils.serviceBound = true;
+            }else{
+                Utils.serviceBound = false;
+
+            }
             song_title = (TextView) view.findViewById(R.id.song_title);
             artist = (TextView) view.findViewById(R.id.artist);
             duration = (TextView) view.findViewById(R.id.song_duration);
@@ -142,13 +152,20 @@ public class AlbumSongsAdapter extends RecyclerView.Adapter<AlbumSongsAdapter.Vi
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            serviceBound = false;
+            MediaPlayerService  mediaPlayerService = new MediaPlayerService(context);
+
+            if(mediaPlayerService.isPng()) {
+                Utils.serviceBound = true;
+            }else{
+              Utils.serviceBound = false;
+            }
         }
     };
 
 
     private void playAudio(int audioIndex) {
         //Check is service is active
+        serviceBound = Utils.isServiceBound();
         if (!serviceBound) {
             //Store Serializable audioList to SharedPreferences
             StorageUtil storage = new StorageUtil(context);
@@ -162,6 +179,7 @@ public class AlbumSongsAdapter extends RecyclerView.Adapter<AlbumSongsAdapter.Vi
         } else {
             //Store the new audioIndex to SharedPreferences
             StorageUtil storage = new StorageUtil(context);
+            storage.storeAudio(song_list);
             storage.storeAudioIndex(audioIndex);
 
             //Service is active

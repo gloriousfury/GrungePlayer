@@ -16,7 +16,7 @@
         android:fitsSystemWindows="true"
         tools:context="com.grocer.grocer.ui.activity.MainActivity">
 
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
@@ -43,29 +43,31 @@
                 android:id="@+id/containerView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_below="@id/appBar"
-                android:orientation="vertical"
+                android:layout_above="@+id/mini_layout"
+                android:layout_below="@+id/appBar"
+
 
 
                 ></FrameLayout>
 
+            <LinearLayout
+                android:id="@+id/mini_layout"
+                android:layout_gravity="bottom"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:layout_alignParentBottom="true"
+                >
 
-        </LinearLayout>
+                <include layout="@layout/view_mini_player"
+
+                    />
+
+            </LinearLayout>
+        </RelativeLayout>
 
 
-        <LinearLayout
-            android:id="@+id/mini_layout"
-            android:layout_gravity="bottom"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:clickable="true">
 
-            <include layout="@layout/view_mini_player"
-
-                />
-
-        </LinearLayout>
 
         <!--<android.support.design.widget.FloatingActionButton-->
         <!--android:id="@+id/fab"-->
@@ -84,7 +86,9 @@
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
         app:headerLayout="@layout/nav_header_library"
-        app:menu="@menu/activity_library_drawer" />
+        app:menu="@menu/activity_library_drawer"
+
+        />
 
 </android.support.v4.widget.DrawerLayout>
 

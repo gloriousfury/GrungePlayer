@@ -1,101 +1,94 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/relative_layout_mini_player"
     android:layout_width="match_parent"
     android:layout_height="@dimen/seventy"
-    android:clickable="true"
-    android:orientation="horizontal">
+    android:background="@color/white">
 
-
-    <RelativeLayout
+    <SeekBar
+        android:id="@+id/songProgressBar"
         android:layout_width="match_parent"
+        android:layout_height="@dimen/five"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="-20dp"
+        android:progressDrawable="@drawable/seekbar_progress2"
+
+        />
+
+
+
+
+    <ImageView
+        android:id="@+id/song_background"
+        android:layout_width="@dimen/seventy"
         android:layout_height="match_parent"
-        android:background="@color/white">
+        android:layout_below="@id/songProgressBar"
+        android:background="@color/grey"
+        android:scaleType="fitXY" />
 
-        <SeekBar
-            android:id="@+id/songProgressBar"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/five"
-            android:progressDrawable="@drawable/seekbar_progress2"
-           android:layout_marginLeft="-15dp"
-            android:layout_alignParentTop="true"
+    <TextView
+        android:id="@+id/artist"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/ten"
+        android:layout_marginTop="@dimen/ten"
+        android:layout_toRightOf="@id/song_background"
+        android:text="Passenger"
+        android:textSize="15sp"
+        android:textStyle="bold"
 
-           />
+        />
 
+    <TextView
+        android:id="@+id/song_title"
+        android:layout_width="@dimen/seventy"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/artist"
+        android:layout_marginLeft="@dimen/ten"
 
-        <ImageView
-            android:id="@+id/song_background"
-            android:layout_width="@dimen/seventy"
-            android:layout_height="match_parent"
-            android:background="@color/grey"
-            android:scaleType="fitXY"
-            android:layout_below="@id/songProgressBar"
-            />
-
-        <TextView
-            android:id="@+id/artist"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/ten"
-            android:layout_marginTop="@dimen/ten"
-            android:layout_toRightOf="@id/song_background"
-            android:text="Passenger"
-            android:textSize="15sp"
-            android:textStyle="bold"
-
-            />
-
-        <TextView
-            android:id="@+id/song_title"
-            android:layout_width="@dimen/seventy"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/artist"
-            android:layout_marginLeft="@dimen/ten"
-
-            android:layout_toRightOf="@id/song_background"
-            android:text="Let Her Go"
-            android:textSize="13sp"
-            android:maxLines="1"
+        android:layout_toRightOf="@id/song_background"
+        android:maxLines="1"
+        android:text="Let Her Go"
+        android:textSize="13sp"
 
 
-            />
+        />
 
 
-        <ImageView
-            android:id="@+id/img_fast_foward"
-            android:layout_width="@dimen/twenty_five"
-            android:layout_height="@dimen/twenty_five"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:layout_marginRight="@dimen/ten"
-            android:src="@drawable/ic_fast_forward_black_24dp" />
+    <!--<ImageView-->
+        <!--android:id="@+id/img_fast_foward"-->
+        <!--android:layout_width="@dimen/twenty_five"-->
+        <!--android:layout_height="@dimen/twenty_five"-->
+        <!--android:layout_alignParentRight="true"-->
+        <!--android:layout_centerVertical="true"-->
+        <!--android:layout_marginRight="@dimen/ten"-->
+        <!--android:src="@drawable/ic_fast_forward_black_24dp" />-->
 
 
-        <ImageView
-            android:id="@+id/img_play_pause"
-            android:layout_width="@dimen/thirty_five"
-            android:layout_height="@dimen/thirty_five"
+    <ImageView
+        android:id="@+id/img_play_pause"
+        android:layout_width="@dimen/thirty_five"
+        android:layout_height="@dimen/thirty_five"
 
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="@dimen/five"
-            android:layout_marginRight="@dimen/five"
-            android:layout_toLeftOf="@id/img_fast_foward"
-            android:src="@drawable/ic_play_circle_filled_white_black_24dp" />
-
-
-        <ImageView
-            android:id="@+id/img_rewind"
-            android:layout_width="@dimen/twenty_five"
-            android:layout_height="@dimen/twenty_five"
-
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="@dimen/five"
-            android:layout_marginRight="@dimen/five"
-            android:layout_toLeftOf="@id/img_play_pause"
-            android:src="@drawable/ic_fast_rewind_black_24dp" />
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="@dimen/five"
+        android:layout_marginRight="@dimen/five"
+  android:layout_alignParentRight="true"
+        android:src="@drawable/ic_play_arrow_black_24dp" />
 
 
-    </RelativeLayout>
+    <!--<ImageView-->
+        <!--android:id="@+id/img_rewind"-->
+        <!--android:layout_width="@dimen/twenty_five"-->
+        <!--android:layout_height="@dimen/twenty_five"-->
+
+        <!--android:layout_centerVertical="true"-->
+        <!--android:layout_marginLeft="@dimen/five"-->
+        <!--android:layout_marginRight="@dimen/five"-->
+        <!--android:layout_toLeftOf="@id/img_play_pause"-->
+        <!--android:src="@drawable/ic_fast_rewind_black_24dp" />-->
 
 
-</LinearLayout>
+</RelativeLayout>
+

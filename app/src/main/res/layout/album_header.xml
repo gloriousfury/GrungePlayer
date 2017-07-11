@@ -6,7 +6,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="@dimen/fourty"
-        android:background="@color/white"
+        android:background="@color/app_white_smoke"
         android:id="@+id/category_header"
 
         >

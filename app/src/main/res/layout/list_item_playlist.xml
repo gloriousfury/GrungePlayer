@@ -13,17 +13,19 @@
 
 
 
-        <de.hdodenhof.circleimageview.CircleImageView
+        <ImageView
             android:id="@+id/song_background"
             android:layout_width="@dimen/fifty"
             android:layout_height="@dimen/fifty"
-            android:layout_margin="@dimen/five"
+            android:layout_marginLeft="@dimen/twenty"
+            android:layout_marginRight="@dimen/five"
             android:layout_centerVertical="true"
+            android:background="@color/app_grey"
             />
 
         <TextView
-            android:id="@+id/song_title"
-            android:layout_width="@dimen/three_fifty"
+            android:id="@+id/playlist_title"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/five"
             android:layout_marginRight="@dimen/fifty"
@@ -31,30 +33,19 @@
             android:layout_toRightOf="@id/song_background"
             tools:text="Fresh Red South African apples (BlueBand)"
             android:textColor="@color/black"
-            android:maxLines="1"
              />
 
 
         <TextView
-            android:id="@+id/artist"
+            android:id="@+id/playlist_no_ofsongs"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/song_title"
+            android:layout_below="@id/playlist_title"
             android:layout_marginLeft="@dimen/five"
             android:layout_marginRight="@dimen/twenty"
             android:layout_marginTop="@dimen/five"
             android:layout_toRightOf="@id/song_background"
             tools:text="RS 18999ml/ 180ml" />
-
-        <TextView
-            android:id="@+id/song_duration"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="3:11"
-            android:layout_centerVertical="true"
-            android:layout_alignParentRight="true"
-            android:layout_marginRight="@dimen/ten"
-            />
 
         <View
             android:layout_width="match_parent"

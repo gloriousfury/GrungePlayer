@@ -16,6 +16,7 @@ import android.widget.TextView;
 
 import com.gloriousfury.musicplayer.R;
 import com.gloriousfury.musicplayer.model.Albums;
+import com.gloriousfury.musicplayer.model.Audio;
 import com.gloriousfury.musicplayer.service.MediaPlayerService;
 import com.gloriousfury.musicplayer.ui.activity.AlbumActivity;
 import com.squareup.picasso.Picasso;
@@ -188,6 +189,16 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.ViewHolder> 
 
         }
 
+
+    }
+
+
+    public void setAudioListData(ArrayList<Albums> albumArraylist) {
+        if (albumArraylist != null) {
+            this.album_list = albumArraylist;
+            notifyDataSetChanged();
+
+        }
 
     }
 
