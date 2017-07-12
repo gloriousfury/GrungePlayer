@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.gloriousfury.musicplayer.R;
+import com.gloriousfury.musicplayer.model.Artist;
 
 
 public class ScrollFragmentContainer extends Fragment {
@@ -69,6 +70,8 @@ public class ScrollFragmentContainer extends Fragment {
             }
             else if(position == 2) {
                 return PlaylistFragments.newInstance();
+            }else if(position == 3) {
+                return ArtistFragment.newInstance();
             }
             else {
                 return BasicFragment.newInstance();
@@ -78,7 +81,7 @@ public class ScrollFragmentContainer extends Fragment {
         @Override
         public int getCount() {
             // Show 3 total pages.
-            return 3;
+            return 4;
         }
 
         @Override
@@ -92,6 +95,9 @@ public class ScrollFragmentContainer extends Fragment {
                     return "Albums";
                 case 2:
                     return "Playlists";
+                case 3:
+                    return "Artists";
+
 
             }
             return null;

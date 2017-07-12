@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/seventy"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="@color/app_white_smoke"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/img_background"
+            android:layout_width="@dimen/fifty"
+            android:layout_height="@dimen/fifty"
+            android:layout_marginLeft="@dimen/twenty"
+            android:layout_marginRight="@dimen/five"
+            android:layout_centerVertical="true"
+            android:background="@color/app_grey"
+            />
+
+        <TextView
+            android:id="@+id/artist_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/five"
+            android:layout_marginRight="@dimen/fifty"
+            android:layout_marginTop="@dimen/ten"
+            android:layout_toRightOf="@+id/img_background"
+            tools:text="Fresh Red South African "
+            android:textColor="@color/black"
+             />
+
+
+        <TextView
+            android:id="@+id/no_of_albums"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/artist_name"
+            android:layout_marginLeft="@dimen/five"
+            android:layout_marginRight="@dimen/twenty"
+            android:layout_marginTop="@dimen/five"
+            android:layout_toRightOf="@+id/img_background"
+            tools:text="RS 18999ml/ 180ml" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/greyish_white"
+            android:layout_marginLeft="@dimen/ten"
+            android:layout_marginRight="@dimen/ten"
+            android:layout_alignParentTop="true"
+            />
+    </RelativeLayout>
+
+
+
+
+
+</LinearLayout>

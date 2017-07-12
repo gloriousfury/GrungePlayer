@@ -363,6 +363,8 @@ public class LibraryActivity extends AppCompatActivity
         final String albumart = MediaStore.Audio.Albums.ALBUM_ART;
         final String tracks = MediaStore.Audio.Albums.NUMBER_OF_SONGS;
 
+
+
         final String[] columns = {_id, album_name, artist, albumart, tracks};
         Cursor cursor = getContentResolver().query(uri, columns, where,
                 null, null);
