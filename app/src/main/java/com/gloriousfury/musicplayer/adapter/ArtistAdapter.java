@@ -5,6 +5,7 @@ package com.gloriousfury.musicplayer.adapter;
  */
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -16,6 +17,7 @@ import android.widget.TextView;
 import com.gloriousfury.musicplayer.R;
 import com.gloriousfury.musicplayer.model.Artist;
 import com.gloriousfury.musicplayer.service.MediaPlayerService;
+import com.gloriousfury.musicplayer.ui.activity.ArtistActivity;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -26,6 +28,9 @@ public class ArtistAdapter extends RecyclerView.Adapter<ArtistAdapter.ViewHolder
     private ArrayList<Artist> artist_list;
     boolean serviceBound = false;
     private MediaPlayerService player;
+    String ALBUM_TITLE = "album_title";
+    String  NO_OF_ALBUMS= "artist";
+    String ARTIST_ITEM = "artist_item";
 
 
 
@@ -60,12 +65,12 @@ public class ArtistAdapter extends RecyclerView.Adapter<ArtistAdapter.ViewHolder
         public void onClick(View v) {
             int adapterposition = getAdapterPosition();
 
-//            Artist singleSong = artist_list.get(adapterposition);
+            Artist singleArtist = artist_list.get(adapterposition);
 //            playArtist(adapterposition);
-//            Intent openSingleSongActivity = new Intent(context, SingleSongActivity.class);
-//            openSingleSongActivity.putExtra(SONG, singleSong);
-//
-//            context.startActivity(openSingleSongActivity);
+            Intent openArtistActivity = new Intent(context, ArtistActivity.class);
+            openArtistActivity.putExtra(ARTIST_ITEM, singleArtist);
+
+            context.startActivity(openArtistActivity);
 
         }
     }

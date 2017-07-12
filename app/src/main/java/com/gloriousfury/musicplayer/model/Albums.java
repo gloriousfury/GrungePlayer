@@ -2,9 +2,12 @@ package com.gloriousfury.musicplayer.model;
 
 
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.io.Serializable;
 
-public class Albums implements Serializable {
+public class Albums implements Parcelable {
 
     private String data;
     private String title;
@@ -19,6 +22,9 @@ public class Albums implements Serializable {
 
 
     }
+
+
+
 
     public Albums(String album, String artist, int noOfSongs, long albumId, String albumArtString) {
         this.album = album;
@@ -94,4 +100,43 @@ public class Albums implements Serializable {
     }
 
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.data);
+        dest.writeString(this.title);
+        dest.writeString(this.album);
+        dest.writeString(this.artist);
+        dest.writeInt(this.noOfSongs);
+        dest.writeLong(this.albumId);
+        dest.writeString(this.albumArtString);
+        dest.writeInt(this.type);
+    }
+
+    protected Albums(Parcel in) {
+        this.data = in.readString();
+        this.title = in.readString();
+        this.album = in.readString();
+        this.artist = in.readString();
+        this.noOfSongs = in.readInt();
+        this.albumId = in.readLong();
+        this.albumArtString = in.readString();
+        this.type = in.readInt();
+    }
+
+    public static final Creator<Albums> CREATOR = new Creator<Albums>() {
+        @Override
+        public Albums createFromParcel(Parcel source) {
+            return new Albums(source);
+        }
+
+        @Override
+        public Albums[] newArray(int size) {
+            return new Albums[size];
+        }
+    };
 }

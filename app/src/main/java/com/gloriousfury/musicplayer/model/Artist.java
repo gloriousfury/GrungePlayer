@@ -1,9 +1,12 @@
 package com.gloriousfury.musicplayer.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class Artist {
+public class Artist implements Parcelable {
 
     @SerializedName("artist_name")
     @Expose
@@ -90,5 +93,37 @@ public class Artist {
     }
 
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
 
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.artistName);
+        dest.writeLong(this.artistId);
+        dest.writeValue(this.noOfAlbums);
+        dest.writeValue(this.noOfTracks);
+        dest.writeString(this.albumArtUri);
+    }
+
+    protected Artist(Parcel in) {
+        this.artistName = in.readString();
+        this.artistId = in.readLong();
+        this.noOfAlbums = (Integer) in.readValue(Integer.class.getClassLoader());
+        this.noOfTracks = (Integer) in.readValue(Integer.class.getClassLoader());
+        this.albumArtUri = in.readString();
+    }
+
+    public static final Creator<Artist> CREATOR = new Creator<Artist>() {
+        @Override
+        public Artist createFromParcel(Parcel source) {
+            return new Artist(source);
+        }
+
+        @Override
+        public Artist[] newArray(int size) {
+            return new Artist[size];
+        }
+    };
 }

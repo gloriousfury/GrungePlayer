@@ -41,6 +41,12 @@
             android:name=".ui.activity.AlbumActivity"
             android:label="@string/title_activity_album"
             android:theme="@style/AppTheme"></activity>
+
+
+        <activity
+            android:name=".ui.activity.ArtistActivity"
+            android:label="@string/title_activity_album"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>

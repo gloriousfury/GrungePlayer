@@ -189,7 +189,7 @@ public class ArtistFragment extends Fragment implements LoaderManager.LoaderCall
                 String album_art_string = null;
 //
 //
-                final String[] projection = {_id, albumart1, tracks1};
+                final String[] projection = {_id1, albumart1, tracks1};
 //
                 Uri uri1 = MediaStore.Audio.Artists.Albums.getContentUri("external", Id);
                 Cursor cursor2 = getActivity().getContentResolver().query(uri1, projection, null,
