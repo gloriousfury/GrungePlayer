@@ -59,7 +59,7 @@
                 android:layout_alignParentBottom="true"
                 >
 
-                <include layout="@layout/view_mini_player"
+                <include layout="@layout/view_mini_player3"
 
                     />
 

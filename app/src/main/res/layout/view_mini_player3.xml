@@ -13,7 +13,7 @@
         android:id="@+id/song_background"
         android:layout_width="@dimen/seventy"
         android:layout_height="match_parent"
-        android:layout_below="@id/songProgressBar"
+
         android:background="@color/grey"
         android:scaleType="fitXY" />
 
@@ -34,7 +34,7 @@
         />
     <TextView
         android:id="@+id/artist"
-        android:layout_width="wrap_content"
+        android:layout_width="@dimen/one_fifty"
         android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/ten"
         android:layout_marginTop="@dimen/ten"
@@ -46,7 +46,7 @@
 
     <TextView
         android:id="@+id/song_title"
-        android:layout_width="@dimen/seventy"
+        android:layout_width="@dimen/one_hundred"
         android:layout_height="wrap_content"
         android:layout_below="@id/artist"
         android:layout_marginLeft="@dimen/ten"

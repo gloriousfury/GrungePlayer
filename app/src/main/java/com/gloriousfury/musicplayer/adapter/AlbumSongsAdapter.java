@@ -59,6 +59,7 @@ public class AlbumSongsAdapter extends RecyclerView.Adapter<AlbumSongsAdapter.Vi
         TextView song_title, artist, duration;
         ImageView song_background;
         View playIdentifier;
+        StorageUtil storageUtil;
 
         public ViewHolder(View view) {
             super(view);
@@ -103,6 +104,8 @@ public class AlbumSongsAdapter extends RecyclerView.Adapter<AlbumSongsAdapter.Vi
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_albumsongs, parent, false);
+
+
         return new ViewHolder(view);
     }
 

@@ -121,7 +121,7 @@ public class AlbumActivity extends AppCompatActivity {
             if (AlbumUri != null) {
                 Uri albumArtUri = Uri.parse(AlbumUri);
                 Picasso.with(this).load(albumArtUri).into(songBackground);
-                Toast.makeText(this, albumArtUri.toString(), Toast.LENGTH_LONG);
+//                Toast.makeText(this, albumArtUri.toString(), Toast.LENGTH_LONG);
             } else {
                 Toast.makeText(this, "Album Art is non existence", Toast.LENGTH_LONG);
 
@@ -131,7 +131,7 @@ public class AlbumActivity extends AppCompatActivity {
 
             requestAlbumDetails(AlbumTitle);
 
-            Toast.makeText(this, AlbumArtist + " " + AlbumTitle, Toast.LENGTH_LONG).show();
+//            Toast.makeText(this, AlbumArtist + " " + AlbumTitle, Toast.LENGTH_LONG).show();
 //            recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
             recyclerView.setHasFixedSize(true);
 
@@ -276,8 +276,8 @@ public class AlbumActivity extends AppCompatActivity {
 //
 //                audioList = storage.loadAllAudio();
 
-                Toast statu = Toast.makeText(this, "I came here, just so you know", Toast.LENGTH_LONG);
-                statu.show();
+//                Toast statu = Toast.makeText(this, "I came here, just so you know", Toast.LENGTH_LONG);
+//                statu.show();
                 audioIndex = storage.loadAudioIndex();
 //                changeAdapterData();
 
