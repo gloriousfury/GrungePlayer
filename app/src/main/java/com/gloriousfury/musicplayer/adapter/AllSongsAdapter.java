@@ -117,10 +117,7 @@ public class AllSongsAdapter extends RecyclerView.Adapter<AllSongsAdapter.ViewHo
             Uri albumArtUri = Uri.parse(song_list.get(position).getAlbumArtUriString());
             Picasso.with(context).load(albumArtUri).resize(120, 120).into(holder.song_background);
         }else{
-
-            Drawable mDrawable = ContextCompat.getDrawable(context, R.drawable.background_danger);
-            mDrawable.setColorFilter(backgroundColor, PorterDuff.Mode.MULTIPLY);
-            holder.song_background.setImageDrawable(mDrawable);
+            Picasso.with(context).load(R.drawable.ic_default_music_image).into(holder.song_background);
 
         }
 

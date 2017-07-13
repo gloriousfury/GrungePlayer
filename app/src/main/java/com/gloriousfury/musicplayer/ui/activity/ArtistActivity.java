@@ -43,7 +43,7 @@ import de.greenrobot.event.EventBus;
 
 import static com.gloriousfury.musicplayer.ui.activity.MainActivity.Broadcast_PLAY_NEW_AUDIO;
 
-public class ArtistActivity extends AppCompatActivity {
+public class ArtistActivity extends AppCompatActivity implements View.OnClickListener {
 
 
     @BindView(R.id.artist)
@@ -63,6 +63,10 @@ public class ArtistActivity extends AppCompatActivity {
 
     @BindView(R.id.song_background)
     ImageView songBackground;
+
+    @BindView(R.id.img_back_button)
+    ImageView btnGoBack;
+
 
     @BindView(R.id.recyclerView)
     RecyclerView recyclerView;
@@ -90,13 +94,13 @@ public class ArtistActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
 //        setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle("Grunge Player");
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+//        getSupportActionBar().setTitle("Grunge Player");
+//        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
 
         storage = new StorageUtil(this);
         mediaPlayerService = new MediaPlayerService(this);
-
+        btnGoBack.setOnClickListener(this);
 
         Bundle getArtistData = getIntent().getExtras();
 
@@ -117,9 +121,9 @@ public class ArtistActivity extends AppCompatActivity {
 
             artist.setText(artist_name);
 
-            requestAlbumDetails(artist_id);
+            requestAlbumDetails(artist_id, artist_name);
 
-//            Toast.makeText(this, AlbumArtist + " " + AlbumTitle, Toast.LENGTH_LONG).show();
+            Toast.makeText(this, artist_id + " ", Toast.LENGTH_LONG).show();
             recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
             recyclerView.setHasFixedSize(true);
 
@@ -169,38 +173,34 @@ public class ArtistActivity extends AppCompatActivity {
 //
 //    }
 
-    private ArrayList<Albums> requestAlbumDetails(long Id) {
-
-        albumAudioList = new ArrayList<>();
-        ContentResolver contentResolver = getContentResolver();
-        Uri uri = MediaStore.Audio.Artists.Albums.getContentUri("external", Id);
-        String[] columns = {MediaStore.Audio.Albums._ID,
-                MediaStore.Audio.Albums.ALBUM};
+    private ArrayList<Albums> requestAlbumDetails(long Id, String artistName) {
 
         final String _id = MediaStore.Audio.Albums._ID;
         final String album_name = MediaStore.Audio.Albums.ALBUM;
         final String albumart = MediaStore.Audio.Albums.ALBUM_ART;
         final String tracks = MediaStore.Audio.Albums.NUMBER_OF_SONGS;
         final String artist_name = MediaStore.Audio.Albums.ARTIST;
-        String album_art_string = null;
+
+        final String[] projection = {_id, albumart, artist_name, album_name, tracks};
 //
+        String where = MediaStore.Audio.Albums.ARTIST + "=?";
+
+        String whereVal[] = {artistName};
+
+        String orderBy = MediaStore.Audio.Albums.ALBUM;
+
+
+        Uri uri1 = MediaStore.Audio.Artists.Albums.getContentUri("external", Id);
+        Cursor cursor = getContentResolver().query(uri1, projection, where,
+                whereVal, MediaStore.Audio.Albums.ARTIST + " ASC");
 //
-        final String[] projection = {_id, albumart, album_name, tracks};
-
-        Cursor cursor = getContentResolver().query(uri, projection, null,
-                null, MediaStore.Audio.Albums.DEFAULT_SORT_ORDER);
-
-
         if (cursor != null && cursor.getCount() > 0) {
+
             while (cursor.moveToNext()) {
-
-
-                // I want to list down song in album Rolling Papers (Deluxe Version)
-
                 String album = cursor.getString(cursor.getColumnIndex(album_name));
                 Long albumId = cursor.getLong(cursor
                         .getColumnIndexOrThrow(_id));
-                String album_artist = cursor.getString(cursor.getColumnIndex(artist_name));
+//                String album_artist = cursor.getString(cursor.getColumnIndex(artist_name));
 //               int album_art = cursor.getInt(cursor.getColumnIndex(artist));
                 int noOf_Tracks = cursor.getInt(cursor.getColumnIndex(tracks));
 
@@ -208,57 +208,27 @@ public class ArtistActivity extends AppCompatActivity {
                         .parse("content://media/external/audio/albumart");
                 Uri albumArtUri = ContentUris.withAppendedId(sArtworkUri, albumId);
 
-                album_art_string = albumArtUri.toString();
+                String album_art_string = albumArtUri.toString();
 
 
-                albumAudioList.add(new Albums(album, album_artist, noOf_Tracks, albumId, album_art_string));
+                albumAudioList.add(new Albums(album, "", noOf_Tracks, albumId, album_art_string));
+
+
+//                Toast.makeText(this, String.valueOf(albumAudioList.size()) + " ", Toast.LENGTH_SHORT);
+//
+//                    }
+
             }
-
-
         }
 
-        adapter.setAlbumListData(albumAudioList);
+//        adapter.setAlbumListData(albumAudioList);
+
+        noOfAlbums.setText(String.valueOf(albumAudioList.size()) + " Albums");
+        cursor.close();
+
+
         return albumAudioList;
     }
-
-
-//    public void onEventMainThread(AppMainServiceEvent event) {
-//        Log.d(TAG, "onEventMainThread() called with: " + "event = [" + event + "]");
-//        Intent i = event.getMainIntent();
-//
-//
-//        if (event.getEventType() == AppMainServiceEvent.ONCOMPLETED_RESPONSE) {
-//            if (i != null) {
-//
-////                Audio recievedAudio = i.getParcelableExtra(AppMainServiceEvent.RESPONSE_DATA);
-////
-////                audioList = storage.loadAllAudio();
-//
-//                Toast statu = Toast.makeText(this, "I came here, just so you know", Toast.LENGTH_LONG);
-//                statu.show();
-//                audioIndex = storage.loadAudioIndex();
-////                changeAdapterData();
-//
-////                adapter = new AlbumSongsAdapter(this, albumAudioList, audioIndex);
-////
-////
-////                recyclerView.setAdapter(adapter);
-////
-////
-//
-//                Toast.makeText(this, String.valueOf(audioIndex), Toast.LENGTH_LONG).show();
-//                adapter.setAdapterData(audioIndex);
-//
-//
-//            } else {
-//
-//                Toast statu = Toast.makeText(this, "Cant Retrieve data at the moment, Try again", Toast.LENGTH_LONG);
-//                statu.show();
-//            }
-//
-//
-//        }
-//    }
 
 
     @Override
@@ -268,38 +238,38 @@ public class ArtistActivity extends AppCompatActivity {
 
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        bus.register(this);
-
-
-        if (audioList != null && audioIndex != -1) {
-            audioList = storage.loadAudio();
-            audioIndex = storage.loadAudioIndex();
-            activeAudio = audioList.get(audioIndex);
-
+//    @Override
+//    protected void onResume() {
+//        super.onResume();
+////        bus.register(this);
 //
-//            if(audioList)
-//            nextAudio = audioList.get(audioIndex + 1);
+//
+//        if (audioList != null && audioIndex != -1) {
+//            audioList = storage.loadAudio();
+//            audioIndex = storage.loadAudioIndex();
+//            activeAudio = audioList.get(audioIndex);
+//
+////
+////            if(audioList)
+////            nextAudio = audioList.get(audioIndex + 1);
+//
+////            changeMiniPlayer(activeAudio, nextAudio);
+//
+//        }
+//
+//    }
 
-//            changeMiniPlayer(activeAudio, nextAudio);
-
-        }
-
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        bus.unregister(this);
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        bus.unregister(this);
-    }
+//    @Override
+//    protected void onPause() {
+//        super.onPause();
+//        bus.unregister(this);
+//    }
+//
+//    @Override
+//    protected void onStop() {
+//        super.onStop();
+//        bus.unregister(this);
+//    }
 
 
     @Override
@@ -368,4 +338,17 @@ public class ArtistActivity extends AppCompatActivity {
             serviceBound = false;
         }
     };
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.img_back_button:
+                onBackPressed();
+                break;
+
+
+        }
+
+
+    }
 }

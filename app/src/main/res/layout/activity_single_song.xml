@@ -21,10 +21,11 @@
 
         <ImageView
             android:id="@+id/close_activity"
-            android:layout_width="@dimen/thirty"
-            android:layout_height="@dimen/thirty"
-            android:layout_margin="@dimen/three"
-            android:src="@drawable/ic_keyboard_arrow_down_white_24dp" />
+            android:layout_width="@dimen/twenty_five"
+            android:layout_height="@dimen/twenty_five"
+            android:layout_marginTop="@dimen/ten"
+            android:layout_marginLeft="@dimen/ten"
+            android:src="@drawable/ic_arrow_down_button" />
 
 
     </RelativeLayout>

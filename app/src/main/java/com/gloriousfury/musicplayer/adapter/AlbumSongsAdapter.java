@@ -45,8 +45,7 @@ public class AlbumSongsAdapter extends RecyclerView.Adapter<AlbumSongsAdapter.Vi
     int activeAudioIndex = -1;
     int formerAudioIndex = -1;
     String actionMode = null;
-    MediaPlayerService  mediaPlayerService;
-
+    MediaPlayerService mediaPlayerService;
 
 
     public AlbumSongsAdapter(Context context, ArrayList<Audio> song_list) {
@@ -59,7 +58,7 @@ public class AlbumSongsAdapter extends RecyclerView.Adapter<AlbumSongsAdapter.Vi
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         TextView song_title, artist, duration;
         ImageView song_background;
-
+        View playIdentifier;
 
         public ViewHolder(View view) {
             super(view);
@@ -69,9 +68,9 @@ public class AlbumSongsAdapter extends RecyclerView.Adapter<AlbumSongsAdapter.Vi
 
             mediaPlayerService = new MediaPlayerService(context);
 
-            if(mediaPlayerService.isPng()){
+            if (mediaPlayerService.isPng()) {
                 Utils.serviceBound = true;
-            }else{
+            } else {
                 Utils.serviceBound = false;
 
             }
@@ -79,6 +78,7 @@ public class AlbumSongsAdapter extends RecyclerView.Adapter<AlbumSongsAdapter.Vi
             artist = (TextView) view.findViewById(R.id.artist);
             duration = (TextView) view.findViewById(R.id.song_duration);
             song_background = (ImageView) view.findViewById(R.id.song_background);
+            playIdentifier = view.findViewById(R.id.play_identifier);
 
 
         }
@@ -86,12 +86,15 @@ public class AlbumSongsAdapter extends RecyclerView.Adapter<AlbumSongsAdapter.Vi
         @Override
         public void onClick(View v) {
             int adapterposition = getAdapterPosition();
-
+            notifyItemChanged(activeAudioIndex);
             activeAudioIndex = adapterposition;
             Audio singleSong = song_list.get(adapterposition);
             activeAudio = singleSong;
-            song_title.setTextSize(20);
+
+
+//            song_title.setTextSize(20);
             playAudio(activeAudioIndex);
+            notifyItemChanged(activeAudioIndex);
 
 
         }
@@ -114,12 +117,12 @@ public class AlbumSongsAdapter extends RecyclerView.Adapter<AlbumSongsAdapter.Vi
         holder.duration.setText(duration);
 
 
-        if (activeAudio.getTitle()!= null) {
+        if (activeAudio.getTitle() != null) {
             if (title.contentEquals(activeAudio.getTitle())) {
-                holder.song_title.setTextSize(20);
+                holder.playIdentifier.setVisibility(View.VISIBLE);
 
             } else {
-                holder.song_title.setTextSize(15);
+                holder.playIdentifier.setVisibility(View.INVISIBLE);
 
             }
         }
@@ -152,12 +155,12 @@ public class AlbumSongsAdapter extends RecyclerView.Adapter<AlbumSongsAdapter.Vi
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            MediaPlayerService  mediaPlayerService = new MediaPlayerService(context);
+            MediaPlayerService mediaPlayerService = new MediaPlayerService(context);
 
-            if(mediaPlayerService.isPng()) {
+            if (mediaPlayerService.isPng()) {
                 Utils.serviceBound = true;
-            }else{
-              Utils.serviceBound = false;
+            } else {
+                Utils.serviceBound = false;
             }
         }
     };
@@ -172,7 +175,7 @@ public class AlbumSongsAdapter extends RecyclerView.Adapter<AlbumSongsAdapter.Vi
             storage.storeAudio(song_list);
             storage.storeAudioIndex(audioIndex);
 
-            Toast.makeText(context, String.valueOf(storage.loadAudioIndex()), Toast.LENGTH_LONG).show();
+//            Toast.makeText(context, String.valueOf(storage.loadAudioIndex()), Toast.LENGTH_LONG).show();
             Intent playerIntent = new Intent(context, MediaPlayerService.class);
             context.startService(playerIntent);
             context.bindService(playerIntent, serviceConnection, Context.BIND_AUTO_CREATE);

@@ -5,6 +5,7 @@ package com.gloriousfury.musicplayer.adapter;
  */
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,6 +17,7 @@ import com.gloriousfury.musicplayer.R;
 import com.gloriousfury.musicplayer.model.Albums;
 import com.gloriousfury.musicplayer.model.Playlist;
 import com.gloriousfury.musicplayer.service.MediaPlayerService;
+import com.gloriousfury.musicplayer.ui.activity.AlbumActivity;
 
 import java.util.ArrayList;
 
@@ -25,7 +27,9 @@ public class SongNormalAdapter extends RecyclerView.Adapter<SongNormalAdapter.Vi
     private ArrayList<Albums> albumLists;
     boolean serviceBound = false;
     private MediaPlayerService player;
-
+    String ALBUM_TITLE = "album_title";
+    String ALBUM_ARTIST = "ALBUM_ARTIST";
+    String ALBUM_ART_URI = "album_art_uri";
 
 
     public SongNormalAdapter(Context context, ArrayList<Albums> albumLists) {
@@ -57,14 +61,12 @@ public class SongNormalAdapter extends RecyclerView.Adapter<SongNormalAdapter.Vi
 
         @Override
         public void onClick(View v) {
-            int adapterposition = getAdapterPosition();
-
-//            Playlist singleSong = albumLists.get(adapterposition);
-//            playPlaylist(adapterposition);
-//            Intent openSingleSongActivity = new Intent(context, SingleSongActivity.class);
-//            openSingleSongActivity.putExtra(SONG, singleSong);
-//
-//            context.startActivity(openSingleSongActivity);
+         
+            Intent openAlbumActivity = new Intent(context, AlbumActivity.class);
+            openAlbumActivity.putExtra(ALBUM_TITLE, albumLists.get(getAdapterPosition()).getAlbum());
+            openAlbumActivity.putExtra(ALBUM_ARTIST, albumLists.get(getAdapterPosition()).getArtist());
+            openAlbumActivity.putExtra(ALBUM_ART_URI, albumLists.get(getAdapterPosition()).getAlbumArtUriString());
+            context.startActivity(openAlbumActivity);
 
         }
     }

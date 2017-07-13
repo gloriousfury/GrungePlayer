@@ -12,6 +12,15 @@
         android:orientation="vertical">
 
 
+        <View
+            android:id="@+id/play_identifier"
+            android:layout_width="@dimen/ten"
+            android:layout_height="match_parent"
+            android:background="@color/colorPrimaryDark"
+            android:visibility="invisible"
+            />
+
+
 
         <TextView
             android:id="@+id/song_title"
@@ -20,7 +29,7 @@
             android:layout_marginLeft="@dimen/ten"
             android:layout_marginRight="@dimen/fifty"
             android:layout_marginTop="@dimen/ten"
-            android:layout_toRightOf="@id/song_background"
+            android:layout_toRightOf="@+id/play_identifier"
             tools:text="Fresh Red South African apples (BlueBand)"
             android:textColor="@color/black"
              />
@@ -34,7 +43,7 @@
             android:layout_marginLeft="@dimen/ten"
             android:layout_marginRight="@dimen/twenty"
             android:layout_marginTop="@dimen/five"
-            android:layout_toRightOf="@id/song_background"
+            android:layout_toRightOf="@+id/play_identifier"
             tools:text="RS 18999ml/ 180ml" />
 
         <TextView

@@ -20,7 +20,7 @@
             android:layout_marginLeft="@dimen/twenty"
             android:layout_marginRight="@dimen/five"
             android:layout_centerVertical="true"
-            android:background="@color/app_grey"
+            android:src="@drawable/ic_default_music_image"
             />
 
         <TextView
@@ -33,6 +33,7 @@
             android:layout_toRightOf="@id/song_background"
             tools:text="Fresh Red South African apples (BlueBand)"
             android:textColor="@color/black"
+            android:maxLines="1"
              />
 
 

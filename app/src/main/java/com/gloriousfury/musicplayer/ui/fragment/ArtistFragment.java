@@ -21,6 +21,7 @@ import android.view.ViewGroup;
 import android.widget.AlphabetIndexer;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import com.gloriousfury.musicplayer.R;
 import com.gloriousfury.musicplayer.adapter.ArtistAdapter;
@@ -31,6 +32,7 @@ import com.gloriousfury.musicplayer.model.Audio;
 import com.gloriousfury.musicplayer.model.Artist;
 import com.gloriousfury.musicplayer.utils.StorageUtil;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -63,6 +65,7 @@ public class ArtistFragment extends Fragment implements LoaderManager.LoaderCall
     ArrayList<Audio> audioList = new ArrayList<>();
     ArrayList<Artist> artistList;
     ArtistAdapter adapter;
+
     boolean serviceBound = false;
     Cursor cursor;
     private static final int TASK_LOADER_ID = 6;
@@ -166,7 +169,7 @@ public class ArtistFragment extends Fragment implements LoaderManager.LoaderCall
 
         final String[] columns = {_id, artist_name, noOfAlbums, noOfTracks};
         Cursor cursor = getActivity().getContentResolver().query(uri, columns, null,
-                null, null);
+                null, artist_name + " ASC");
 
 
         // add playlsit to
@@ -178,7 +181,7 @@ public class ArtistFragment extends Fragment implements LoaderManager.LoaderCall
                 String artist = cursor.getString(cursor.getColumnIndex(artist_name));
                 Long Id = cursor.getLong(cursor
                         .getColumnIndexOrThrow(_id));
-                int no_of_Albums = cursor.getInt(cursor.getColumnIndex(noOfTracks));
+                int no_of_Albums = cursor.getInt(cursor.getColumnIndex(noOfAlbums));
 //                String album_art = cursor.getString(cursor.getColumnIndex(Albums));
                 int no_Of_Tracks = cursor.getInt(cursor.getColumnIndex(noOfTracks));
 
@@ -187,6 +190,7 @@ public class ArtistFragment extends Fragment implements LoaderManager.LoaderCall
                 final String albumart1 = MediaStore.Audio.Albums.ALBUM_ART;
                 final String tracks1 = MediaStore.Audio.Albums.NUMBER_OF_SONGS;
                 String album_art_string = null;
+                Uri albumArtUri = null;
 //
 //
                 final String[] projection = {_id1, albumart1, tracks1};
@@ -199,26 +203,40 @@ public class ArtistFragment extends Fragment implements LoaderManager.LoaderCall
 
 
                     cursor2.moveToPosition(0);
-////
-//                        String album = cursor.getString(cursor.getColumnIndex(album_name1));
+
                     Long albumId = cursor2.getLong(cursor2
                             .getColumnIndexOrThrow(_id1));
-//                        String album_artist = cursor.getString(cursor.getColumnIndex(artist));
-////               int album_art = cursor.getInt(cursor.getColumnIndex(artist));
-//                        int noOf_Tracks = cursor.getInt(cursor.getColumnIndex(tracks1));
-
                     Uri sArtworkUri = Uri
                             .parse("content://media/external/audio/albumart");
-                    Uri albumArtUri = ContentUris.withAppendedId(sArtworkUri, albumId);
+                    albumArtUri = ContentUris.withAppendedId(sArtworkUri, albumId);
 
                     album_art_string = albumArtUri.toString();
-//
-//                    }
 
 
                 }
                 cursor2.close();
 
+                ContentResolver cr = getActivity().getContentResolver();
+                String[] projectionArt = {MediaStore.MediaColumns.DATA};
+                Cursor cur = cr.query(Uri.parse(album_art_string), projectionArt, null, null, null);
+                if (cur != null) {
+                    if (cur.moveToFirst()) {
+                        String filePath = cur.getString(0);
+
+                        if (new File(filePath).exists()) {
+                            // do something if it exists
+                        } else {
+                            album_art_string = null;
+                            // File was not found
+                        }
+                    } else {
+                        album_art_string = null;
+                        // Uri was ok but no entry found.
+                    }
+                    cur.close();
+                } else {
+                    // content Uri was invalid or some other error occurred
+                }
 
                 artistList.add(new Artist(artist, Id, no_Of_Tracks, no_of_Albums, album_art_string));
             }

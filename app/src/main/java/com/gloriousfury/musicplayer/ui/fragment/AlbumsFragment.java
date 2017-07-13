@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -24,12 +26,15 @@ import com.gloriousfury.musicplayer.model.Albums;
 import com.gloriousfury.musicplayer.model.Audio;
 import com.gloriousfury.musicplayer.service.AppMainServiceEvent;
 import com.gloriousfury.musicplayer.utils.StorageUtil;
+import com.gloriousfury.musicplayer.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
 import de.greenrobot.event.EventBus;
+
+import static com.gloriousfury.musicplayer.utils.Utils.dpToPx;
 
 
 /**
@@ -79,10 +84,27 @@ public class AlbumsFragment extends Fragment {
         recyclerView.setHasFixedSize(true);
         retrievedAlbumList = storage.loadAllAlbums();
 
+//
+//        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext());
+//
+//        recyclerView.setLayoutManager(layoutManager);
 
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext());
+        recyclerView = (RecyclerView) v.findViewById(R.id.recyclerView);
+        recyclerView.setHasFixedSize(true);
 
+//        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext());
+
+
+        recyclerView.setHasFixedSize(true);
+
+        RecyclerView.LayoutManager layoutManager = new GridLayoutManager(getActivity(), 2);
         recyclerView.setLayoutManager(layoutManager);
+
+        recyclerView.addItemDecoration(new Utils.GridSpacingItemDecoration(2, dpToPx(1,getContext()), true));
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+//        recyclerView.addItemDecoration(new DividerItemDecoration(context,
+//                LinearLayoutManager.VERTICAL, R.drawable.divider_white));
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
 
         adapter = new AlbumAdapter(getActivity(), retrievedAlbumList);
 
@@ -134,10 +156,10 @@ public class AlbumsFragment extends Fragment {
     ArrayList<Albums> addAlphabets(ArrayList<Albums> list) {
         int i = 0;
         ArrayList<Albums> customList = new ArrayList<Albums>();
-        Albums firstAlbum = new Albums();
-        firstAlbum.setAlbum(String.valueOf(list.get(0).getAlbum().charAt(0)));
-        firstAlbum.setType(1);
-        customList.add(firstAlbum);
+//        Albums firstAlbum = new Albums();
+//        firstAlbum.setAlbum(String.valueOf(list.get(0).getAlbum().charAt(0)));
+//        firstAlbum.setType(1);
+//        customList.add(firstAlbum);
         for (i = 0; i < list.size() - 1; i++) {
             Albums teamMember = new Albums();
             char name1 = list.get(i).getAlbum().toUpperCase().charAt(0);
@@ -148,10 +170,10 @@ public class AlbumsFragment extends Fragment {
             } else {
                 list.get(i).setType(2);
                 customList.add(list.get(i));
-                teamMember.setAlbum(String.valueOf(name2));
-//                Toast.makeText(getActivity(),String.valueOf(name2),Toast.LENGTH_SHORT).show();
-                teamMember.setType(1);
-                customList.add(teamMember);
+//                teamMember.setAlbum(String.valueOf(name2));
+////                Toast.makeText(getActivity(),String.valueOf(name2),Toast.LENGTH_SHORT).show();
+//                teamMember.setType(1);
+//                customList.add(teamMember);
             }
         }
         list.get(i).setType(2);

@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.gloriousfury.musicplayer.R;
 import com.gloriousfury.musicplayer.model.Artist;
@@ -21,6 +22,8 @@ import com.gloriousfury.musicplayer.ui.activity.ArtistActivity;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 
 public class ArtistAdapter extends RecyclerView.Adapter<ArtistAdapter.ViewHolder> {
@@ -43,7 +46,7 @@ public class ArtistAdapter extends RecyclerView.Adapter<ArtistAdapter.ViewHolder
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         TextView title, noOfSongs;
-        ImageView playlist_background;
+       CircleImageView playlist_background;
 
 
         public ViewHolder(View view) {
@@ -55,7 +58,7 @@ public class ArtistAdapter extends RecyclerView.Adapter<ArtistAdapter.ViewHolder
 
             title = (TextView) view.findViewById(R.id.artist_name);
             noOfSongs= (TextView) view.findViewById(R.id.no_of_albums);
-            playlist_background = (ImageView) view.findViewById(R.id.img_background);
+            playlist_background = (CircleImageView) view.findViewById(R.id.img_background);
 
 
 
@@ -88,8 +91,12 @@ public class ArtistAdapter extends RecyclerView.Adapter<ArtistAdapter.ViewHolder
         holder.title.setText(artist_list.get(position).getArtistName());
         holder.noOfSongs.setText(String.valueOf(artist_list.get(position).getNoOfAlbums() +" Albums"));
         if (artist_list.get(position).getAlbumArtUri() != null) {
+
             Uri albumArtUri = Uri.parse(artist_list.get(position).getAlbumArtUri());
             Picasso.with(context).load(albumArtUri).resize(120, 120).into(holder.playlist_background);
+        }else{
+            Picasso.with(context).load(R.drawable.ic_default_music_image).into(holder.playlist_background);
+
         }
 
     }

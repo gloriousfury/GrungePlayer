@@ -49,6 +49,7 @@ import com.gloriousfury.musicplayer.utils.StorageUtil;
 import com.gloriousfury.musicplayer.utils.Timer;
 import com.squareup.picasso.Picasso;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -121,7 +122,6 @@ public class LibraryActivity extends AppCompatActivity
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
 
-
         storage = new StorageUtil(this);
         audioList = storage.loadAudio();
         audioIndex = storage.loadAudioIndex();
@@ -159,10 +159,10 @@ public class LibraryActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        if(checkPermissions()) {
+        if (checkPermissions()) {
             startTasks();
 
-        }else{
+        } else {
             checkPermissions();
 
         }
@@ -173,7 +173,7 @@ public class LibraryActivity extends AppCompatActivity
         getSupportLoaderManager().initLoader(TASK_LOADER_ID, null, this);
     }
 
-    public boolean checkPermissions(){
+    public boolean checkPermissions() {
 
         if (ContextCompat.checkSelfPermission(this,
                 android.Manifest.permission.READ_EXTERNAL_STORAGE)
@@ -202,19 +202,18 @@ public class LibraryActivity extends AppCompatActivity
 
         }
 
-        if(ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_EXTERNAL_STORAGE)
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_EXTERNAL_STORAGE)
                 == PackageManager.PERMISSION_GRANTED
                 &&
                 ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                == PackageManager.PERMISSION_GRANTED
-                &&(ContextCompat.checkSelfPermission(this,Manifest.permission.MEDIA_CONTENT_CONTROL) ==
+                        == PackageManager.PERMISSION_GRANTED
+                && (ContextCompat.checkSelfPermission(this, Manifest.permission.MEDIA_CONTENT_CONTROL) ==
                 PackageManager.PERMISSION_GRANTED
-                )){
+        )) {
             startTasks();
             return true;
 
-        }
-        else {
+        } else {
             return false;
         }
 
@@ -273,7 +272,7 @@ public class LibraryActivity extends AppCompatActivity
                 // COMPLETED (5) Query and load all task data in the background; sort by priority
                 // [Hint] use a try/catch block to catch any errors in loading data
                 ContentResolver contentResolver = getContentResolver();
-
+                String album_art_string = null;
                 Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
                 String selection = MediaStore.Audio.Media.IS_MUSIC + "!= 0";
                 String sortOrder = MediaStore.Audio.Media.TITLE + " ASC";
@@ -297,6 +296,32 @@ public class LibraryActivity extends AppCompatActivity
                                 .parse("content://media/external/audio/albumart");
                         Uri albumArtUri = ContentUris.withAppendedId(sArtworkUri, albumId);
 
+                        album_art_string = albumArtUri.toString();
+                        ContentResolver cr = getContentResolver();
+                        String[] projectionArt = {MediaStore.MediaColumns.DATA};
+                        Cursor cur = cr.query(Uri.parse(album_art_string), projectionArt, null, null, null);
+                        if (cur != null) {
+                            if (cur.moveToFirst()) {
+                                String filePath = cur.getString(0);
+
+                                if (new File(filePath).exists()) {
+                                    album_art_string = albumArtUri.toString();
+                                    // do something if it exists
+                                } else {
+                                    album_art_string = null;
+                                    // File was not found
+                                }
+                            } else {
+                                album_art_string = null;
+                                // Uri was ok but no entry found.
+                            }
+                            cur.close();
+                        } else {
+                            album_art_string = null;
+                            // content Uri was invalid or some other error occurred
+                        }
+
+
 //
 //                        Bitmap bitmap = null;
 //                        try {
@@ -315,7 +340,7 @@ public class LibraryActivity extends AppCompatActivity
 
 
                         // Save to audioList
-                        audioList.add(new Audio(data, title, album, artist, duration, albumId, albumArtUri.toString()));
+                        audioList.add(new Audio(data, title, album, artist, duration, albumId, album_art_string));
 
                     }
                 }
@@ -338,7 +363,7 @@ public class LibraryActivity extends AppCompatActivity
 
 
 //        responseIntent.putExtra(AppMainServiceEvent.RESPONSE_DATA, activeAudio);
-        Log.d(TAG,"I sent in sometihing here");
+        Log.d(TAG, "I sent in sometihing here");
         event.setMainIntent(responseIntent);
         event.setEventType(AppMainServiceEvent.ONDATALOADED);
         EventBus.getDefault().post(event);
@@ -355,14 +380,13 @@ public class LibraryActivity extends AppCompatActivity
     public ArrayList<Albums> getListOfAlbums() {
 
         String where = null;
-
+        String album_art_string = null;
         final Uri uri = MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI;
         final String _id = MediaStore.Audio.Albums._ID;
         final String album_name = MediaStore.Audio.Albums.ALBUM;
         final String artist = MediaStore.Audio.Albums.ARTIST;
         final String albumart = MediaStore.Audio.Albums.ALBUM_ART;
         final String tracks = MediaStore.Audio.Albums.NUMBER_OF_SONGS;
-
 
 
         final String[] columns = {_id, album_name, artist, albumart, tracks};
@@ -386,26 +410,51 @@ public class LibraryActivity extends AppCompatActivity
                 Uri sArtworkUri = Uri
                         .parse("content://media/external/audio/albumart");
                 Uri albumArtUri = ContentUris.withAppendedId(sArtworkUri, albumId);
+                album_art_string = albumArtUri.toString();
 
 
-                Bitmap bitmap = null;
-                try {
-                    bitmap = MediaStore.Images.Media.getBitmap(
-                            getContentResolver(), albumArtUri);
-                    bitmap = Bitmap.createScaledBitmap(bitmap, 30, 30, true);
+                ContentResolver cr = getContentResolver();
+                String[] projectionArt = {MediaStore.MediaColumns.DATA};
+                Cursor cur = cr.query(Uri.parse(album_art_string), projectionArt, null, null, null);
+                if (cur != null) {
+                    if (cur.moveToFirst()) {
+                        String filePath = cur.getString(0);
 
-                } catch (FileNotFoundException exception) {
-                    exception.printStackTrace();
-                    bitmap = BitmapFactory.decodeResource(getResources(),
-                            R.mipmap.ic_launcher);
-                } catch (IOException e) {
-
-                    e.printStackTrace();
+                        if (new File(filePath).exists()) {
+                            album_art_string = albumArtUri.toString();
+                            // do something if it exists
+                        } else {
+                            album_art_string = null;
+                            // File was not found
+                        }
+                    } else {
+                        album_art_string = null;
+                        // Uri was ok but no entry found.
+                    }
+                    cur.close();
+                } else {
+                    // content Uri was invalid or some other error occurred
                 }
 
 
+//                Bitmap bitmap = null;
+//                try {
+//                    bitmap = MediaStore.Images.Media.getBitmap(
+//                            getContentResolver(), albumArtUri);
+//                    bitmap = Bitmap.createScaledBitmap(bitmap, 30, 30, true);
+//
+//                } catch (FileNotFoundException exception) {
+//                    exception.printStackTrace();
+//                    bitmap = BitmapFactory.decodeResource(getResources(),
+//                            R.mipmap.ic_launcher);
+//                } catch (IOException e) {
+//
+//                    e.printStackTrace();
+//                }
+
+
                 // Save to audioList
-                albumList.add(new Albums(album, album_artist, noOfTracks, albumId, albumArtUri.toString()));
+                albumList.add(new Albums(album, album_artist, noOfTracks, albumId, album_art_string));
 
             }
         }
@@ -512,7 +561,7 @@ public class LibraryActivity extends AppCompatActivity
         artist.setText(recievedAudio.getArtist());
 
 
-        Log.d(TAG,recievedAudio.getAlbumArtUriString());
+        Log.d(TAG, recievedAudio.getAlbumArtUriString());
         seekBar.setProgress(0);
         seekBar.setMax(100);
 
@@ -542,7 +591,7 @@ public class LibraryActivity extends AppCompatActivity
 
             updateProgressBar();
 
-        }else if(!isPlaying() && serviceBound){
+        } else if (!isPlaying() && serviceBound) {
             playPauseView.setImageResource(R.drawable.ic_play_arrow_black_24dp);
 
         }
@@ -559,7 +608,6 @@ public class LibraryActivity extends AppCompatActivity
 
 
         }
-
 
 
     }
@@ -600,14 +648,14 @@ public class LibraryActivity extends AppCompatActivity
     protected void onStart() {
         super.onStart();
         bus.register(this);
-        if(audioList==null){
+        if (audioList == null) {
             miniPlayerView.setVisibility(View.GONE);
             miniPlayerView.invalidate();
         } else if (audioList != null && audioIndex != -1) {
-            if (audioList.size()==0 ) {
+            if (audioList.size() == 0) {
                 miniPlayerView.setVisibility(View.GONE);
                 miniPlayerView.invalidate();
-            }else {
+            } else {
                 miniPlayerView.setVisibility(View.VISIBLE);
                 audioList = storage.loadAudio();
                 audioIndex = storage.loadAudioIndex();
@@ -623,14 +671,14 @@ public class LibraryActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
-        if(audioList==null){
+        if (audioList == null) {
             miniPlayerView.setVisibility(View.GONE);
             miniPlayerView.invalidate();
         } else if (audioList != null && audioIndex != -1) {
-            if (audioList.size()==0 ) {
+            if (audioList.size() == 0) {
                 miniPlayerView.setVisibility(View.GONE);
                 miniPlayerView.invalidate();
-            }else {
+            } else {
                 miniPlayerView.setVisibility(View.VISIBLE);
                 audioList = storage.loadAudio();
                 audioIndex = storage.loadAudioIndex();
@@ -670,15 +718,15 @@ public class LibraryActivity extends AppCompatActivity
 
                 } else if (!mediaPlayerService.isPng()) {
 
-                    if(!serviceBound) {
+                    if (!serviceBound) {
                         playPauseView.setImageDrawable(ContextCompat
                                 .getDrawable(LibraryActivity.this, R.drawable.ic_pause_black_24dp));
                         mediaPlayerService.resumeMedia(currentMediaPlayer);
 
                         //TODO BUILD EXTERNAL PLAYER
 
-                        serviceBound=true;
-                    }else{
+                        serviceBound = true;
+                    } else {
                         playPauseView.setImageDrawable(ContextCompat
                                 .getDrawable(LibraryActivity.this, R.drawable.ic_pause_black_24dp));
                         mediaPlayerService.resumeMedia(currentMediaPlayer);
