@@ -1,6 +1,8 @@
 package com.gloriousfury.musicplayer.ui.activity;
 
 import android.Manifest;
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Intent;
@@ -21,6 +23,7 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -28,11 +31,14 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.GestureDetector;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -62,7 +68,7 @@ import de.greenrobot.event.EventBus;
 
 public class LibraryActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
-        LoaderManager.LoaderCallbacks<ArrayList<Audio>>, View.OnClickListener {
+        LoaderManager.LoaderCallbacks<ArrayList<Audio>>, View.OnClickListener, GestureDetector.OnGestureListener {
 
     FragmentManager mFragmentManager;
     FragmentTransaction mFragmentTransaction;
@@ -106,12 +112,17 @@ public class LibraryActivity extends AppCompatActivity
     @BindView(R.id.img_play_pause)
     ImageView playPauseView;
     @BindView(R.id.relative_layout_mini_player)
-    RelativeLayout miniPlayerView;
+    LinearLayout miniPlayerView;
+
+    @BindView(R.id.queuelist_view)
+    RecyclerView queueRecycler;
 
     @BindView(R.id.song_background)
     ImageView songBackground;
     @BindView(R.id.songProgressBar)
     SeekBar seekBar;
+    GestureDetector gestureScanner;
+    boolean expanded;
 
 
     @Override
@@ -121,7 +132,7 @@ public class LibraryActivity extends AppCompatActivity
         ButterKnife.bind(this);
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
-
+        gestureScanner = new GestureDetector(this);
         storage = new StorageUtil(this);
         audioList = storage.loadAudio();
         audioIndex = storage.loadAudioIndex();
@@ -139,6 +150,13 @@ public class LibraryActivity extends AppCompatActivity
         mFragmentManager = getSupportFragmentManager();
         mFragmentTransaction = mFragmentManager.beginTransaction();
         mFragmentTransaction.replace(R.id.containerView, new ScrollFragmentContainer()).commit();
+
+        miniPlayerView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                return gestureScanner.onTouchEvent(event);
+            }
+        });
 //
 //
 //        if (audioList != null && audioIndex != -1) {
@@ -345,7 +363,7 @@ public class LibraryActivity extends AppCompatActivity
                     }
                 }
 
-
+                cursor.close();
                 return audioList;
             }
 
@@ -564,6 +582,12 @@ public class LibraryActivity extends AppCompatActivity
         Log.d(TAG, recievedAudio.getAlbumArtUriString());
         seekBar.setProgress(0);
         seekBar.setMax(100);
+        seekBar.setOnTouchListener(new View.OnTouchListener(){
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                return true;
+            }
+        });
 
 //                 Updating progress bar
         updateProgressBar();
@@ -774,5 +798,77 @@ public class LibraryActivity extends AppCompatActivity
         if (mediaPlayerService != null && serviceBound)
             return mediaPlayerService.isPng();
         return false;
+    }
+
+    @Override
+    public boolean onDown(MotionEvent motionEvent) {
+        Log.i("MiniPlayer view", "The onDown override was called");
+        if (expanded) {
+            queueRecycler.animate()
+                    .translationY(0)
+                    .alpha(0.0f)
+                    .setListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            super.onAnimationEnd(animation);
+                            queueRecycler.setVisibility(View.GONE);
+
+                        }
+                    });
+            expanded =false;
+
+
+        }
+
+        return false;
+    }
+
+    @Override
+    public void onShowPress(MotionEvent motionEvent) {
+
+    }
+
+    @Override
+    public boolean onSingleTapUp(MotionEvent motionEvent) {
+        return false;
+    }
+
+    @Override
+    public boolean onScroll(MotionEvent motionEvent, MotionEvent motionEvent1, float v, float v1) {
+        return false;
+    }
+
+    @Override
+    public void onLongPress(MotionEvent motionEvent) {
+
+        Log.i("MiniPlayer view", "The long press override was called");
+    }
+
+    @Override
+    public boolean onFling(MotionEvent motionEvent, MotionEvent motionEvent1, float v, float v1) {
+
+        Log.i("MiniPlayer view", "The fling override was called");
+
+        if (!expanded) {
+            queueRecycler.setVisibility(View.VISIBLE);
+            queueRecycler.setAlpha(0.0f);
+
+// Start the animation
+            queueRecycler.animate()
+                    .translationY(queueRecycler.getHeight())
+                    .alpha(1.0f);
+            expanded = true;
+        }
+
+
+        return false;
+    }
+
+    //Very important to the fling event
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        boolean handled = super.dispatchTouchEvent(ev);
+        handled = gestureScanner.onTouchEvent(ev);
+        return handled;
     }
 }

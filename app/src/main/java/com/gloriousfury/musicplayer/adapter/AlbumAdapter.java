@@ -206,15 +206,20 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.ViewHolder> 
                     e.printStackTrace();
                 }
 
-                Palette.from(bitmap).generate(new Palette.PaletteAsyncListener() {
-                    @Override
-                    public void onGenerated(Palette palette) {
-                        //work with the palette here
-                        int colorInt = ContextCompat.getColor(context, R.color.white);
-                        setViewSwatch(holder.backgroundRelativeLayout, palette.getMutedSwatch());
-                    }
-                });
+                if(bitmap!=null) {
 
+                    Palette.from(bitmap).generate(new Palette.PaletteAsyncListener() {
+                        @Override
+                        public void onGenerated(Palette palette) {
+                            //work with the palette here
+                            int colorInt = ContextCompat.getColor(context, R.color.white);
+                            setViewSwatch(holder.backgroundRelativeLayout, palette.getMutedSwatch());
+                        }
+                    });
+                }else{
+                    Picasso.with(context).load(R.drawable.ic_default_music_image).into(Holder.song_background);
+
+                }
 //
 //                bitmap = drawableToBitmap(ContextCompat.getDrawable(context, R.drawable.ic_default_music_image));
 //

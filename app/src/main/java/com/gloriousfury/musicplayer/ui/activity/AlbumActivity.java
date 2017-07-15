@@ -260,6 +260,7 @@ public class AlbumActivity extends AppCompatActivity {
 
             }
         }
+        cursor.close();
         return albumAudioList;
     }
 

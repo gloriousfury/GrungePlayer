@@ -215,7 +215,7 @@ public class PlaylistFragments extends Fragment implements LoaderManager.LoaderC
                         try {
                             bitmap = MediaStore.Images.Media.getBitmap(
                                     getActivity().getContentResolver(), albumArtUri);
-                            bitmap = Bitmap.createScaledBitmap(bitmap, 30, 30, true);
+//                            bitmap = Bitmap.createScaledBitmap(bitmap, 30, 30, true);
 
                         } catch (FileNotFoundException exception) {
                             exception.printStackTrace();

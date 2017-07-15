@@ -514,14 +514,17 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         }
         Bitmap albumArt = null;
         try {
-            albumArt = MediaStore.Images.Media.getBitmap(
-                    getContentResolver(), albumArtUri);
-            albumArt = Bitmap.createScaledBitmap(albumArt, 30, 30, true);
+
+            if (albumArtUri != null) {
+                albumArt = MediaStore.Images.Media.getBitmap(
+                        getContentResolver(), albumArtUri);
+                albumArt = Bitmap.createScaledBitmap(albumArt, 30, 30, true);
+            }
 
         } catch (FileNotFoundException exception) {
             exception.printStackTrace();
             albumArt = BitmapFactory.decodeResource(getResources(),
-                    R.mipmap.ic_launcher);
+                    R.drawable.ic_default_music_image);
         } catch (IOException e) {
 
             e.printStackTrace();
@@ -625,6 +628,31 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         int notificationAction = android.R.drawable.ic_media_pause;//needs to be initialized
         PendingIntent play_pauseAction = null;
 
+        Uri albumArtUri = null;
+
+        if (activeAudio.getAlbumArtUriString() != null) {
+            albumArtUri = Uri.parse(activeAudio.getAlbumArtUriString());
+
+        }
+        Bitmap albumArt = null;
+
+        if (albumArtUri != null) {
+            try {
+                albumArt = MediaStore.Images.Media.getBitmap(
+                        getContentResolver(), albumArtUri);
+            } catch (IOException e) {
+                e.printStackTrace();
+                albumArt = BitmapFactory.decodeResource(getResources(),
+                        R.drawable.ic_default_music_image);
+            }
+
+        } else {
+
+            albumArt = BitmapFactory.decodeResource(getResources(),
+                    R.drawable.ic_default_music_image);
+        }
+        albumArt = Bitmap.createScaledBitmap(albumArt, 60, 60, true);
+
         //Build a new notification according to the current state of the MediaPlayer
         if (playbackStatus == PlaybackStatus.PLAYING) {
             notificationAction = R.drawable.ic_pause_circle_filled_black_24dp;
@@ -649,9 +677,9 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                         // Show our playback controls in the compact notification view.
                         .setShowActionsInCompactView(0, 1, 2))
                 // Set the Notification color
-                .setColor(getResources().getColor(R.color.colorPrimary))
+                .setColor(getResources().getColor(R.color.grey))
                 // Set the large and small icons
-                .setLargeIcon(largeIcon)
+                .setLargeIcon(albumArt)
                 .setSmallIcon(android.R.drawable.stat_sys_headset)
                 // Set Notification content information
                 .setContentText(activeAudio.getArtist())

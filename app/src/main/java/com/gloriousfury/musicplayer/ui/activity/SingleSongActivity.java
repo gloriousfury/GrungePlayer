@@ -144,13 +144,18 @@ public class SingleSongActivity extends AppCompatActivity implements
             String song_title = audio.getTitle();
             String song_artist = audio.getArtist();
             totalDuration = audio.getDuration();
-            Uri albumArtUri = Uri.parse(audio.getAlbumArtUriString());
+            Uri albumArtUri = null;
+            if(audio.getAlbumArtUriString()!=null){
+             albumArtUri = Uri.parse(audio.getAlbumArtUriString());}
             songTitle.setText(song_title);
             artist.setText(song_artist);
             if (albumArtUri != null) {
 
                 Picasso.with(this).load(albumArtUri).into(songBackground);
 
+
+            }else {
+                Picasso.with(this).load(R.drawable.ic_default_music_image).into(songBackground);
 
             }
 

@@ -67,6 +67,8 @@ public class AllSongsFragment extends Fragment {
     String TAG = "LibraryActivity";
     ProgressBar progressBar;
     EventBus bus = EventBus.getDefault();
+    private static final String LIFECYCLE_AUDIOLIST_CALLBACKS_KEY = "movieList";
+//    private static final String LIFECYCLE_PAGE_NO_KEY = "page_no";
 
     AllSongsAdapter adapter;
 
@@ -86,14 +88,25 @@ public class AllSongsFragment extends Fragment {
         recyclerView.setLayoutManager(layoutManager);
         audioList = storage.loadAllAudio();
         adapter = new AllSongsAdapter(getActivity(), audioList);
-        if (audioList != null) {
-            adapter.setAudioListData(audioList);
+
+
+        if (savedInstanceState == null || !savedInstanceState.containsKey(LIFECYCLE_AUDIOLIST_CALLBACKS_KEY)) {
+            if (audioList != null) {
+                adapter.setAudioListData(audioList);
+
+            } else {
+                adapter.setAudioListData(audioList);
+                progressBar.setVisibility(View.VISIBLE);
+                recyclerView.setVisibility(View.INVISIBLE);
+                Toast.makeText(getActivity(), "Not loaded yet", Toast.LENGTH_LONG).show();
+            }
 
         } else {
-            adapter.setAudioListData(audioList);
-            progressBar.setVisibility(View.VISIBLE);
-            recyclerView.setVisibility(View.INVISIBLE);
-            Toast.makeText(getActivity(), "Not loaded yet", Toast.LENGTH_LONG).show();
+            audioList = savedInstanceState.getParcelableArrayList(LIFECYCLE_AUDIOLIST_CALLBACKS_KEY);
+//                page_no = savedInstanceState.getInt(LIFECYCLE_PAGE_NO_KEY);
+//                sortingParameter = savedInstanceState.getString(LIFECYCLE_SORTING_PARAMETER_KEY);
+//                actionBar.setTitle(savedInstanceState.getString(LIFECYCLE_ACTIONBAR_TITLE));
+//                moviesAdapter.setMoviesData(movieList);
         }
 
 
@@ -158,6 +171,16 @@ public class AllSongsFragment extends Fragment {
         return audioList;
     }
 
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putParcelableArrayList(LIFECYCLE_AUDIOLIST_CALLBACKS_KEY, audioList);
+//        outState.putInt(LIFECYCLE_PAGE_NO_KEY, page_no);
+//        outState.putString(LIFECYCLE_SORTING_PARAMETER_KEY, sortingParameter);
+//        outState.putString(LIFECYCLE_ACTIONBAR_TITLE, actionBarTitle);
+        super.onSaveInstanceState(outState);
+    }
+
     public void onEventMainThread(AppMainServiceEvent event) {
         Log.d(TAG, "onEventMainThread() called with: " + "event = [" + event + "]");
         Intent i = event.getMainIntent();
@@ -165,12 +188,10 @@ public class AllSongsFragment extends Fragment {
 
         if (event.getEventType() == AppMainServiceEvent.ONDATALOADED) {
 //            if (i != null) {
-                audioList = storage.loadAllAudio();
-                adapter.setAudioListData(audioList);
-                progressBar.setVisibility(View.INVISIBLE);
-                recyclerView.setVisibility(View.VISIBLE);
-
-
+            audioList = storage.loadAllAudio();
+            adapter.setAudioListData(audioList);
+            progressBar.setVisibility(View.INVISIBLE);
+            recyclerView.setVisibility(View.VISIBLE);
 
 
         }
