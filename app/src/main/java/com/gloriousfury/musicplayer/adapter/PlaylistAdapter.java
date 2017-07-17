@@ -21,6 +21,7 @@ import android.widget.Toast;
 import com.gloriousfury.musicplayer.R;
 import com.gloriousfury.musicplayer.model.Playlist;
 import com.gloriousfury.musicplayer.service.MediaPlayerService;
+import com.gloriousfury.musicplayer.ui.activity.PlaylistActivity;
 import com.gloriousfury.musicplayer.ui.activity.SingleSongActivity;
 import com.gloriousfury.musicplayer.utils.StorageUtil;
 import com.gloriousfury.musicplayer.utils.Timer;
@@ -34,6 +35,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHo
     private ArrayList<Playlist> playlist;
     boolean serviceBound = false;
     private MediaPlayerService player;
+    String PLAYLIST_ITEM = "playlist_item";
 
 
 
@@ -68,12 +70,12 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHo
         public void onClick(View v) {
             int adapterposition = getAdapterPosition();
 
-//            Playlist singleSong = playlist.get(adapterposition);
-//            playPlaylist(adapterposition);
-//            Intent openSingleSongActivity = new Intent(context, SingleSongActivity.class);
-//            openSingleSongActivity.putExtra(SONG, singleSong);
-//
-//            context.startActivity(openSingleSongActivity);
+            Playlist playlistItem = playlist.get(adapterposition);
+
+            Intent openSinglePlaylistActivity = new Intent(context, PlaylistActivity.class);
+            openSinglePlaylistActivity.putExtra(PLAYLIST_ITEM, playlistItem);
+
+            context.startActivity(openSinglePlaylistActivity);
 
         }
     }

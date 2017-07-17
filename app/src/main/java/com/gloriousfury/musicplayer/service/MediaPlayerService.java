@@ -293,9 +293,15 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             case AudioManager.AUDIOFOCUS_GAIN:
                 // resume playback
                 if (mediaPlayer == null) initMediaPlayer();
-                else if (!mediaPlayer.isPlaying() & isPlayBackSupposedToContinue()) {
+                else if (!mediaPlayer.isPlaying()) {
+
+                    AudioManager amanager = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
+                    int maxVolume = amanager.getStreamMaxVolume(AudioManager.STREAM_ALARM);
+                    amanager.setStreamVolume(AudioManager.STREAM_ALARM, maxVolume, 0);
+
+                    mediaPlayer.setAudioStreamType(AudioManager.STREAM_ALARM);
                     mediaPlayer.start();
-                    mediaPlayer.setVolume(1.0f, 1.0f);
+//                    mediaPlayer.setVolume(1.0f, 1.0f);
                 }
 
 
@@ -318,6 +324,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 // at an attenuated level
                 if (mediaPlayer.isPlaying()) mediaPlayer.setVolume(0.1f, 0.1f);
                 break;
+
         }
     }
 

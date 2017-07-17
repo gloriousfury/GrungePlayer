@@ -1,9 +1,12 @@
 package com.gloriousfury.musicplayer.ui.activity;
 
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ServiceConnection;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
@@ -19,14 +22,18 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.gloriousfury.musicplayer.R;
+import com.gloriousfury.musicplayer.adapter.AlbumSongsAdapter;
 import com.gloriousfury.musicplayer.adapter.SongNormalAdapter;
 import com.gloriousfury.musicplayer.model.Albums;
 import com.gloriousfury.musicplayer.model.Artist;
 import com.gloriousfury.musicplayer.model.Audio;
+import com.gloriousfury.musicplayer.model.Playlist;
 import com.gloriousfury.musicplayer.service.MediaPlayerService;
 import com.gloriousfury.musicplayer.utils.StorageUtil;
 import com.squareup.picasso.Picasso;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
@@ -37,12 +44,12 @@ import de.greenrobot.event.EventBus;
 public class PlaylistActivity extends AppCompatActivity implements View.OnClickListener {
 
 
-    @BindView(R.id.artist)
-    TextView artist;
+    @BindView(R.id.playlist_title)
+    TextView playlistTitle;
 
 
-    @BindView(R.id.no_of_albums)
-    TextView noOfAlbums;
+    @BindView(R.id.no_of_songs)
+    TextView noOfSongs;
 
 
 //    @BindView(R.id.toolbar)
@@ -62,10 +69,10 @@ public class PlaylistActivity extends AppCompatActivity implements View.OnClickL
     @BindView(R.id.recyclerView)
     RecyclerView recyclerView;
 
-    String ARTIST_ITEM = "artist_item";
+    String PLAYLIST_ITEM = "playlist_item";
 
     ArrayList<Albums> albumAudioList = new ArrayList<>();
-    SongNormalAdapter adapter;
+    AlbumSongsAdapter adapter;
     MediaPlayerService mediaPlayerService;
     MediaPlayer currentMediaPlayer;
     StorageUtil storage;
@@ -93,28 +100,27 @@ public class PlaylistActivity extends AppCompatActivity implements View.OnClickL
         mediaPlayerService = new MediaPlayerService(this);
         btnGoBack.setOnClickListener(this);
 
-        Bundle getArtistData = getIntent().getExtras();
+        Bundle getPlaylistData = getIntent().getExtras();
 
-        if (getArtistData != null) {
-            Artist singleArtist = getArtistData.getParcelable(ARTIST_ITEM);
-            String artist_name = singleArtist.getArtistName();
-            String album_art_uri = singleArtist.getAlbumArtUri();
-            long artist_id = singleArtist.getArtistId();
+        if (getPlaylistData != null) {
+            Playlist singlePlaylist = getPlaylistData.getParcelable(PLAYLIST_ITEM);
+            String playlist_name = singlePlaylist.getPlaylistTitle();
+//            String album_art_uri = singlePlaylist.getAlbumArtUri();
+            long playlist_id = singlePlaylist.getPlaylistId();
 
-            if (album_art_uri != null) {
-                Uri albumArtUri = Uri.parse(album_art_uri);
-                Picasso.with(this).load(albumArtUri).into(songBackground);
-                Toast.makeText(this, albumArtUri.toString(), Toast.LENGTH_LONG);
-            } else {
-                Toast.makeText(this, "Album Art is non existence", Toast.LENGTH_LONG);
+//            if (album_art_uri != null) {
+//                Uri albumArtUri = Uri.parse(album_art_uri);
+//                Picasso.with(this).load(albumArtUri).into(songBackground);
+//                Toast.makeText(this, albumArtUri.toString(), Toast.LENGTH_LONG);
+//            } else {
+//                Toast.makeText(this, "Album Art is non existence", Toast.LENGTH_LONG);
+//
+//            }
 
-            }
+            playlistTitle.setText(playlist_name);
 
-            artist.setText(artist_name);
 
-            requestAlbumDetails(artist_id, artist_name);
-
-            Toast.makeText(this, artist_id + " ", Toast.LENGTH_LONG).show();
+//            Toast.makeText(this, artist_id + " ", Toast.LENGTH_LONG).show();
             recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
             recyclerView.setHasFixedSize(true);
 
@@ -122,9 +128,8 @@ public class PlaylistActivity extends AppCompatActivity implements View.OnClickL
 
             recyclerView.setLayoutManager(layoutManager);
 
-
-            adapter = new SongNormalAdapter(this, albumAudioList);
-
+            audioList = getPlayists(playlist_id);
+            adapter = new AlbumSongsAdapter(this,audioList);
 
             recyclerView.setAdapter(adapter);
 
@@ -164,63 +169,50 @@ public class PlaylistActivity extends AppCompatActivity implements View.OnClickL
 //
 //    }
 
-    private ArrayList<Albums> requestAlbumDetails(long Id, String artistName) {
-
-        final String _id = MediaStore.Audio.Albums._ID;
-        final String album_name = MediaStore.Audio.Albums.ALBUM;
-        final String albumart = MediaStore.Audio.Albums.ALBUM_ART;
-        final String tracks = MediaStore.Audio.Albums.NUMBER_OF_SONGS;
-        final String artist_name = MediaStore.Audio.Albums.ARTIST;
-
-        final String[] projection = {_id, albumart, artist_name, album_name, tracks};
-//
-        String where = MediaStore.Audio.Albums.ARTIST + "=?";
-
-        String whereVal[] = {artistName};
-
-        String orderBy = MediaStore.Audio.Albums.ALBUM;
 
 
-        Uri uri1 = MediaStore.Audio.Artists.Albums.getContentUri("external", Id);
-        Cursor cursor = getContentResolver().query(uri1, projection, where,
-                whereVal, MediaStore.Audio.Albums.ARTIST + " ASC");
-//
+
+
+
+    public ArrayList<Audio> getPlayists(long playlistId) {
+        audioList = new ArrayList<>();
+        // query external audio
+        ContentResolver contentResolver = getContentResolver();
+
+        Uri uri =MediaStore.Audio.Playlists.Members.getContentUri("external", playlistId);
+        String selection = MediaStore.Audio.Media.IS_MUSIC + "!= 0";
+        String sortOrder = MediaStore.Audio.Media.TITLE + " ASC";
+        Cursor cursor = contentResolver.query(uri, null, selection, null, sortOrder);
+
         if (cursor != null && cursor.getCount() > 0) {
-
+            audioList = new ArrayList<>();
             while (cursor.moveToNext()) {
-                String album = cursor.getString(cursor.getColumnIndex(album_name));
+                String data = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA));
+                String title = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE));
+                String album = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM));
+                String artist = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST));
                 Long albumId = cursor.getLong(cursor
-                        .getColumnIndexOrThrow(_id));
-//                String album_artist = cursor.getString(cursor.getColumnIndex(artist_name));
-//               int album_art = cursor.getInt(cursor.getColumnIndex(artist));
-                int noOf_Tracks = cursor.getInt(cursor.getColumnIndex(tracks));
+                        .getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID));
+
+                int duration = cursor.getInt(cursor
+                        .getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
 
                 Uri sArtworkUri = Uri
                         .parse("content://media/external/audio/albumart");
                 Uri albumArtUri = ContentUris.withAppendedId(sArtworkUri, albumId);
 
-                String album_art_string = albumArtUri.toString();
 
 
-                albumAudioList.add(new Albums(album, "", noOf_Tracks, albumId, album_art_string));
 
-
-//                Toast.makeText(this, String.valueOf(albumAudioList.size()) + " ", Toast.LENGTH_SHORT);
-//
-//                    }
-
+                // Save to audioList
+                audioList.add(new Audio(data, title, album, artist, duration, albumId, albumArtUri.toString()
+                ));
             }
         }
 
-//        adapter.setAlbumListData(albumAudioList);
-
-        noOfAlbums.setText(String.valueOf(albumAudioList.size()) + " Albums");
         cursor.close();
-
-
-        return albumAudioList;
+        return audioList;
     }
-
 
     @Override
     protected void onDestroy() {

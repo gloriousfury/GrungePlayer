@@ -1,10 +1,13 @@
 package com.gloriousfury.musicplayer.model;
 
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Playlist implements Serializable {
+public class Playlist implements Parcelable {
 
 
     private long playlistId;
@@ -66,4 +69,37 @@ public class Playlist implements Serializable {
     public void setplayListMembers(ArrayList<Audio> playListMembers) {
         this.playListMembers = playListMembers;
     }
+
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeLong(this.playlistId);
+        dest.writeString(this.playlistTitle);
+        dest.writeInt(this.noOfSongs);
+        dest.writeTypedList(this.playListMembers);
+    }
+
+    protected Playlist(Parcel in) {
+        this.playlistId = in.readLong();
+        this.playlistTitle = in.readString();
+        this.noOfSongs = in.readInt();
+        this.playListMembers = in.createTypedArrayList(Audio.CREATOR);
+    }
+
+    public static final Creator<Playlist> CREATOR = new Creator<Playlist>() {
+        @Override
+        public Playlist createFromParcel(Parcel source) {
+            return new Playlist(source);
+        }
+
+        @Override
+        public Playlist[] newArray(int size) {
+            return new Playlist[size];
+        }
+    };
 }
