@@ -1,9 +1,12 @@
 package com.gloriousfury.musicplayer.ui.fragment;
 
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
@@ -23,6 +26,7 @@ import com.gloriousfury.musicplayer.R;
 import com.gloriousfury.musicplayer.adapter.AlbumAdapter;
 import com.gloriousfury.musicplayer.model.AlbumLists;
 import com.gloriousfury.musicplayer.model.Albums;
+import com.gloriousfury.musicplayer.model.Artist;
 import com.gloriousfury.musicplayer.model.Audio;
 import com.gloriousfury.musicplayer.service.AppMainServiceEvent;
 import com.gloriousfury.musicplayer.utils.StorageUtil;
@@ -58,19 +62,20 @@ public class AlbumsFragment extends Fragment {
         super.onCreate(savedInstanceState);
     }
 
-    RelativeLayout settingsLayout;
-    ImageView settingsImage;
+
     RecyclerView recyclerView;
-    ArrayList<Albums> albumsArray;
-    ArrayList<AlbumLists> albumListArray;
     ArrayList<Albums> albumList = new ArrayList<>();
     AlbumAdapter adapter;
-    boolean serviceBound = false;
     StorageUtil storage;
     ArrayList<Albums> retrievedAlbumList = new ArrayList<>();
     EventBus bus = EventBus.getDefault();
     String TAG = "AlbumFragments";
     ProgressBar progressBar;
+    ArrayList<Albums> albumAudioList = new ArrayList<>();
+    String ARTIST_NAME = "artist_name";
+    String ARTIST_ID = "artist_id";
+    String ARTIST_ITEM = "artist_item";
+    Bundle getData;
 
 
     @Override
@@ -82,8 +87,23 @@ public class AlbumsFragment extends Fragment {
         progressBar = (ProgressBar) v.findViewById(R.id.progressBar);
         recyclerView = (RecyclerView) v.findViewById(R.id.recyclerView);
         recyclerView.setHasFixedSize(true);
-        retrievedAlbumList = storage.loadAllAlbums();
 
+
+       getData = getActivity().getIntent().getExtras();
+
+        if(getData!=null){
+            retrievedAlbumList = new ArrayList<>();
+            Artist singleArtist = getData.getParcelable(ARTIST_ITEM);
+            String artist_name = singleArtist.getArtistName();
+//            String album_art_uri = singleArtist.getAlbumArtUri();
+            long artist_id = singleArtist.getArtistId();
+            progressBar.setVisibility(View.VISIBLE);
+            retrievedAlbumList = requestAlbumDetails(artist_id,artist_name);
+
+        }else {
+            retrievedAlbumList = storage.loadAllAlbums();
+
+        }
 //
 //        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext());
 //
@@ -181,6 +201,67 @@ public class AlbumsFragment extends Fragment {
         return customList;
     }
 
+
+    private ArrayList<Albums> requestAlbumDetails(long Id, String artistName) {
+
+        final String _id = MediaStore.Audio.Albums._ID;
+        final String album_name = MediaStore.Audio.Albums.ALBUM;
+        final String albumart = MediaStore.Audio.Albums.ALBUM_ART;
+        final String tracks = MediaStore.Audio.Albums.NUMBER_OF_SONGS;
+        final String artist_name = MediaStore.Audio.Albums.ARTIST;
+
+        final String[] projection = {_id, albumart, artist_name, album_name, tracks};
+//
+        String where = MediaStore.Audio.Albums.ARTIST + "=?";
+
+        String whereVal[] = {artistName};
+
+        String orderBy = MediaStore.Audio.Albums.ALBUM;
+
+
+        Uri uri1 = MediaStore.Audio.Artists.Albums.getContentUri("external", Id);
+        Cursor cursor = getActivity().getContentResolver().query(uri1, projection, where,
+                whereVal, MediaStore.Audio.Albums.ARTIST + " ASC");
+//
+        if (cursor != null && cursor.getCount() > 0) {
+
+            while (cursor.moveToNext()) {
+                String album = cursor.getString(cursor.getColumnIndex(album_name));
+                Long albumId = cursor.getLong(cursor
+                        .getColumnIndexOrThrow(_id));
+                String album_artist = cursor.getString(cursor.getColumnIndex(artist_name));
+//               int album_art = cursor.getInt(cursor.getColumnIndex(artist));
+                int noOf_Tracks = cursor.getInt(cursor.getColumnIndex(tracks));
+
+                Uri sArtworkUri = Uri
+                        .parse("content://media/external/audio/albumart");
+                Uri albumArtUri = ContentUris.withAppendedId(sArtworkUri, albumId);
+
+                String album_art_string = albumArtUri.toString();
+
+
+                albumAudioList.add(new Albums(album,album, noOf_Tracks, albumId, album_art_string));
+
+
+//                Toast.makeText(this, String.valueOf(albumAudioList.size()) + " ", Toast.LENGTH_SHORT);
+//
+//                    }
+
+            }
+        }
+
+//        adapter.setAlbumListData(albumAudioList);
+
+
+        //TODO Return from fragment to the activity
+//        noOfAlbums.setText(String.valueOf(albumAudioList.size()) + " Albums");
+        cursor.close();
+
+        progressBar.setVisibility(View.INVISIBLE);
+        return albumAudioList;
+    }
+
+
     @Override
     public void onDetach() {
         super.onDetach();
@@ -191,6 +272,17 @@ public class AlbumsFragment extends Fragment {
     public void onAttach(Context context) {
         super.onAttach(context);
         bus.register(this);
+
+
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if(getData!= null){
+            retrievedAlbumList= null;
+//            adapter.setAudioListData(retrievedAlbumList);
+        }
     }
 
     public void onEventMainThread(AppMainServiceEvent event) {

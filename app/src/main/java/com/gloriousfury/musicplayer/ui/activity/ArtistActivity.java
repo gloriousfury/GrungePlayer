@@ -12,6 +12,11 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.MediaStore;
+import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -30,6 +35,9 @@ import com.gloriousfury.musicplayer.model.Artist;
 import com.gloriousfury.musicplayer.model.Audio;
 import com.gloriousfury.musicplayer.service.AppMainServiceEvent;
 import com.gloriousfury.musicplayer.service.MediaPlayerService;
+import com.gloriousfury.musicplayer.ui.fragment.AlbumsFragment;
+import com.gloriousfury.musicplayer.ui.fragment.AllSongsFragment;
+import com.gloriousfury.musicplayer.ui.fragment.BasicFragment;
 import com.gloriousfury.musicplayer.utils.StorageUtil;
 import com.squareup.picasso.Picasso;
 
@@ -68,8 +76,8 @@ public class ArtistActivity extends AppCompatActivity implements View.OnClickLis
     ImageView btnGoBack;
 
 
-    @BindView(R.id.recyclerView)
-    RecyclerView recyclerView;
+//    @BindView(R.id.recyclerView)
+//    RecyclerView recyclerView;
 
     String ARTIST_ITEM = "artist_item";
 
@@ -85,12 +93,14 @@ public class ArtistActivity extends AppCompatActivity implements View.OnClickLis
     ArrayList<Audio> audioList;
     private int audioIndex = -1;
     Audio activeAudio;
-
+    ArtistDetailsSectionPagerAdapter detailsSectionPagerAdpter;
+    TabLayout tablayout;
+    ViewPager viewPager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_artist);
+        setContentView(R.layout.activity_artist_testing);
         ButterKnife.bind(this);
 
 //        setSupportActionBar(toolbar);
@@ -101,6 +111,18 @@ public class ArtistActivity extends AppCompatActivity implements View.OnClickLis
         storage = new StorageUtil(this);
         mediaPlayerService = new MediaPlayerService(this);
         btnGoBack.setOnClickListener(this);
+
+        tablayout = (TabLayout) findViewById(R.id.artist_details_tab);
+        viewPager = (ViewPager) findViewById(R.id.artist_details_container);
+
+
+        detailsSectionPagerAdpter = new ArtistDetailsSectionPagerAdapter(getSupportFragmentManager());
+
+        viewPager.setAdapter(detailsSectionPagerAdpter);
+
+        tablayout.setupWithViewPager(viewPager);
+
+
 
         Bundle getArtistData = getIntent().getExtras();
 
@@ -121,21 +143,21 @@ public class ArtistActivity extends AppCompatActivity implements View.OnClickLis
 
             artist.setText(artist_name);
 
-            requestAlbumDetails(artist_id, artist_name);
-
-            Toast.makeText(this, artist_id + " ", Toast.LENGTH_LONG).show();
-            recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
-            recyclerView.setHasFixedSize(true);
-
-            RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
-
-            recyclerView.setLayoutManager(layoutManager);
-
-
-            adapter = new SongNormalAdapter(this, albumAudioList);
-
-
-            recyclerView.setAdapter(adapter);
+//            requestAlbumDetails(artist_id, artist_name);
+//
+//            Toast.makeText(this, artist_id + " ", Toast.LENGTH_LONG).show();
+//            recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
+//            recyclerView.setHasFixedSize(true);
+//
+//            RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
+//
+//            recyclerView.setLayoutManager(layoutManager);
+//
+//
+//            adapter = new SongNormalAdapter(this, albumAudioList);
+//
+//
+//            recyclerView.setAdapter(adapter);
 
 
         }
@@ -200,7 +222,7 @@ public class ArtistActivity extends AppCompatActivity implements View.OnClickLis
                 String album = cursor.getString(cursor.getColumnIndex(album_name));
                 Long albumId = cursor.getLong(cursor
                         .getColumnIndexOrThrow(_id));
-//                String album_artist = cursor.getString(cursor.getColumnIndex(artist_name));
+                String album_artist = cursor.getString(cursor.getColumnIndex(artist_name));
 //               int album_art = cursor.getInt(cursor.getColumnIndex(artist));
                 int noOf_Tracks = cursor.getInt(cursor.getColumnIndex(tracks));
 
@@ -211,7 +233,7 @@ public class ArtistActivity extends AppCompatActivity implements View.OnClickLis
                 String album_art_string = albumArtUri.toString();
 
 
-                albumAudioList.add(new Albums(album, "", noOf_Tracks, albumId, album_art_string));
+                albumAudioList.add(new Albums(album,album, noOf_Tracks, albumId, album_art_string));
 
 
 //                Toast.makeText(this, String.valueOf(albumAudioList.size()) + " ", Toast.LENGTH_SHORT);
@@ -272,6 +294,47 @@ public class ArtistActivity extends AppCompatActivity implements View.OnClickLis
 //    }
 
 
+    private class ArtistDetailsSectionPagerAdapter extends FragmentPagerAdapter {
+
+        private ArtistDetailsSectionPagerAdapter(FragmentManager fm) {
+            super(fm);
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            if (position == 0) {
+                return AlbumsFragment.newInstance();
+            } else if (position == 1) {
+                return BasicFragment.newInstance();
+            } else if (position == 2) {
+                return AllSongsFragment.newInstance();
+            } else {
+                return BasicFragment.newInstance();
+            }
+        }
+
+        @Override
+        public int getCount() {
+            // Show 3 total pages.
+            return 3;
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            switch (position) {
+                case 0:
+                    return "Albums";
+                case 1:
+                    return "Bio";
+                case 2:
+                    return "Songs";
+
+            }
+            return null;
+        }
+    }
+
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -287,7 +350,7 @@ public class ArtistActivity extends AppCompatActivity implements View.OnClickLis
 
     public void changeAdapterData() {
 
-        recyclerView.setVisibility(View.INVISIBLE);
+//        recyclerView.setVisibility(View.INVISIBLE);
 
 
     }

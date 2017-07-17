@@ -246,6 +246,7 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.ViewHolder> 
 
     public void setAudioListData(ArrayList<Albums> albumArraylist) {
         if (albumArraylist != null) {
+//            album_list.clear();
             this.album_list = albumArraylist;
             notifyDataSetChanged();
 

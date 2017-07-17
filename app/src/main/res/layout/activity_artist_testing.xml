@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <!--<android.support.v7.widget.Toolbar-->
+    <!--android:id="@+id/toolbar"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="?attr/actionBarSize"-->
+    <!--android:background="?attr/colorAccent"-->
+    <!--app:popupTheme="@style/AppTheme.PopupOverlay" />-->
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/two_hundred">
+
+
+        <ImageView
+            android:id="@+id/song_background"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/pink"
+            android:scaleType="centerCrop" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:alpha="0.5"
+            android:background="@color/black"
+
+            />
+
+
+        <ImageView
+            android:id="@+id/img_back_button"
+            android:layout_width="@dimen/twenty_five"
+            android:layout_height="@dimen/twenty_five"
+            android:layout_marginLeft="@dimen/twenty"
+            android:layout_marginTop="@dimen/ten"
+            android:scaleType="fitXY"
+            android:src="@drawable/ic_arrow_back_black_24dp" />
+
+        <TextView
+            android:id="@+id/artist"
+            android:layout_width="@dimen/three_hundred"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/no_of_albums"
+            android:layout_marginBottom="@dimen/five"
+            android:layout_marginLeft="@dimen/twenty"
+            android:maxLines="1"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
+
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            tools:text="Wizkid"
+
+            />
+
+
+        <!--<TextView-->
+        <!--android:id="@+id/song_year"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_below="@id/artist"-->
+        <!--android:layout_marginTop="@dimen/five"-->
+        <!--android:layout_toRightOf="@id/img_background_view"-->
+        <!--android:textColor="@color/light_grey"-->
+        <!--android:textSize="14sp"-->
+        <!--android:textStyle="bold"-->
+        <!--tools:text="2014" />-->
+
+
+        <TextView
+            android:id="@+id/no_of_albums"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="@dimen/twenty"
+            android:layout_marginLeft="@dimen/twenty"
+            android:textColor="@color/white"
+
+            android:textSize="14sp"
+            tools:text="14 Albums" />
+
+
+        <!--<ImageView-->
+        <!--android:id="@+id/img_play_pause"-->
+        <!--android:layout_width="@dimen/thirty_five"-->
+        <!--android:layout_height="@dimen/thirty_five"-->
+        <!--android:layout_alignParentBottom="true"-->
+        <!--android:layout_marginRight="@dimen/five"-->
+        <!--android:layout_toLeftOf="@+id/shuffle"-->
+        <!--android:layout_marginTop="@dimen/five"-->
+
+        <!--android:src="@drawable/ic_play_arrow_black_24dp"-->
+        <!--/>-->
+
+        <!--<ImageView-->
+        <!--android:id="@+id/shuffle"-->
+        <!--android:layout_width="@dimen/thirty"-->
+        <!--android:layout_height="@dimen/thirty"-->
+        <!--android:layout_alignParentBottom="true"-->
+        <!--android:layout_marginRight="@dimen/ten"-->
+
+        <!--android:layout_marginTop="@dimen/five"-->
+        <!--android:layout_alignParentRight="true"-->
+        <!--android:src="@drawable/ic_shuffle_black_24dp"-->
+        <!--/>-->
+
+
+    </RelativeLayout>
+    <android.support.design.widget.TabLayout
+        android:id="@+id/artist_details_tab"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+
+        android:layout_gravity="bottom"
+        android:background="@color/app_blue"
+        app:tabGravity="fill"
+        app:tabIndicatorColor="@color/light_grey"
+        app:tabIndicatorHeight="2dp"
+        app:tabMode="fixed"
+        app:tabSelectedTextColor="@color/light_grey"
+        app:tabTextAppearance="@android:style/TextAppearance.Widget.TabWidget"
+
+        app:tabTextColor="@color/white" />
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/artist_details_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+</LinearLayout>

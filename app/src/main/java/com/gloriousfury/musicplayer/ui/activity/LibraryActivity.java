@@ -151,12 +151,13 @@ public class LibraryActivity extends AppCompatActivity
         mFragmentTransaction = mFragmentManager.beginTransaction();
         mFragmentTransaction.replace(R.id.containerView, new ScrollFragmentContainer()).commit();
 
-        miniPlayerView.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                return gestureScanner.onTouchEvent(event);
-            }
-        });
+//        miniPlayerView.setOnTouchListener(new View.OnTouchListener() {
+//            @Override
+//            public boolean onTouch(View v, MotionEvent event) {
+//                return gestureScanner.onTouchEvent(event);
+//
+//            }
+//        });
 //
 //
 //        if (audioList != null && audioIndex != -1) {
@@ -582,7 +583,7 @@ public class LibraryActivity extends AppCompatActivity
         Log.d(TAG, recievedAudio.getAlbumArtUriString());
         seekBar.setProgress(0);
         seekBar.setMax(100);
-        seekBar.setOnTouchListener(new View.OnTouchListener(){
+        seekBar.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 return true;
@@ -803,6 +804,11 @@ public class LibraryActivity extends AppCompatActivity
     @Override
     public boolean onDown(MotionEvent motionEvent) {
         Log.i("MiniPlayer view", "The onDown override was called");
+
+
+
+
+//        if(motionEvent = MotionEvent.)
         if (expanded) {
             queueRecycler.animate()
                     .translationY(0)
@@ -815,12 +821,19 @@ public class LibraryActivity extends AppCompatActivity
 
                         }
                     });
-            expanded =false;
+            expanded = false;
 
 
         }
+        if(expanded){
+            return  false;
 
-        return false;
+        }else{
+            return  true;
+        }
+
+
+
     }
 
     @Override
@@ -849,19 +862,24 @@ public class LibraryActivity extends AppCompatActivity
 
         Log.i("MiniPlayer view", "The fling override was called");
 
-        if (!expanded) {
-            queueRecycler.setVisibility(View.VISIBLE);
-            queueRecycler.setAlpha(0.0f);
-
-// Start the animation
-            queueRecycler.animate()
-                    .translationY(queueRecycler.getHeight())
-                    .alpha(1.0f);
-            expanded = true;
-        }
-
-
-        return false;
+//        if (!expanded) {
+//            queueRecycler.setVisibility(View.VISIBLE);
+//            queueRecycler.setAlpha(0.0f);
+//
+//// Start the animation
+//            queueRecycler.animate()
+//                    .translationY(queueRecycler.getHeight())
+//                    .alpha(1.0f);
+//            expanded = true;
+//        }
+//
+//        if(!expanded){
+//            return false;
+//        }else {
+//
+//            return true;
+//        }
+        return true;
     }
 
     //Very important to the fling event

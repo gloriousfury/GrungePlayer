@@ -28,6 +28,7 @@ import android.widget.Toast;
 
 import com.gloriousfury.musicplayer.R;
 import com.gloriousfury.musicplayer.adapter.AllSongsAdapter;
+import com.gloriousfury.musicplayer.model.Artist;
 import com.gloriousfury.musicplayer.model.Audio;
 import com.gloriousfury.musicplayer.service.AppMainServiceEvent;
 import com.gloriousfury.musicplayer.ui.activity.MainActivity;
@@ -68,8 +69,8 @@ public class AllSongsFragment extends Fragment {
     ProgressBar progressBar;
     EventBus bus = EventBus.getDefault();
     private static final String LIFECYCLE_AUDIOLIST_CALLBACKS_KEY = "movieList";
-//    private static final String LIFECYCLE_PAGE_NO_KEY = "page_no";
-
+    //    private static final String LIFECYCLE_PAGE_NO_KEY = "page_no";
+    String ARTIST_ITEM = "artist_item";
     AllSongsAdapter adapter;
 
     @Override
@@ -86,7 +87,22 @@ public class AllSongsFragment extends Fragment {
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext());
 
         recyclerView.setLayoutManager(layoutManager);
-        audioList = storage.loadAllAudio();
+
+        Bundle getData = getActivity().getIntent().getExtras();
+
+        if (getData != null) {
+
+            Artist singleArtist = getData.getParcelable(ARTIST_ITEM);
+            String artist_name = singleArtist.getArtistName();
+//            String album_art_uri = singleArtist.getAlbumArtUri();
+            long artist_id = singleArtist.getArtistId();
+            progressBar.setVisibility(View.VISIBLE);
+            audioList = loadAudioWithArtistName(artist_name);
+
+        } else {
+            audioList = storage.loadAllAudio();
+        }
+
         adapter = new AllSongsAdapter(getActivity(), audioList);
 
 
@@ -168,6 +184,64 @@ public class AllSongsFragment extends Fragment {
         cursor.close();
 
 
+        return audioList;
+    }
+
+    private ArrayList<Audio> loadAudioWithArtistName(String artistName) {
+        Log.e(TAG, "I came her o");
+        ContentResolver contentResolver = getActivity().getContentResolver();
+        String where = MediaStore.Audio.Albums.ARTIST + "=?";
+
+        String whereVal[] = {artistName};
+        Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+        String selection = MediaStore.Audio.Media.IS_MUSIC + "!= 0";
+        String sortOrder = MediaStore.Audio.Media.TITLE + " ASC";
+        Cursor cursor = contentResolver.query(uri, null, where, whereVal, sortOrder);
+
+        if (cursor != null && cursor.getCount() > 0) {
+            audioList = new ArrayList<>();
+            while (cursor.moveToNext()) {
+                String data = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA));
+                String title = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE));
+                String album = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM));
+                String artist = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST));
+                Long albumId = cursor.getLong(cursor
+                        .getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID));
+
+                int duration = cursor.getInt(cursor
+                        .getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION));
+
+                Uri sArtworkUri = Uri
+                        .parse("content://media/external/audio/albumart");
+                Uri albumArtUri = ContentUris.withAppendedId(sArtworkUri, albumId);
+
+
+                Bitmap bitmap = null;
+                try {
+                    bitmap = MediaStore.Images.Media.getBitmap(
+                            getActivity().getContentResolver(), albumArtUri);
+                    bitmap = Bitmap.createScaledBitmap(bitmap, 30, 30, true);
+
+                } catch (FileNotFoundException exception) {
+                    exception.printStackTrace();
+                    bitmap = BitmapFactory.decodeResource(getResources(),
+                            R.mipmap.ic_launcher);
+                } catch (IOException e) {
+
+                    e.printStackTrace();
+                }
+
+
+                // Save to audioList
+                audioList.add(new Audio(data, title, album, artist, duration, albumId, albumArtUri.toString()
+                ));
+            }
+        }
+
+
+        cursor.close();
+
+        progressBar.setVisibility(View.INVISIBLE);
         return audioList;
     }
 
