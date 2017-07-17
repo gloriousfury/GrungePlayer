@@ -1,15 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:weightSum="9">
+   >
+
+
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:weightSum="100"
+    android:layout_above="@+id/queue_view"
+    >
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="4">
+        android:layout_weight="40">
 
 
         <ImageView
@@ -35,7 +44,7 @@
         android:id="@+id/relative_layout_anchor"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="3">
+        android:layout_weight="60">
 
 
         <SeekBar
@@ -107,9 +116,9 @@
             android:id="@+id/artist"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/shuffle"
+            android:layout_below="@+id/songProgressBar"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="@dimen/twenty"
+            android:layout_marginTop="@dimen/fourty"
             android:textAlignment="center"
             android:textColor="@color/black"
             android:textSize="20sp"
@@ -134,7 +143,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/song_title"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="@dimen/ten"
+            android:layout_marginTop="@dimen/five"
             android:orientation="horizontal"
             android:weightSum="90">
 
@@ -172,12 +181,28 @@
 
 
     </RelativeLayout>
-<RelativeLayout
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layout_weight="2">
 
+    </LinearLayout>
+
+
+<RelativeLayout
+    android:id="@+id/queue_view"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/thirty_five"
+    android:background="@color/colorPrimary"
+    android:layout_alignParentBottom="true"
+    >
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Queue"
+        android:textColor="@color/white"
+        android:textStyle="bold"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="@dimen/twenty"
+        />
 
 </RelativeLayout>
 
-</LinearLayout>
+</RelativeLayout>

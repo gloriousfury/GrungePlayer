@@ -107,7 +107,7 @@ public class SingleSongActivity extends AppCompatActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_single_song);
+        setContentView(R.layout.activity_single_song_test);
         ButterKnife.bind(this);
         mediaPlayerService = new MediaPlayerService(this);
         currentMediaPlayer = mediaPlayerService.getMediaPlayerInstance();
