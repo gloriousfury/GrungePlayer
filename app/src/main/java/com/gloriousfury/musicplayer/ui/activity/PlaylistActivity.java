@@ -12,9 +12,11 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.MediaStore;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -62,8 +64,11 @@ public class PlaylistActivity extends AppCompatActivity implements View.OnClickL
     @BindView(R.id.song_background)
     ImageView songBackground;
 
-    @BindView(R.id.img_back_button)
-    ImageView btnGoBack;
+//    @BindView(R.id.img_back_button)
+//    ImageView btnGoBack;
+
+    @BindView(R.id.collapsing_toolbar)
+    CollapsingToolbarLayout collapsingToolbarLayout;
 
 
     @BindView(R.id.recyclerView)
@@ -88,17 +93,17 @@ public class PlaylistActivity extends AppCompatActivity implements View.OnClickL
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_playlist);
+        setContentView(R.layout.activity_playlist_test);
         ButterKnife.bind(this);
 
-//        setSupportActionBar(toolbar);
-//        getSupportActionBar().setTitle("Grunge Player");
-//        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         storage = new StorageUtil(this);
         mediaPlayerService = new MediaPlayerService(this);
-        btnGoBack.setOnClickListener(this);
+//        btnGoBack.setOnClickListener(this);
 
         Bundle getPlaylistData = getIntent().getExtras();
 
@@ -118,7 +123,8 @@ public class PlaylistActivity extends AppCompatActivity implements View.OnClickL
 //            }
 
             playlistTitle.setText(playlist_name);
-
+            collapsingToolbarLayout.setTitle(playlist_name);
+            collapsingToolbarLayout.setExpandedTitleColor(getResources().getColor(android.R.color.transparent));
 
 //            Toast.makeText(this, artist_id + " ", Toast.LENGTH_LONG).show();
             recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
@@ -209,7 +215,7 @@ public class PlaylistActivity extends AppCompatActivity implements View.OnClickL
                 ));
             }
         }
-
+        noOfSongs.setText(String.valueOf(audioList.size() +" Songs"));
         cursor.close();
         return audioList;
     }

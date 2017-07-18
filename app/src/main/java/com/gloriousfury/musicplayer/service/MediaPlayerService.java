@@ -292,16 +292,35 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         switch (focusState) {
             case AudioManager.AUDIOFOCUS_GAIN:
                 // resume playback
-                if (mediaPlayer == null) initMediaPlayer();
+                if (mediaPlayer == null) {
+                    initMediaPlayer();
+                    Log.e(TAG,"I came to the init  player part");
+                }
                 else if (!mediaPlayer.isPlaying()) {
 
                     AudioManager amanager = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
                     int maxVolume = amanager.getStreamMaxVolume(AudioManager.STREAM_ALARM);
                     amanager.setStreamVolume(AudioManager.STREAM_ALARM, maxVolume, 0);
 
-                    mediaPlayer.setAudioStreamType(AudioManager.STREAM_ALARM);
+                    try {
+                        mediaPlayer.prepare();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
                     mediaPlayer.start();
+
+                    Log.e(TAG,"I came to the is not playing part");
 //                    mediaPlayer.setVolume(1.0f, 1.0f);
+                }else if(mediaPlayer.isPlaying()){
+
+                    AudioManager amanager = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
+                    int maxVolume = amanager.getStreamMaxVolume(AudioManager.STREAM_ALARM);
+                    amanager.setStreamVolume(AudioManager.STREAM_ALARM, maxVolume, 0);
+
+                    Log.e(TAG,"I came to the  is playing part");
+                    mediaPlayer.start();
+                    mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
                 }
 
 
@@ -581,24 +600,25 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         audioIndex = rand.nextInt(audioList.size() - 1);
 
         //this should work for when repeat and shuffle is on
-//        else  if (audioIndex == audioList.size() - 1) {
-//            //if last in playlist
-//            audioIndex = 0;
-//            activeAudio = audioList.get(audioIndex);
-//
-//        } else {
-        //get next in playlist
-        activeAudio = audioList.get(audioIndex);
-        //Update stored index
-        new StorageUtil(context).storeAudioIndex(audioIndex);
-        responseIntent.putExtra(AppMainServiceEvent.RESPONSE_DATA, activeAudio);
-        event.setMainIntent(responseIntent);
-        event.setEventType(AppMainServiceEvent.ONCOMPLETED_RESPONSE);
-        EventBus.getDefault().post(event);
-        stopMedia();
-        //reset mediaPlayer
-        mediaPlayer.reset();
-        initMediaPlayer();
+         if (audioIndex == audioList.size() - 1) {
+            //if last in playlist
+            audioIndex = 0;
+            activeAudio = audioList.get(audioIndex);
+
+        } else {
+            //get next in playlist
+            activeAudio = audioList.get(audioIndex);
+            //Update stored index
+            new StorageUtil(context).storeAudioIndex(audioIndex);
+            responseIntent.putExtra(AppMainServiceEvent.RESPONSE_DATA, activeAudio);
+            event.setMainIntent(responseIntent);
+            event.setEventType(AppMainServiceEvent.ONCOMPLETED_RESPONSE);
+            EventBus.getDefault().post(event);
+            stopMedia();
+            //reset mediaPlayer
+            mediaPlayer.reset();
+            initMediaPlayer();
+        }
 
     }
 

@@ -89,21 +89,32 @@ public class AlbumsFragment extends Fragment {
         recyclerView.setHasFixedSize(true);
 
 
-       getData = getActivity().getIntent().getExtras();
 
-        if(getData!=null){
-            retrievedAlbumList = new ArrayList<>();
-            Artist singleArtist = getData.getParcelable(ARTIST_ITEM);
-            String artist_name = singleArtist.getArtistName();
-//            String album_art_uri = singleArtist.getAlbumArtUri();
-            long artist_id = singleArtist.getArtistId();
-            progressBar.setVisibility(View.VISIBLE);
-            retrievedAlbumList = requestAlbumDetails(artist_id,artist_name);
+        String currentActivity= getActivity().getClass().getSimpleName();
+        Log.e(TAG,currentActivity);
 
-        }else {
+        if(currentActivity.contentEquals("LibraryActivity")){
+
             retrievedAlbumList = storage.loadAllAlbums();
 
+        }else  if(currentActivity.contentEquals("ArtistActivity")){
+            getData = getActivity().getIntent().getExtras();
+
+            if(getData!=null){
+                retrievedAlbumList = new ArrayList<>();
+                Artist singleArtist = getData.getParcelable(ARTIST_ITEM);
+                String artist_name = singleArtist.getArtistName();
+//            String album_art_uri = singleArtist.getAlbumArtUri();
+                long artist_id = singleArtist.getArtistId();
+                progressBar.setVisibility(View.VISIBLE);
+                retrievedAlbumList = requestAlbumDetails(artist_id,artist_name);
+
+            }
         }
+
+
+
+
 //
 //        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext());
 //

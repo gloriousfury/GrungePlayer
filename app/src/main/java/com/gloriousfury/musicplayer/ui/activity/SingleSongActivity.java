@@ -115,6 +115,7 @@ public class SingleSongActivity extends AppCompatActivity implements
         seekBar.setOnSeekBarChangeListener(this);
 
 
+
         // set Progress bar values
         seekBar.setProgress(0);
         seekBar.setMax(100);
@@ -123,7 +124,6 @@ public class SingleSongActivity extends AppCompatActivity implements
 
         // Updating progress bar
         updateProgressBar();
-        setController();
 
 //        if (currentMediaPlayer.isPlaying()) {
 //            playPauseView.setImageDrawable(ContextCompat
@@ -137,10 +137,12 @@ public class SingleSongActivity extends AppCompatActivity implements
 //        }
 
         Intent getSongData = getIntent();
+        Bundle getData = getSongData.getExtras();
 
-        if (getSongData != null) {
+        if (getData != null) {
 
             audio = getSongData.getParcelableExtra(SONG);
+            activeAudio = audio;
             String song_title = audio.getTitle();
             String song_artist = audio.getArtist();
             totalDuration = audio.getDuration();
@@ -161,6 +163,11 @@ public class SingleSongActivity extends AppCompatActivity implements
 
             storage = new StorageUtil(getApplicationContext());
 
+
+        }else{
+
+            activeAudio = mediaPlayerService.getActiveAudio();
+            updateMetaData(activeAudio);
 
         }
 
@@ -254,19 +261,20 @@ public class SingleSongActivity extends AppCompatActivity implements
         public void run() {
 
 
-//            long totalDuration = mediaPlayerService.getDur();
+
+            long totalDuration = activeAudio.getDuration();
             long currentDuration = mediaPlayerService.getCurrentDur();
 
 
-            if (!currentMediaPlayer.isPlaying()) {
-                songCurrentDuration.setText("0.00");
+//            if (!currentMediaPlayer.isPlaying()) {
+//                songCurrentDuration.setText("0.00");
 //                Toast.makeText(SingleSongActivity.this, "I came here o", Toast.LENGTH_LONG).show();
 
-            } else {
+//            } else {
                 // Displaying Total Duration time
                 songTotalDuration.setText(String.valueOf(Timer.milliSecondsToTimer(totalDuration)));
 //                Toast.makeText(SingleSongActivity.this, "I didnt come here o", Toast.LENGTH_LONG).show();
-            }
+//            }
             // Displaying time completed playing
             songCurrentDuration.setText(String.valueOf(Timer.milliSecondsToTimer(currentDuration)));
 
@@ -283,72 +291,42 @@ public class SingleSongActivity extends AppCompatActivity implements
     };
 
 
-    private void setController() {
-        //set the controller up
-
-        controller = new MusicController(this);
-
-        controller.setPrevNextListeners(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                playNext();
-            }
-        }, new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                playPrev();
-            }
-        });
-        controller.setMediaPlayer(this);
-        controller.setAnchorView(findViewById(R.id.relative_layout_anchor));
-        controller.setEnabled(true);
-
-
-    }
-
-
-    //play next
-    private void playNext() {
-        mediaPlayerService.playNext();
-        controller.show(0);
-    }
-
-    //play previous
-    private void playPrev() {
-        mediaPlayerService.playPrev();
-        controller.show(0);
-    }
-
     private void updateMetaData(Audio activeAudio) {
-//        seekBar.setProgress(0);
-//        seekBar.setMax(100);
+        seekBar.setProgress(0);
+        seekBar.setMax(100);
 //
-//        updateProgressBar();
-//        long totalDuration = mediaPlayer.getDuration();
-//        long currentDuration = mediaPlayer.getCurrentPosition();
-//        activeAudio = audioList.get(audioIndex);
+
+        long totalDuration = activeAudio.getDuration();
+        long currentDuration = mediaPlayerService.getCurrentDur();
+        this.activeAudio = activeAudio;
 //        // Displaying Total Duration time
-//        songTotalDuration.setText("" + Timer.milliSecondsToTimer(totalDuration));
+        songTotalDuration.setText("" + Timer.milliSecondsToTimer(totalDuration));
 //        // Displaying time completed playing
-//        songCurrentDuration.setText("" + Timer.milliSecondsToTimer(currentDuration));
+        songCurrentDuration.setText("" + Timer.milliSecondsToTimer(currentDuration));
 
-
+        updateProgressBar();
 //        mediaPlayer.setOnCompletionListener(this);
 
         String song_title = activeAudio.getTitle();
         String song_artist = activeAudio.getArtist();
 
-        Uri albumArtUri = Uri.parse(activeAudio.getAlbumArtUriString());
 
-
-        songTitle.setText(song_title);
-        artist.setText(song_artist);
+        Uri albumArtUri = null;
+        if(activeAudio.getAlbumArtUriString()!=null){
+            albumArtUri = Uri.parse(activeAudio.getAlbumArtUriString());
+            Log.e(TAG,activeAudio.getAlbumArtUriString());
+        }
         if (albumArtUri != null) {
 
             Picasso.with(this).load(albumArtUri).into(songBackground);
 
 
+        }else {
+            Picasso.with(this).load(R.drawable.ic_default_music_image).into(songBackground);
+
         }
+        songTitle.setText(song_title);
+        artist.setText(song_artist);
 
     }
 
@@ -375,7 +353,7 @@ public class SingleSongActivity extends AppCompatActivity implements
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
         mHandler.removeCallbacks(mUpdateTimeTask);
-        int totalDuration = mediaPlayerService.getDur();
+        int totalDuration = activeAudio.getDuration();
         int currentPosition = Timer.progressToTimer(seekBar.getProgress(), totalDuration);
 
         // forward or backward to certain seconds

@@ -62,13 +62,13 @@ public class AllSongsFragment extends Fragment {
     RelativeLayout settingsLayout;
     ImageView settingsImage;
     RecyclerView recyclerView;
-    ArrayList<Audio> audioList = new ArrayList<>();
+    ArrayList<Audio> audioList = null;
     boolean serviceBound = false;
     StorageUtil storage;
     String TAG = "LibraryActivity";
     ProgressBar progressBar;
     EventBus bus = EventBus.getDefault();
-    private static final String LIFECYCLE_AUDIOLIST_CALLBACKS_KEY = "movieList";
+    private static final String LIFECYCLE_AUDIOLIST_CALLBACKS_KEY = "audioList";
     //    private static final String LIFECYCLE_PAGE_NO_KEY = "page_no";
     String ARTIST_ITEM = "artist_item";
     AllSongsAdapter adapter;
@@ -88,41 +88,55 @@ public class AllSongsFragment extends Fragment {
 
         recyclerView.setLayoutManager(layoutManager);
 
-        Bundle getData = getActivity().getIntent().getExtras();
-
-        if (getData != null) {
-
-            Artist singleArtist = getData.getParcelable(ARTIST_ITEM);
-            String artist_name = singleArtist.getArtistName();
-//            String album_art_uri = singleArtist.getAlbumArtUri();
-            long artist_id = singleArtist.getArtistId();
-            progressBar.setVisibility(View.VISIBLE);
-            audioList = loadAudioWithArtistName(artist_name);
-
-        } else {
-            audioList = storage.loadAllAudio();
-        }
-
         adapter = new AllSongsAdapter(getActivity(), audioList);
+        String currentActivity = getActivity().getClass().getSimpleName();
+        Log.e(TAG, currentActivity);
+
+        if (currentActivity.contentEquals("LibraryActivity")) {
 
 
-        if (savedInstanceState == null || !savedInstanceState.containsKey(LIFECYCLE_AUDIOLIST_CALLBACKS_KEY)) {
-            if (audioList != null) {
-                adapter.setAudioListData(audioList);
+            if (savedInstanceState == null || !savedInstanceState.containsKey(LIFECYCLE_AUDIOLIST_CALLBACKS_KEY)) {
+                if (audioList != null) {
+                    adapter.setAudioListData(audioList);
+
+                } else if (audioList == null) {
+                    audioList = storage.loadAllAudio();
+                    adapter.setAudioListData(audioList);
+                } else {
+                    adapter.setAudioListData(audioList);
+                    progressBar.setVisibility(View.VISIBLE);
+                    recyclerView.setVisibility(View.INVISIBLE);
+                    Toast.makeText(getActivity(), "Not loaded yet", Toast.LENGTH_LONG).show();
+
+                }
 
             } else {
-                adapter.setAudioListData(audioList);
-                progressBar.setVisibility(View.VISIBLE);
-                recyclerView.setVisibility(View.INVISIBLE);
-                Toast.makeText(getActivity(), "Not loaded yet", Toast.LENGTH_LONG).show();
-            }
+                Log.e(TAG, "I came to the savedInstance, point");
+                audioList = savedInstanceState.getParcelableArrayList(LIFECYCLE_AUDIOLIST_CALLBACKS_KEY);
+                if (audioList == null) {
+                    Log.e(TAG, "Baba, it is null o");
+                } else {
 
-        } else {
-            audioList = savedInstanceState.getParcelableArrayList(LIFECYCLE_AUDIOLIST_CALLBACKS_KEY);
+                    Log.e(TAG, String.valueOf(audioList.size()) + ": This is the size ");
+                    adapter.setAudioListData(audioList);
+                }
 //                page_no = savedInstanceState.getInt(LIFECYCLE_PAGE_NO_KEY);
 //                sortingParameter = savedInstanceState.getString(LIFECYCLE_SORTING_PARAMETER_KEY);
 //                actionBar.setTitle(savedInstanceState.getString(LIFECYCLE_ACTIONBAR_TITLE));
 //                moviesAdapter.setMoviesData(movieList);
+            }
+        } else if (currentActivity.contentEquals("ArtistActivity")) {
+            Bundle getData = getActivity().getIntent().getExtras();
+            if (getData != null) {
+
+                Artist singleArtist = getData.getParcelable(ARTIST_ITEM);
+                String artist_name = singleArtist.getArtistName();
+//            String album_art_uri = singleArtist.getAlbumArtUri();
+                long artist_id = singleArtist.getArtistId();
+                progressBar.setVisibility(View.VISIBLE);
+                audioList = loadAudioWithArtistName(artist_name);
+
+            }
         }
 
 

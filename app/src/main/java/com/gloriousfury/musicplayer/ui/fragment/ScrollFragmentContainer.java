@@ -25,6 +25,7 @@ public class ScrollFragmentContainer extends Fragment {
     TabLayout tabLayout;
     ViewPager mViewPager;
 
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);}
@@ -63,8 +64,10 @@ public class ScrollFragmentContainer extends Fragment {
 
         @Override
         public Fragment getItem(int position) {
-            if(position == 0){
+            if(position == 0) {
                 return AllSongsFragment.newInstance();
+
+
             } else if(position == 1) {
                 return AlbumsFragment.newInstance();
             }

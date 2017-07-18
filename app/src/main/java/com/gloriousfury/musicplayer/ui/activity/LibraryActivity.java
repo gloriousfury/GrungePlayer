@@ -87,6 +87,7 @@ public class LibraryActivity extends AppCompatActivity
     boolean serviceBound = true;
     EventBus bus = EventBus.getDefault();
     String TAG = "LibraryActivity";
+    String FRAGMENT_TAG = "ScrollFragmentContainer";
     int totalDuration;
     long currentDuration;
     private Handler mHandler = new Handler();
@@ -147,9 +148,9 @@ public class LibraryActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        mFragmentManager = getSupportFragmentManager();
-        mFragmentTransaction = mFragmentManager.beginTransaction();
-        mFragmentTransaction.replace(R.id.containerView, new ScrollFragmentContainer()).commit();
+//        mFragmentManager = getSupportFragmentManager();
+//        mFragmentTransaction = mFragmentManager.beginTransaction();
+//        mFragmentTransaction.replace(R.id.containerView, new ScrollFragmentContainer(),FRAGMENT_TAG).commit();
 
 //        miniPlayerView.setOnTouchListener(new View.OnTouchListener() {
 //            @Override
@@ -168,6 +169,16 @@ public class LibraryActivity extends AppCompatActivity
 //            changeMiniPlayer(activeAudio, nextAudio);
 //
 //        }
+
+
+        if (savedInstanceState == null) {
+            mFragmentManager = getSupportFragmentManager();
+            mFragmentTransaction = mFragmentManager.beginTransaction();
+            mFragmentTransaction.replace(R.id.containerView, new ScrollFragmentContainer(),FRAGMENT_TAG).commit();
+        } else {
+            ScrollFragmentContainer test = (ScrollFragmentContainer) getSupportFragmentManager().findFragmentByTag(FRAGMENT_TAG);
+
+        }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -783,11 +794,11 @@ public class LibraryActivity extends AppCompatActivity
 
             case R.id.song_background:
 
-//                Intent openSingleSongActivity = new Intent(this, SingleSongActivity.class);
+                Intent openSingleSongActivity = new Intent(this, SingleSongActivity.class);
 //                openSingleSongActivity.putExtra(SONG, activeAudio);
-//
-//                startActivity(openSingleSongActivity);
-//                Toast.makeText(this, "I just don't want to respond",Toast.LENGTH_LONG).show();
+
+                startActivity(openSingleSongActivity);
+                Toast.makeText(this, "I just don't want to respond",Toast.LENGTH_LONG).show();
                 break;
 
         }
