@@ -71,6 +71,9 @@ public class AlbumActivity extends AppCompatActivity {
     @BindView(R.id.img_play_pause)
     ImageView playPauseView;
 
+    @BindView(R.id.shuffle)
+    ImageView shuffleView;
+
     @BindView(R.id.song_background)
     ImageView songBackground;
 
@@ -105,6 +108,7 @@ public class AlbumActivity extends AppCompatActivity {
 //        setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("Grunge Player");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
 
 
         storage = new StorageUtil(this);
@@ -155,7 +159,8 @@ public class AlbumActivity extends AppCompatActivity {
     @OnClick(R.id.img_play_pause)
     public void playPause() {
         currentMediaPlayer = mediaPlayerService.getMediaPlayerInstance();
-
+        playPauseView.setImageDrawable(ContextCompat
+                .getDrawable(AlbumActivity.this, R.drawable.ic_pause_black_24dp));
         if (!serviceBound) {
             //Store Serializable audioList to SharedPreferences
             StorageUtil storage = new StorageUtil(this);
@@ -169,14 +174,26 @@ public class AlbumActivity extends AppCompatActivity {
         //check this for when a song is already playing and you launch an album
         else {
             //Store the new audioIndex to SharedPreferences
-            StorageUtil storage = new StorageUtil(this);
-            storage.storeAudio(albumAudioList);
-            storage.storeAudioIndex(0);
+            if (currentMediaPlayer.isPlaying()) {
 
-            //Service is active
-            //Send a broadcast to the service -> PLAY_NEW_AUDIO
-            Intent broadcastIntent = new Intent(Broadcast_PLAY_NEW_AUDIO);
-            sendBroadcast(broadcastIntent);
+                playPauseView.setImageDrawable(ContextCompat
+                        .getDrawable(AlbumActivity.this, R.drawable.ic_pause_black_24dp));
+
+                mediaPlayerService.pauseMedia(currentMediaPlayer);
+
+            }else {
+
+                StorageUtil storage = new StorageUtil(this);
+                storage.storeAudio(albumAudioList);
+                storage.storeAudioIndex(0);
+
+                //Service is active
+                //Send a broadcast to the service -> PLAY_NEW_AUDIO
+                Intent broadcastIntent = new Intent(Broadcast_PLAY_NEW_AUDIO);
+                sendBroadcast(broadcastIntent);
+
+            }
+
         }
 
     }
