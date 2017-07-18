@@ -338,6 +338,7 @@ public class AlbumActivity extends AppCompatActivity {
             audioList = storage.loadAudio();
             audioIndex = storage.loadAudioIndex();
             activeAudio = audioList.get(audioIndex);
+            adapter.setAdapterData(audioIndex);
 
 //
 //            if(audioList)

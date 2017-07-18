@@ -203,6 +203,15 @@
         android:layout_marginLeft="@dimen/twenty"
         />
 
+    <ImageView
+        android:id="@+id/img_more_queue"
+        android:layout_width="@dimen/fifty"
+        android:layout_height="@dimen/fifty"
+        android:src="@drawable/ic_more_horiz_white_24dp"
+        android:layout_alignParentRight="true"
+
+        />
+
 </RelativeLayout>
 
 </RelativeLayout>
