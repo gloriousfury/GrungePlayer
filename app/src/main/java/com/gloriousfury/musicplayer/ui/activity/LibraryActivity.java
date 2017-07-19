@@ -630,6 +630,15 @@ public class LibraryActivity extends AppCompatActivity
         } else if (!isPlaying() && serviceBound) {
             playPauseView.setImageResource(R.drawable.ic_play_arrow_black_24dp);
 
+        }else if(!isPlaying() && !serviceBound){
+            mediaPlayerService = new MediaPlayerService(this);
+            currentMediaPlayer = mediaPlayerService.getMediaPlayerInstance();
+
+            currentDuration = new StorageUtil(this).loadPlayBackPosition();
+            totalDuration =  activeAudio.getDuration();
+            // Updating progress bar
+            int progress = (int) (Timer.getProgressPercentage(currentDuration, totalDuration));
+            seekBar.setProgress(progress);
         }
 
         songTitle.setText(activeAudio.getTitle());
@@ -765,6 +774,7 @@ public class LibraryActivity extends AppCompatActivity
                     } else {
                         playPauseView.setImageDrawable(ContextCompat
                                 .getDrawable(LibraryActivity.this, R.drawable.ic_pause_black_24dp));
+
                         mediaPlayerService.resumeMedia(currentMediaPlayer);
 
                     }

@@ -26,6 +26,8 @@ public class StorageUtil {
     private final String ALL_PLAYLIST_STORAGE = " com.gloriousfury.MusicPlayer.ALL_PLAYLIST_STORAGE";
     private final String ALL_PLAYLIST_STORAGE_KEY= "allPlaylistArrayList";
 
+    private final String PLAYBACK_POSITION = "allPlaylistArrayList";
+
     public final String SHUFFLE_KEY = "shuffle";
     private SharedPreferences preferences;
     private Context context;
@@ -131,6 +133,20 @@ public class StorageUtil {
         preferences = context.getSharedPreferences(STORAGE, Context.MODE_PRIVATE);
         return preferences.getInt("audioIndex", -1);//return -1 if no data found
     }
+
+    public void storePlayBackPostition(long playBackPos) {
+        preferences = context.getSharedPreferences(STORAGE, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putLong(PLAYBACK_POSITION, playBackPos);
+        editor.apply();
+    }
+
+    public long loadPlayBackPosition() {
+        preferences = context.getSharedPreferences(STORAGE, Context.MODE_PRIVATE);
+        return preferences.getLong(PLAYBACK_POSITION, 0);//return -1 if no data found
+    }
+
+
 
     public void clearCachedAudioPlaylist() {
         preferences = context.getSharedPreferences(STORAGE, Context.MODE_PRIVATE);

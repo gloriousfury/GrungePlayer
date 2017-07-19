@@ -188,6 +188,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             mediaPlayer.pause();
             playbackStatus = PlaybackStatus.PAUSED;
             resumePosition = mediaPlayer.getCurrentPosition();
+            new StorageUtil(getApplicationContext()).storePlayBackPostition(resumePosition);
 
         }
     }
@@ -870,6 +871,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     public void onDestroy() {
         super.onDestroy();
         if (mediaPlayer != null) {
+            resumePosition = mediaPlayer.getCurrentPosition();
+            new StorageUtil(getApplicationContext()).storePlayBackPostition(resumePosition);
             stopMedia();
             mediaPlayer.release();
         }
@@ -884,6 +887,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         //unregister BroadcastReceivers
         unregisterReceiver(becomingNoisyReceiver);
         unregisterReceiver(playNewAudio);
+
+
 
         //clear cached playlist
         new StorageUtil(getApplicationContext()).clearCachedAudioPlaylist();
