@@ -51,8 +51,10 @@ import com.gloriousfury.musicplayer.model.Audio;
 import com.gloriousfury.musicplayer.service.AppMainServiceEvent;
 import com.gloriousfury.musicplayer.service.MediaPlayerService;
 import com.gloriousfury.musicplayer.ui.fragment.ScrollFragmentContainer;
+import com.gloriousfury.musicplayer.utils.PlaybackStatus;
 import com.gloriousfury.musicplayer.utils.StorageUtil;
 import com.gloriousfury.musicplayer.utils.Timer;
+import com.gloriousfury.musicplayer.utils.Utils;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
@@ -92,6 +94,8 @@ public class LibraryActivity extends AppCompatActivity
     long currentDuration;
     private Handler mHandler = new Handler();
     String SONG = "single_audio";
+    String CLICK_CHECKER = "click_checker";
+
     Intent responseIntent = new Intent();
     AppMainServiceEvent event = new AppMainServiceEvent();
 
@@ -141,12 +145,17 @@ public class LibraryActivity extends AppCompatActivity
         currentMediaPlayer = mediaPlayerService.getMediaPlayerInstance();
         songBackground.setOnClickListener(this);
         playPauseView.setOnClickListener(this);
+        Utils.serviceBound =false;
 //        nextSong.setOnClickListener(this);
 //        previousSong.setOnClickListener(this);
 
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+//        if(mediaPlayerService.getActiveAudio()!=null){
+//            mediaPlayerService.buildNotification(PlaybackStatus.PAUSED);
+//        }
 
 //        mFragmentManager = getSupportFragmentManager();
 //        mFragmentTransaction = mFragmentManager.beginTransaction();
@@ -685,6 +694,8 @@ public class LibraryActivity extends AppCompatActivity
     protected void onDestroy() {
         super.onDestroy();
         bus.unregister(this);
+        mHandler.removeCallbacks(mUpdateTimeTask);
+        mediaPlayerService.onDestroy();
 
     }
 
@@ -805,10 +816,10 @@ public class LibraryActivity extends AppCompatActivity
             case R.id.song_background:
 
                 Intent openSingleSongActivity = new Intent(this, SingleSongActivity.class);
-//                openSingleSongActivity.putExtra(SONG, activeAudio);
-
+                openSingleSongActivity.putExtra(SONG, activeAudio);
+                openSingleSongActivity.putExtra(CLICK_CHECKER,"miniplayer");
                 startActivity(openSingleSongActivity);
-                Toast.makeText(this, "I just don't want to respond",Toast.LENGTH_LONG).show();
+//                Toast.makeText(this, "I just don't want to respond",Toast.LENGTH_LONG).show();
                 break;
 
         }

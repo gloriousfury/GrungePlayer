@@ -33,6 +33,7 @@ import com.gloriousfury.musicplayer.ui.activity.SingleSongActivity;
 import com.gloriousfury.musicplayer.utils.StorageUtil;
 import com.gloriousfury.musicplayer.ui.activity.MainActivity;
 import com.gloriousfury.musicplayer.utils.PlaybackStatus;
+import com.gloriousfury.musicplayer.utils.Utils;
 import com.squareup.picasso.Picasso;
 
 import java.io.FileNotFoundException;
@@ -185,10 +186,11 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
     public void pauseMedia(MediaPlayer mediaPlayer) {
         if (mediaPlayer.isPlaying()) {
+            resumePosition = mediaPlayer.getCurrentPosition();
+            new StorageUtil(getContext()).storePlayBackPostition(resumePosition);
             mediaPlayer.pause();
             playbackStatus = PlaybackStatus.PAUSED;
-            resumePosition = mediaPlayer.getCurrentPosition();
-            new StorageUtil(getApplicationContext()).storePlayBackPostition(resumePosition);
+
 
         }
     }
@@ -295,9 +297,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 // resume playback
                 if (mediaPlayer == null) {
                     initMediaPlayer();
-                    Log.e(TAG,"I came to the init  player part");
-                }
-                else if (!mediaPlayer.isPlaying()) {
+                    Log.e(TAG, "I came to the init  player part");
+                } else if (!mediaPlayer.isPlaying()) {
 
                     AudioManager amanager = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
                     int maxVolume = amanager.getStreamMaxVolume(AudioManager.STREAM_ALARM);
@@ -311,15 +312,15 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                     mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
                     mediaPlayer.start();
 
-                    Log.e(TAG,"I came to the is not playing part");
+                    Log.e(TAG, "I came to the is not playing part");
 //                    mediaPlayer.setVolume(1.0f, 1.0f);
-                }else if(mediaPlayer.isPlaying()){
+                } else if (mediaPlayer.isPlaying()) {
 
                     AudioManager amanager = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
                     int maxVolume = amanager.getStreamMaxVolume(AudioManager.STREAM_ALARM);
                     amanager.setStreamVolume(AudioManager.STREAM_ALARM, maxVolume, 0);
 
-                    Log.e(TAG,"I came to the  is playing part");
+                    Log.e(TAG, "I came to the  is playing part");
                     mediaPlayer.start();
                     mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
                 }
@@ -360,8 +361,12 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     }
 
     private boolean removeAudioFocus() {
-        return AudioManager.AUDIOFOCUS_REQUEST_GRANTED ==
-                audioManager.abandonAudioFocus(this);
+        if (audioManager != null) {
+            return AudioManager.AUDIOFOCUS_REQUEST_GRANTED ==
+                    audioManager.abandonAudioFocus(this);
+        } else {
+            return false;
+        }
     }
 
 
@@ -533,6 +538,11 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     private void updateMetaData() {
 //        Bitmap albumArt = BitmapFactory.decodeResource(getContext().getResources(),
 //                R.mipmap.ic_launcher); //replace with medias albumArt
+        StorageUtil storageUtil = new StorageUtil(context);
+        audioList = storageUtil.loadAudio();
+        audioIndex = storageUtil.loadAudioIndex();
+        activeAudio = audioList.get(audioIndex);
+
         Uri albumArtUri = null;
 
         if (activeAudio.getAlbumArtUriString() != null) {
@@ -601,7 +611,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         audioIndex = rand.nextInt(audioList.size() - 1);
 
         //this should work for when repeat and shuffle is on
-         if (audioIndex == audioList.size() - 1) {
+        if (audioIndex == audioList.size() - 1) {
             //if last in playlist
             audioIndex = 0;
             activeAudio = audioList.get(audioIndex);
@@ -722,7 +732,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     }
 
     private void removeNotification() {
-        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationManager notificationManager = (NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.cancel(NOTIFICATION_ID);
     }
 
@@ -871,27 +881,37 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     public void onDestroy() {
         super.onDestroy();
         if (mediaPlayer != null) {
-            resumePosition = mediaPlayer.getCurrentPosition();
-            new StorageUtil(getApplicationContext()).storePlayBackPostition(resumePosition);
-            stopMedia();
-            mediaPlayer.release();
+            if (Utils.isServiceBound()) {
+                resumePosition = mediaPlayer.getCurrentPosition();
+                new StorageUtil(getContext()).storePlayBackPostition(resumePosition);
+
+                removeNotification();
+
+
+                Toast.makeText(getContext(), String.valueOf(resumePosition), Toast.LENGTH_LONG).show();
+                stopMedia();
+                mediaPlayer.release();
+            }
+
+
         }
         removeAudioFocus();
         //Disable the PhoneStateListener
         if (phoneStateListener != null) {
             telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_NONE);
         }
-
-        removeNotification();
-
         //unregister BroadcastReceivers
-        unregisterReceiver(becomingNoisyReceiver);
-        unregisterReceiver(playNewAudio);
+        try {
+            unregisterReceiver(becomingNoisyReceiver);
+            unregisterReceiver(playNewAudio);
+        }catch (Exception e){
 
+
+        }
 
 
         //clear cached playlist
-        new StorageUtil(getApplicationContext()).clearCachedAudioPlaylist();
+//        new StorageUtil(getContext()).clearCachedAudioPlaylist();
     }
 
 

@@ -28,6 +28,7 @@ import com.gloriousfury.musicplayer.utils.StorageUtil;
 import com.gloriousfury.musicplayer.service.MediaPlayerService;
 import com.gloriousfury.musicplayer.ui.activity.SingleSongActivity;
 import com.gloriousfury.musicplayer.utils.Timer;
+import com.gloriousfury.musicplayer.utils.Utils;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -45,6 +46,7 @@ public class AllSongsAdapter extends RecyclerView.Adapter<AllSongsAdapter.ViewHo
     String SONG_TITLE = "song_title";
     String SONG_ARTIST = "song_artist";
     String ALBUM_ART_URI = "song_album_art_uri";
+    String CLICK_CHECKER = "click_checker";
 
 
     public AllSongsAdapter(Context context, ArrayList<Audio> song_list) {
@@ -79,10 +81,11 @@ public class AllSongsAdapter extends RecyclerView.Adapter<AllSongsAdapter.ViewHo
         @Override
         public void onClick(View v) {
             int adapterposition = getAdapterPosition();
-
+            String checker = null;
             Audio singleSong = song_list.get(adapterposition);
             playAudio(adapterposition);
             Intent openSingleSongActivity = new Intent(context, SingleSongActivity.class);
+            openSingleSongActivity.putExtra(CLICK_CHECKER,checker);
             openSingleSongActivity.putExtra(SONG, singleSong);
 
             context.startActivity(openSingleSongActivity);
@@ -151,6 +154,8 @@ public class AllSongsAdapter extends RecyclerView.Adapter<AllSongsAdapter.ViewHo
             MediaPlayerService.LocalBinder binder = (MediaPlayerService.LocalBinder) service;
             player = binder.getService();
             serviceBound = true;
+           Utils.serviceBound =true;
+
 
             Toast.makeText(context, "Service Bound", Toast.LENGTH_SHORT).show();
         }

@@ -31,6 +31,7 @@ import com.gloriousfury.musicplayer.utils.StorageUtil;
 import com.gloriousfury.musicplayer.service.MediaPlayerService;
 import com.gloriousfury.musicplayer.utils.PlaybackStatus;
 import com.gloriousfury.musicplayer.utils.Timer;
+import com.gloriousfury.musicplayer.utils.Utils;
 import com.squareup.picasso.Picasso;
 
 import java.lang.reflect.Array;
@@ -103,6 +104,8 @@ public class SingleSongActivity extends AppCompatActivity implements
     boolean serviceBound = true;
     EventBus bus = EventBus.getDefault();
     boolean shuffleState;
+    String CLICK_CHECKER = "click_checker";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,15 +118,13 @@ public class SingleSongActivity extends AppCompatActivity implements
         seekBar.setOnSeekBarChangeListener(this);
 
 
-
         // set Progress bar values
         seekBar.setProgress(0);
         seekBar.setMax(100);
 
-        Toast.makeText(this, String.valueOf(mediaPlayerService.getCurrentDur()), Toast.LENGTH_LONG).show();
 
         // Updating progress bar
-        updateProgressBar();
+
 
 //        if (currentMediaPlayer.isPlaying()) {
 //            playPauseView.setImageDrawable(ContextCompat
@@ -141,14 +142,26 @@ public class SingleSongActivity extends AppCompatActivity implements
 
         if (getData != null) {
 
+            String checker = getData.getString(CLICK_CHECKER);
+            if (checker != null) {
+                serviceBound = false;
+                Utils.serviceBound =false;
+                playPauseView.setImageDrawable(ContextCompat
+                        .getDrawable(SingleSongActivity.this, R.drawable.ic_play_circle_filled_white_black_24dp));
+            } else {
+                Utils.serviceBound =true;
+                serviceBound = true;
+            }
+
             audio = getSongData.getParcelableExtra(SONG);
             activeAudio = audio;
             String song_title = audio.getTitle();
             String song_artist = audio.getArtist();
             totalDuration = audio.getDuration();
             Uri albumArtUri = null;
-            if(audio.getAlbumArtUriString()!=null){
-             albumArtUri = Uri.parse(audio.getAlbumArtUriString());}
+            if (audio.getAlbumArtUriString() != null) {
+                albumArtUri = Uri.parse(audio.getAlbumArtUriString());
+            }
             songTitle.setText(song_title);
             artist.setText(song_artist);
             if (albumArtUri != null) {
@@ -156,15 +169,23 @@ public class SingleSongActivity extends AppCompatActivity implements
                 Picasso.with(this).load(albumArtUri).into(songBackground);
 
 
-            }else {
+            } else {
                 Picasso.with(this).load(R.drawable.ic_default_music_image).into(songBackground);
 
             }
 
             storage = new StorageUtil(getApplicationContext());
+            if (!currentMediaPlayer.isPlaying() && !serviceBound) {
+                long currentPosition = storage.loadPlayBackPosition();
+                setSeekBarProgress(currentPosition);
+                songCurrentDuration.setText(String.valueOf(Timer.milliSecondsToTimer(currentPosition)));
+                Toast.makeText(this, String.valueOf(currentPosition), Toast.LENGTH_LONG).show();
+            } else {
 
+                updateProgressBar();
+            }
 
-        }else{
+        } else {
 
             activeAudio = mediaPlayerService.getActiveAudio();
             updateMetaData(activeAudio);
@@ -220,7 +241,21 @@ public class SingleSongActivity extends AppCompatActivity implements
 
             mediaPlayerService.pauseMedia(currentMediaPlayer);
 
-        } else if (!currentMediaPlayer.isPlaying()) {
+        } else if (!currentMediaPlayer.isPlaying() && !Utils.isServiceBound()) {
+
+            audioIndex = storage.loadAudioIndex();
+            Utils utilInstance = new Utils(this);
+            utilInstance.playAudio(audioIndex);
+            playPauseView.setImageDrawable(ContextCompat
+                    .getDrawable(SingleSongActivity.this, R.drawable.ic_pause_circle_filled_black_24dp));
+//            mediaPlayerService.resumeMedia(currentMediaPlayer);
+            // set Progress bar values
+            seekBar.setProgress(0);
+            seekBar.setMax(100);
+
+            // Updating progress bar
+            updateProgressBar();
+        } else {
 
             playPauseView.setImageDrawable(ContextCompat
                     .getDrawable(SingleSongActivity.this, R.drawable.ic_pause_circle_filled_black_24dp));
@@ -261,27 +296,8 @@ public class SingleSongActivity extends AppCompatActivity implements
         public void run() {
 
 
-
-            long totalDuration = activeAudio.getDuration();
             long currentDuration = mediaPlayerService.getCurrentDur();
-
-
-//            if (!currentMediaPlayer.isPlaying()) {
-//                songCurrentDuration.setText("0.00");
-//                Toast.makeText(SingleSongActivity.this, "I came here o", Toast.LENGTH_LONG).show();
-
-//            } else {
-                // Displaying Total Duration time
-                songTotalDuration.setText(String.valueOf(Timer.milliSecondsToTimer(totalDuration)));
-//                Toast.makeText(SingleSongActivity.this, "I didnt come here o", Toast.LENGTH_LONG).show();
-//            }
-            // Displaying time completed playing
-            songCurrentDuration.setText(String.valueOf(Timer.milliSecondsToTimer(currentDuration)));
-
-            // Updating progress bar
-            int progress = (int) (Timer.getProgressPercentage(currentDuration, totalDuration));
-            //Log.d("Progress", ""+progress);
-            seekBar.setProgress(progress);
+            setSeekBarProgress(currentDuration);
 
             // Running this thread after 100 milliseconds
             mHandler.postDelayed(this, 100);
@@ -290,6 +306,28 @@ public class SingleSongActivity extends AppCompatActivity implements
         }
     };
 
+    public void setSeekBarProgress(long currentDuration) {
+        long totalDuration = activeAudio.getDuration();
+
+
+//            if (!currentMediaPlayer.isPlaying()) {
+//                songCurrentDuration.setText("0.00");
+//                Toast.makeText(SingleSongActivity.this, "I came here o", Toast.LENGTH_LONG).show();
+
+//            } else {
+        // Displaying Total Duration time
+        songTotalDuration.setText(String.valueOf(Timer.milliSecondsToTimer(totalDuration)));
+//                Toast.makeText(SingleSongActivity.this, "I didnt come here o", Toast.LENGTH_LONG).show();
+//            }
+        // Displaying time completed playing
+        songCurrentDuration.setText(String.valueOf(Timer.milliSecondsToTimer(currentDuration)));
+
+        // Updating progress bar
+        int progress = (int) (Timer.getProgressPercentage(currentDuration, totalDuration));
+        //Log.d("Progress", ""+progress);
+        seekBar.setProgress(progress);
+
+    }
 
     private void updateMetaData(Audio activeAudio) {
         seekBar.setProgress(0);
@@ -312,16 +350,16 @@ public class SingleSongActivity extends AppCompatActivity implements
 
 
         Uri albumArtUri = null;
-        if(activeAudio.getAlbumArtUriString()!=null){
+        if (activeAudio.getAlbumArtUriString() != null) {
             albumArtUri = Uri.parse(activeAudio.getAlbumArtUriString());
-            Log.e(TAG,activeAudio.getAlbumArtUriString());
+            Log.e(TAG, activeAudio.getAlbumArtUriString());
         }
         if (albumArtUri != null) {
 
             Picasso.with(this).load(albumArtUri).into(songBackground);
 
 
-        }else {
+        } else {
             Picasso.with(this).load(R.drawable.ic_default_music_image).into(songBackground);
 
         }
@@ -447,7 +485,7 @@ public class SingleSongActivity extends AppCompatActivity implements
 //        if (bus == null) {
         currentMediaPlayer = mediaPlayerService.getMediaPlayerInstance();
 
-        songCurrentDuration.setText("0.00");
+
         bus.register(this);
 //        }
     }
@@ -455,6 +493,7 @@ public class SingleSongActivity extends AppCompatActivity implements
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        mHandler.removeCallbacks(mUpdateTimeTask);
         bus.unregister(this);
     }
 
