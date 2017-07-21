@@ -33,6 +33,7 @@ import com.gloriousfury.musicplayer.ui.activity.SingleSongActivity;
 import com.gloriousfury.musicplayer.utils.StorageUtil;
 import com.gloriousfury.musicplayer.ui.activity.MainActivity;
 import com.gloriousfury.musicplayer.utils.PlaybackStatus;
+import com.gloriousfury.musicplayer.utils.Timer;
 import com.gloriousfury.musicplayer.utils.Utils;
 import com.squareup.picasso.Picasso;
 
@@ -69,12 +70,14 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     public static final String ACTION_PREVIOUS = "com.gloriousfury.musicplayer.ACTION_PREVIOUS";
     public static final String ACTION_NEXT = "com.gloriousfury.musicplayer.ACTION_NEXT";
     public static final String ACTION_STOP = "com.gloriousfury.musicplayer.ACTION_STOP";
+    String DONOT_PLAY_CHECKER = "do_not_play_checker";
     int duration;
     Intent responseIntent = new Intent();
     AppMainServiceEvent event = new AppMainServiceEvent();
     Context context;
     PlaybackStatus playbackStatus;
     boolean shuffleState = false;
+    String checker;
 
     //MediaSession
     private MediaSessionManager mediaSessionManager;
@@ -455,6 +458,18 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         }
     };
 
+
+    public void playOldAudio( ){
+        StorageUtil storageUtil = new StorageUtil(context);
+        audioList = storageUtil.loadAudio();
+        audioIndex = storageUtil.loadAudioIndex();
+        activeAudio = audioList.get(audioIndex);
+        resumePosition = (int)storageUtil.loadPlayBackPosition();
+        resumeMedia(mediaPlayer);
+
+    }
+
+
     public void register_playNewAudio() {
         //Register playNewMedia receiver
         IntentFilter filter = new IntentFilter(MainActivity.Broadcast_PLAY_NEW_AUDIO);
@@ -538,9 +553,12 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     private void updateMetaData() {
 //        Bitmap albumArt = BitmapFactory.decodeResource(getContext().getResources(),
 //                R.mipmap.ic_launcher); //replace with medias albumArt
-        StorageUtil storageUtil = new StorageUtil(context);
+
+        StorageUtil storageUtil = new StorageUtil(getContext());
+
         audioList = storageUtil.loadAudio();
         audioIndex = storageUtil.loadAudioIndex();
+
         activeAudio = audioList.get(audioIndex);
 
         Uri albumArtUri = null;
@@ -843,6 +861,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             StorageUtil storage = new StorageUtil(getContext());
             audioList = storage.loadAudio();
             audioIndex = storage.loadAudioIndex();
+             checker = intent.getExtras().getString(DONOT_PLAY_CHECKER);
 
             if (audioIndex != -1 && audioIndex < audioList.size()) {
                 //index is in a valid range
@@ -860,7 +879,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             stopSelf();
         }
 
-        if (mediaSessionManager == null) {
+        if (mediaSessionManager == null ){
             try {
                 initMediaSession();
                 initMediaPlayer();
@@ -870,6 +889,13 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             }
             buildNotification(PlaybackStatus.PLAYING);
         }
+
+//        }else if(mediaSessionManager == null && !Utils.isServiceBound()){
+//            initMediaPlayer();
+//            playOldAudio();
+//
+//        }
+//
 
         //Handle Intent action from MediaSession.TransportControls
         handleIncomingActions(intent);

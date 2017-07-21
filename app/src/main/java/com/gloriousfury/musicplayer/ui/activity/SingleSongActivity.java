@@ -1,12 +1,16 @@
 package com.gloriousfury.musicplayer.ui.activity;
 
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.media.MediaMetadataCompat;
@@ -41,6 +45,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.greenrobot.event.EventBus;
+
+import static com.gloriousfury.musicplayer.ui.activity.MainActivity.Broadcast_PLAY_NEW_AUDIO;
 
 public class SingleSongActivity extends AppCompatActivity implements
         SeekBar.OnSeekBarChangeListener, MediaController.MediaPlayerControl {
@@ -105,7 +111,7 @@ public class SingleSongActivity extends AppCompatActivity implements
     EventBus bus = EventBus.getDefault();
     boolean shuffleState;
     String CLICK_CHECKER = "click_checker";
-
+    String checker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -141,15 +147,14 @@ public class SingleSongActivity extends AppCompatActivity implements
         Bundle getData = getSongData.getExtras();
 
         if (getData != null) {
-
-            String checker = getData.getString(CLICK_CHECKER);
+            checker = getData.getString(CLICK_CHECKER);
             if (checker != null) {
                 serviceBound = false;
-                Utils.serviceBound =false;
+                Utils.serviceBound = false;
                 playPauseView.setImageDrawable(ContextCompat
                         .getDrawable(SingleSongActivity.this, R.drawable.ic_play_circle_filled_white_black_24dp));
             } else {
-                Utils.serviceBound =true;
+                Utils.serviceBound = true;
                 serviceBound = true;
             }
 
@@ -241,20 +246,22 @@ public class SingleSongActivity extends AppCompatActivity implements
 
             mediaPlayerService.pauseMedia(currentMediaPlayer);
 
-        } else if (!currentMediaPlayer.isPlaying() && !Utils.isServiceBound()) {
+        } else if (!currentMediaPlayer.isPlaying() &&checker!=null) {
 
             audioIndex = storage.loadAudioIndex();
-            Utils utilInstance = new Utils(this);
-            utilInstance.playAudio(audioIndex);
-            playPauseView.setImageDrawable(ContextCompat
-                    .getDrawable(SingleSongActivity.this, R.drawable.ic_pause_circle_filled_black_24dp));
-//            mediaPlayerService.resumeMedia(currentMediaPlayer);
-            // set Progress bar values
-            seekBar.setProgress(0);
-            seekBar.setMax(100);
 
-            // Updating progress bar
-            updateProgressBar();
+            playOldAudio(audioIndex);
+//            Utils utilInstance = new Utils(this);
+//            utilInstance.playAudio(audioIndex);
+//            playPauseView.setImageDrawable(ContextCompat
+//                    .getDrawable(SingleSongActivity.this, R.drawable.ic_pause_circle_filled_black_24dp));
+
+//            // set Progress bar values
+//            seekBar.setProgress(0);
+//            seekBar.setMax(100);
+//
+//            // Updating progress bar
+//            updateProgressBar();
         } else {
 
             playPauseView.setImageDrawable(ContextCompat
@@ -496,6 +503,18 @@ public class SingleSongActivity extends AppCompatActivity implements
         mHandler.removeCallbacks(mUpdateTimeTask);
         bus.unregister(this);
     }
+
+
+    private void playOldAudio(int audioIndex) {
+        //Check is service is active
+        if (checker != null) {
+            //Store Serializable audioList to SharedPreferences
+            mediaPlayerService.playOldAudio();
+
+
+        }
+    }
+
 
     public void onEventMainThread(AppMainServiceEvent event) {
         Log.d(TAG, "onEventMainThread() called with: " + "event = [" + event + "]");

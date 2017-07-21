@@ -3,9 +3,12 @@ package com.gloriousfury.musicplayer.ui.activity;
 import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.ContentUris;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -14,6 +17,7 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -23,6 +27,7 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.support.design.widget.NavigationView;
@@ -39,12 +44,15 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.gloriousfury.musicplayer.R;
+import com.gloriousfury.musicplayer.adapter.AllSongsAdapter;
+import com.gloriousfury.musicplayer.adapter.TruncatedAllSongsAdapter;
 import com.gloriousfury.musicplayer.model.AlbumLists;
 import com.gloriousfury.musicplayer.model.Albums;
 import com.gloriousfury.musicplayer.model.Audio;
@@ -61,6 +69,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -70,7 +79,7 @@ import de.greenrobot.event.EventBus;
 
 public class LibraryActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
-        LoaderManager.LoaderCallbacks<ArrayList<Audio>>, View.OnClickListener, GestureDetector.OnGestureListener {
+        LoaderManager.LoaderCallbacks<ArrayList<Audio>>, View.OnClickListener{
 
     FragmentManager mFragmentManager;
     FragmentTransaction mFragmentTransaction;
@@ -95,6 +104,7 @@ public class LibraryActivity extends AppCompatActivity
     private Handler mHandler = new Handler();
     String SONG = "single_audio";
     String CLICK_CHECKER = "click_checker";
+    String DONOT_PLAY_CHECKER = "do_not_play_checker";
 
     Intent responseIntent = new Intent();
     AppMainServiceEvent event = new AppMainServiceEvent();
@@ -137,7 +147,6 @@ public class LibraryActivity extends AppCompatActivity
         ButterKnife.bind(this);
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
-        gestureScanner = new GestureDetector(this);
         storage = new StorageUtil(this);
         audioList = storage.loadAudio();
         audioIndex = storage.loadAudioIndex();
@@ -626,7 +635,21 @@ public class LibraryActivity extends AppCompatActivity
     }
 
     public void changeMiniPlayer(Audio activeAudio) {
-        if (isPlaying()) {
+
+
+
+       queueRecycler.setHasFixedSize(true);
+
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
+//
+        queueRecycler.setLayoutManager(layoutManager);
+        List<Audio> truncatedArray = audioList.subList(0,4);
+//        ArrayList<String> al2 = new ArrayList<String>(al.subList(1, 4));
+       TruncatedAllSongsAdapter adapter = new TruncatedAllSongsAdapter(this, truncatedArray);
+        queueRecycler.setAdapter(adapter);
+
+
+        if (Utils.isServiceBound()) {
             totalDuration = activeAudio.getDuration();
             playPauseView.setImageResource(R.drawable.ic_pause_black_24dp);
 //            int currentPosition = Timer.progressToTimer(seekBar.getProgress(), totalDuration);
@@ -636,10 +659,10 @@ public class LibraryActivity extends AppCompatActivity
 
             updateProgressBar();
 
-        } else if (!isPlaying() && serviceBound) {
+        } else if (!currentMediaPlayer.isPlaying() && serviceBound) {
             playPauseView.setImageResource(R.drawable.ic_play_arrow_black_24dp);
 
-        }else if(!isPlaying() && !serviceBound){
+        }else if(!currentMediaPlayer.isPlaying() && !serviceBound){
             mediaPlayerService = new MediaPlayerService(this);
             currentMediaPlayer = mediaPlayerService.getMediaPlayerInstance();
 
@@ -716,7 +739,9 @@ public class LibraryActivity extends AppCompatActivity
                 audioList = storage.loadAudio();
                 audioIndex = storage.loadAudioIndex();
                 activeAudio = audioList.get(audioIndex);
-
+                currentMediaPlayer = mediaPlayerService.getMediaPlayerInstance();
+                mediaPlayerService = new MediaPlayerService(this);
+                changeMiniPlayer(activeAudio);
                 changeMiniPlayer(activeAudio);
             }
 
@@ -740,7 +765,6 @@ public class LibraryActivity extends AppCompatActivity
                 audioIndex = storage.loadAudioIndex();
                 activeAudio = audioList.get(audioIndex);
 
-                changeMiniPlayer(activeAudio);
             }
 
         }
@@ -814,7 +838,7 @@ public class LibraryActivity extends AppCompatActivity
                 break;
 
             case R.id.song_background:
-
+                startAudioService();
                 Intent openSingleSongActivity = new Intent(this, SingleSongActivity.class);
                 openSingleSongActivity.putExtra(SONG, activeAudio);
                 openSingleSongActivity.putExtra(CLICK_CHECKER,"miniplayer");
@@ -826,99 +850,51 @@ public class LibraryActivity extends AppCompatActivity
     }
 
 
-    public boolean isPlaying() {
+    private void startAudioService() {
+        audioIndex = storage.loadAudioIndex();
+        //Check is service is active
+        if (!serviceBound) {
+            //Store Serializable audioList to SharedPreferences
+            StorageUtil storage = new StorageUtil(this);
+            storage.storeAudio(audioList);
+            storage.storeAudioIndex(audioIndex);
 
+//            Toast.makeText(context, String.valueOf(storage.loadAudioIndex()), Toast.LENGTH_LONG).show();
+            Intent playerIntent = new Intent(this, MediaPlayerService.class);
+            playerIntent.putExtra(DONOT_PLAY_CHECKER, "donotplay");
+            startService(playerIntent);
+            bindService(playerIntent, serviceConnection, Context.BIND_AUTO_CREATE);
+
+        }
+
+    }
+    private ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            MediaPlayerService.LocalBinder binder = (MediaPlayerService.LocalBinder) service;
+            mediaPlayerService = binder.getService();
+            serviceBound = true;
+            Utils.serviceBound = true;
+
+
+            Toast.makeText(LibraryActivity.this, "Service Bound", Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            serviceBound = false;
+            Utils.serviceBound = false;
+        }
+    };
+
+
+
+    public boolean isPlaying() {
         if (mediaPlayerService != null && serviceBound)
             return mediaPlayerService.isPng();
         return false;
     }
 
-    @Override
-    public boolean onDown(MotionEvent motionEvent) {
-        Log.i("MiniPlayer view", "The onDown override was called");
 
-
-
-
-//        if(motionEvent = MotionEvent.)
-        if (expanded) {
-            queueRecycler.animate()
-                    .translationY(0)
-                    .alpha(0.0f)
-                    .setListener(new AnimatorListenerAdapter() {
-                        @Override
-                        public void onAnimationEnd(Animator animation) {
-                            super.onAnimationEnd(animation);
-                            queueRecycler.setVisibility(View.GONE);
-
-                        }
-                    });
-            expanded = false;
-
-
-        }
-        if(expanded){
-            return  false;
-
-        }else{
-            return  true;
-        }
-
-
-
-    }
-
-    @Override
-    public void onShowPress(MotionEvent motionEvent) {
-
-    }
-
-    @Override
-    public boolean onSingleTapUp(MotionEvent motionEvent) {
-        return false;
-    }
-
-    @Override
-    public boolean onScroll(MotionEvent motionEvent, MotionEvent motionEvent1, float v, float v1) {
-        return false;
-    }
-
-    @Override
-    public void onLongPress(MotionEvent motionEvent) {
-
-        Log.i("MiniPlayer view", "The long press override was called");
-    }
-
-    @Override
-    public boolean onFling(MotionEvent motionEvent, MotionEvent motionEvent1, float v, float v1) {
-
-        Log.i("MiniPlayer view", "The fling override was called");
-
-//        if (!expanded) {
-//            queueRecycler.setVisibility(View.VISIBLE);
-//            queueRecycler.setAlpha(0.0f);
-//
-//// Start the animation
-//            queueRecycler.animate()
-//                    .translationY(queueRecycler.getHeight())
-//                    .alpha(1.0f);
-//            expanded = true;
-//        }
-//
-//        if(!expanded){
-//            return false;
-//        }else {
-//
-//            return true;
-//        }
-        return true;
-    }
-
-    //Very important to the fling event
-    @Override
-    public boolean dispatchTouchEvent(MotionEvent ev) {
-        boolean handled = super.dispatchTouchEvent(ev);
-        handled = gestureScanner.onTouchEvent(ev);
-        return handled;
-    }
 }

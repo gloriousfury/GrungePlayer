@@ -8,9 +8,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.graphics.Color;
-import android.graphics.PorterDuff;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.IBinder;
 import android.support.v4.content.ContextCompat;
@@ -24,21 +21,21 @@ import android.widget.Toast;
 
 import com.gloriousfury.musicplayer.R;
 import com.gloriousfury.musicplayer.model.Audio;
-import com.gloriousfury.musicplayer.utils.StorageUtil;
 import com.gloriousfury.musicplayer.service.MediaPlayerService;
 import com.gloriousfury.musicplayer.ui.activity.SingleSongActivity;
+import com.gloriousfury.musicplayer.utils.StorageUtil;
 import com.gloriousfury.musicplayer.utils.Timer;
 import com.gloriousfury.musicplayer.utils.Utils;
 import com.squareup.picasso.Picasso;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import static com.gloriousfury.musicplayer.ui.activity.MainActivity.Broadcast_PLAY_NEW_AUDIO;
 
 
-public class AllSongsAdapter extends RecyclerView.Adapter<AllSongsAdapter.ViewHolder> {
+public class TruncatedAllSongsAdapter extends RecyclerView.Adapter<TruncatedAllSongsAdapter.ViewHolder> {
     Context context;
-    private ArrayList<Audio> song_list;
+    private List<Audio> song_list;
     boolean serviceBound = false;
     private MediaPlayerService player;
     String SONG = "single_audio";
@@ -49,7 +46,7 @@ public class AllSongsAdapter extends RecyclerView.Adapter<AllSongsAdapter.ViewHo
     String CLICK_CHECKER = "click_checker";
 
 
-    public AllSongsAdapter(Context context, ArrayList<Audio> song_list) {
+    public TruncatedAllSongsAdapter(Context context, List<Audio> song_list) {
         this.context = context;
         this.song_list = song_list;
 
@@ -138,9 +135,9 @@ public class AllSongsAdapter extends RecyclerView.Adapter<AllSongsAdapter.ViewHo
 
     }
 
-    public void setAudioListData(ArrayList<Audio> songArraylist) {
-        if (songArraylist != null) {
-            this.song_list = songArraylist;
+    public void setAudioListData(List<Audio> songlist) {
+        if (songlist != null) {
+            this.song_list = songlist;
             notifyDataSetChanged();
 
         }
@@ -172,10 +169,10 @@ public class AllSongsAdapter extends RecyclerView.Adapter<AllSongsAdapter.ViewHo
         if (!serviceBound) {
             //Store Serializable audioList to SharedPreferences
             StorageUtil storage = new StorageUtil(context);
-            storage.storeAudio(song_list);
-            storage.storeAudioIndex(audioIndex);
+//            storage.storeAudio(song_list);
+//            storage.storeAudioIndex(audioIndex);
 
-//            Toast.makeText(context, String.valueOf(storage.loadAudioIndex()), Toast.LENGTH_LONG).show();
+            Toast.makeText(context, String.valueOf(storage.loadAudioIndex()), Toast.LENGTH_LONG).show();
             Intent playerIntent = new Intent(context, MediaPlayerService.class);
             context.startService(playerIntent);
             context.bindService(playerIntent, serviceConnection, Context.BIND_AUTO_CREATE);

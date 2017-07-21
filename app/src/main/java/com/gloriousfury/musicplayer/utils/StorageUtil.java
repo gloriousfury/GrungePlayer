@@ -26,7 +26,7 @@ public class StorageUtil {
     private final String ALL_PLAYLIST_STORAGE = " com.gloriousfury.MusicPlayer.ALL_PLAYLIST_STORAGE";
     private final String ALL_PLAYLIST_STORAGE_KEY= "allPlaylistArrayList";
 
-    private final String PLAYBACK_POSITION = "allPlaylistArrayList";
+    private final String PLAYBACK_POSITION = "PlayBackPosition";
 
     public final String SHUFFLE_KEY = "shuffle";
     private SharedPreferences preferences;

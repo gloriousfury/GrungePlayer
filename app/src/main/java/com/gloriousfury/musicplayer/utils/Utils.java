@@ -56,7 +56,7 @@ public class Utils {
             player = binder.getService();
             serviceBound = true;
 
-            Toast.makeText(context, "Service Bound at being bound", Toast.LENGTH_SHORT).show();
+
         }
 
         @Override
@@ -88,6 +88,7 @@ public class Utils {
             //Service is active
             //Send a broadcast to the service -> PLAY_NEW_AUDIO
             Intent broadcastIntent = new Intent(Broadcast_PLAY_NEW_AUDIO);
+            Toast.makeText(context, String.valueOf(audioIndex), Toast.LENGTH_SHORT).show();
             context.sendBroadcast(broadcastIntent);
         }else{
 
@@ -99,7 +100,7 @@ public class Utils {
             Intent broadcastIntent = new Intent(Broadcast_PLAY_NEW_AUDIO);
             context.sendBroadcast(broadcastIntent);
 
-
+            Toast.makeText(context, String.valueOf(audioIndex), Toast.LENGTH_SHORT).show();
 
         }
     }
