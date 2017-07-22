@@ -1,7 +1,6 @@
 package com.gloriousfury.musicplayer.model;
 
 
-
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -22,8 +21,13 @@ public class Audio implements Parcelable {
 
     }
 
+    public Audio(String title) {
+        this.title = title;
 
-    public Audio(String data, String title, String artist, int duration,long albumId,String albumArtString) {
+    }
+
+
+    public Audio(String data, String title, String artist, int duration, long albumId, String albumArtString) {
         this.data = data;
         this.title = title;
         this.album = album;
@@ -33,7 +37,7 @@ public class Audio implements Parcelable {
         this.albumArtString = albumArtString;
     }
 
-    public Audio(String data, String title, String album, String artist, int duration,long albumId, String albumArtString) {
+    public Audio(String data, String title, String album, String artist, int duration, long albumId, String albumArtString) {
         this.data = data;
         this.title = title;
         this.album = album;
@@ -97,7 +101,7 @@ public class Audio implements Parcelable {
     }
 
     public void setAlbumArtUriString(String albumArtString) {
-        this.albumArtString= albumArtString;
+        this.albumArtString = albumArtString;
     }
 
 

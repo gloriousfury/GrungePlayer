@@ -162,12 +162,13 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
         try {
             // Set the data source to the mediaFile location
-            mediaPlayer.setDataSource(activeAudio.getData());
+            if (activeAudio.getData() != null)
+                mediaPlayer.setDataSource(activeAudio.getData());
         } catch (IOException e) {
             e.printStackTrace();
             stopSelf();
         }
-
+        if (activeAudio.getData() != null)
         mediaPlayer.prepareAsync();
     }
 
@@ -175,12 +176,12 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     private void playMedia() {
         if (!mediaPlayer.isPlaying()) {
 
-            if(checker!=null){
+            if (checker != null) {
                 mediaPlayer.seekTo(resumePosition);
                 playbackStatus = PlaybackStatus.PAUSED;
-                checker =null;
+                checker = null;
 
-            }else {
+            } else {
                 mediaPlayer.start();
                 playbackStatus = PlaybackStatus.PLAYING;
                 duration = mediaPlayer.getDuration();
@@ -585,7 +586,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         audioList = storageUtil.loadAudio();
         audioIndex = storageUtil.loadAudioIndex();
 
-        if(audioList!=null) {
+        if (audioList != null) {
             activeAudio = audioList.get(audioIndex);
 
             Uri albumArtUri = null;
@@ -907,7 +908,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             stopSelf();
         }
 
-        if (mediaSessionManager == null ) {
+        if (mediaSessionManager == null) {
             try {
                 initMediaSession();
                 initMediaPlayer();

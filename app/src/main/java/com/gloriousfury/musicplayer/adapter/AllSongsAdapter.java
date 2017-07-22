@@ -43,6 +43,7 @@ public class AllSongsAdapter extends RecyclerView.Adapter<AllSongsAdapter.ViewHo
     private MediaPlayerService player;
     String SONG = "single_audio";
     String CLICK_CHECKER = "click_checker";
+    int TYPE_HEADER = 1;
 
 
     public AllSongsAdapter(Context context, ArrayList<Audio> song_list) {
@@ -81,10 +82,10 @@ public class AllSongsAdapter extends RecyclerView.Adapter<AllSongsAdapter.ViewHo
             Audio singleSong = song_list.get(adapterposition);
 //            Utils appUtils = new Utils(context);
 
-            new Utils(context).playAudio(getAdapterPosition(),song_list);
+            new Utils(context).playAudio(getAdapterPosition(), song_list);
 
             Intent openSingleSongActivity = new Intent(context, SingleSongActivity.class);
-            openSingleSongActivity.putExtra(CLICK_CHECKER,checker);
+            openSingleSongActivity.putExtra(CLICK_CHECKER, checker);
             openSingleSongActivity.putExtra(SONG, singleSong);
 
             context.startActivity(openSingleSongActivity);
@@ -92,34 +93,80 @@ public class AllSongsAdapter extends RecyclerView.Adapter<AllSongsAdapter.ViewHo
         }
     }
 
+
+    public class HeaderViewHolder extends ViewHolder implements View.OnClickListener {
+        TextView temp;
+        TextView album_title;
+
+        public HeaderViewHolder(final View view) {
+            super(view);
+
+            view.setClickable(true);
+            view.setOnClickListener(this);
+//            album_title = (TextView) view.findViewById(R.id.letter);
+
+
+        }
+
+
+        @Override
+        public void onClick(View v) {
+
+
+        }
+    }
+
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_allsongs, parent, false);
-        return new ViewHolder(view);
+//        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_allsongs, parent, false);
+//        return new ViewHolder(view);
+
+        View v;
+
+
+        switch (viewType) {
+
+            case 1:
+
+                v = LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.shuffle_header, parent, false);
+
+                return new HeaderViewHolder(v);
+            default:
+                v = LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.list_item_allsongs, parent, false);
+
+                return new ViewHolder(v);
+
+        }
+
+
     }
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
 
+        if (holder.getItemViewType() == TYPE_HEADER) {
+            HeaderViewHolder Holder = (HeaderViewHolder) holder;
+            //  holder.temp.setText(mDataSet[position]);
 
-        holder.song_title.setText(song_list.get(position).getTitle());
-        holder.artist.setText(song_list.get(position).getArtist());
-
-
-        int backgroundColor = (ContextCompat.getColor(context,R.color.colorPrimaryDark));
-
-
-
+        } else {
+            holder.song_title.setText(song_list.get(position).getTitle());
+            holder.artist.setText(song_list.get(position).getArtist());
 
 
+            int backgroundColor = (ContextCompat.getColor(context, R.color.colorPrimaryDark));
 
-        String duration = String.valueOf(Timer.milliSecondsToTimer(song_list.get(position).getDuration()));
-        holder.duration.setText(duration);
-        if (song_list.get(position).getAlbumArtUriString() != null) {
-            Uri albumArtUri = Uri.parse(song_list.get(position).getAlbumArtUriString());
-            Picasso.with(context).load(albumArtUri).resize(120, 120).into(holder.song_background);
-        }else{
-            Picasso.with(context).load(R.drawable.ic_default_music_image).into(holder.song_background);
+
+            String duration = String.valueOf(Timer.milliSecondsToTimer(song_list.get(position).getDuration()));
+            holder.duration.setText(duration);
+            if (song_list.get(position).getAlbumArtUriString() != null) {
+                Uri albumArtUri = Uri.parse(song_list.get(position).getAlbumArtUriString());
+                Picasso.with(context).load(albumArtUri).resize(120, 120).into(holder.song_background);
+            } else {
+                Picasso.with(context).load(R.drawable.ic_default_music_option1).into(holder.song_background);
+
+            }
 
         }
 
@@ -135,6 +182,18 @@ public class AllSongsAdapter extends RecyclerView.Adapter<AllSongsAdapter.ViewHo
             return 0;
         }
 
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        int viewType = 0;
+        if (song_list.get(position).getTitle().contentEquals("Header")){
+            viewType = TYPE_HEADER;
+        } else  {
+            viewType = 2;
+        }
+
+        return viewType;
     }
 
     public void setAudioListData(ArrayList<Audio> songArraylist) {

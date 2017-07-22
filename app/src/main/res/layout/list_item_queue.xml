@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/seventy"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="@color/app_white_smoke"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+        <ImageView
+            android:id="@+id/play_identifier"
+            android:layout_width="@dimen/thirty"
+            android:layout_height="@dimen/thirty_five"
+            android:src="@drawable/ic_list_black_24dp"
+            android:layout_marginLeft="@dimen/ten"
+            android:layout_marginRight="@dimen/five"
+            android:layout_centerVertical="true"
+            />
+
+
+
+
+
+        <TextView
+            android:id="@+id/song_title"
+            android:layout_width="@dimen/two_fifty"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/ten"
+            android:layout_marginRight="@dimen/fifty"
+            android:layout_marginTop="@dimen/fifteen"
+            android:layout_toRightOf="@+id/play_identifier"
+            tools:text="Fresh Red South African apples (BlueBand)"
+            android:textColor="@color/black"
+            android:maxLines="1"
+
+             />
+
+
+        <TextView
+            android:id="@+id/artist"
+            android:layout_width="@dimen/two_fifty"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/song_title"
+            android:layout_marginLeft="@dimen/ten"
+            android:layout_marginRight="@dimen/twenty"
+            android:layout_marginTop="@dimen/five"
+            android:layout_toRightOf="@+id/play_identifier"
+            tools:text="RS 18999ml/ 180ml"
+            android:maxLines="1"/>
+
+        <TextView
+            android:id="@+id/song_duration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="3:11"
+            android:layout_centerVertical="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="@dimen/five"
+            />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/greyish_white"
+            android:layout_marginLeft="@dimen/ten"
+            android:layout_marginRight="@dimen/ten"
+            android:layout_alignParentTop="true"
+            />
+    </RelativeLayout>
+
+
+
+
+
+</LinearLayout>

@@ -114,11 +114,11 @@ public class Utils {
         //Check is service is active
 
         //Store Serializable audioList to SharedPreferences
-//        StorageUtil storage = new StorageUtil(this);
+//
         storage.storeAudio(song_list);
         storage.storeAudioIndex(audioIndex);
 
-//            Toast.makeText(context, String.valueOf(storage.loadAudioIndex()), Toast.LENGTH_LONG).show();
+            Toast.makeText(context, String.valueOf(song_list.size()), Toast.LENGTH_LONG).show();
         Intent playerIntent = new Intent(context, MediaPlayerService.class);
         playerIntent.putExtra(DONOT_PLAY_CHECKER, "donotplay");
         context.startService(playerIntent);

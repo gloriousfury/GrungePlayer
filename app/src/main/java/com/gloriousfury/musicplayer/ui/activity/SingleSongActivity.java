@@ -176,7 +176,7 @@ public class SingleSongActivity extends AppCompatActivity implements
 
 
             } else {
-                Picasso.with(this).load(R.drawable.ic_default_music_image).into(songBackground);
+                Picasso.with(this).load(R.drawable.background_cover).into(songBackground);
 
             }
 

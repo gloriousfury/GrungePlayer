@@ -151,9 +151,11 @@ public class LibraryActivity extends AppCompatActivity
         storage = new StorageUtil(this);
         audioList = storage.loadAudio();
         audioIndex = storage.loadAudioIndex();
-        if (audioList != null) {
-            Utils utils = Utils.getInstance();
-            utils.startAudioService(audioIndex, audioList);
+        if (audioList != null && audioIndex!=-1) {
+//            Utils utils = Utils.getInstance();
+//            utils.startAudioService(audioIndex, audioList);
+
+            new Utils(this).startAudioService(1,audioList);
         } else {
 
             startTasks();
@@ -339,6 +341,9 @@ public class LibraryActivity extends AppCompatActivity
 
                 if (cursor != null && cursor.getCount() > 0) {
                     audioList = new ArrayList<>();
+                    Audio audio = new Audio("Header");
+                    audioList.add(audio);
+
 
                     while (cursor.moveToNext()) {
                         String data = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA));
@@ -655,7 +660,7 @@ public class LibraryActivity extends AppCompatActivity
         queueRecycler.setLayoutManager(layoutManager);
         List<Audio> truncatedArray;
         if (audioList.size() > 4) {
-            truncatedArray = audioList.subList(0, 4);
+            truncatedArray = audioList.subList(1, 5);
         } else {
             truncatedArray = audioList;
 
