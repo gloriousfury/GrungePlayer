@@ -29,19 +29,28 @@ import static com.gloriousfury.musicplayer.ui.activity.MainActivity.Broadcast_PL
 public class Utils {
 
 
-   public static boolean serviceBound = false;
+    public static boolean serviceBound = false;
     private MediaPlayerService player;
 
-   private Context context;
+    private static Context context;
     private ArrayList<Audio> song_list = new ArrayList<>();
     private int audioIndex;
     MediaPlayerService mediaPlayerService;
     MediaPlayer currentMediaPlayer;
+    String DONOT_PLAY_CHECKER = "do_not_play_checker";
 
-    public Utils(Context context){
+    public Utils(Context context) {
         this.context = context;
     }
-    public Utils(Context context,ArrayList<Audio> song_list, int audioIndex ){
+
+
+    private final static Utils ourInstance = new Utils(context);
+    public static Utils getInstance() {
+        return ourInstance;
+    }
+
+
+    public Utils(Context context, ArrayList<Audio> song_list, int audioIndex) {
         this.context = context;
         this.song_list = song_list;
         this.audioIndex = audioIndex;
@@ -55,8 +64,10 @@ public class Utils {
             MediaPlayerService.LocalBinder binder = (MediaPlayerService.LocalBinder) service;
             player = binder.getService();
             serviceBound = true;
+            Utils.serviceBound = true;
 
 
+            Toast.makeText(context, "Service Bound", Toast.LENGTH_SHORT).show();
         }
 
         @Override
@@ -66,52 +77,60 @@ public class Utils {
     };
 
 
-    public void playAudio(int audioIndex) {
+    public void playAudio(int audioIndex, ArrayList<Audio> song_list) {
         //Check is service is active
-        MediaPlayerService mediaPlayerService =  new MediaPlayerService(context);
-        currentMediaPlayer = mediaPlayerService.getMediaPlayerInstance();
         if (!serviceBound) {
             //Store Serializable audioList to SharedPreferences
             StorageUtil storage = new StorageUtil(context);
             storage.storeAudio(song_list);
             storage.storeAudioIndex(audioIndex);
+//            Audio audio = song_list.get(audioIndex);
+//
+//            Toast.makeText(context, audio.getTitle().toString(), Toast.LENGTH_LONG);
 
-            Toast.makeText(context, String.valueOf(storage.loadAudioIndex()), Toast.LENGTH_LONG).show();
+//            Toast.makeText(context, String.valueOf(storage.loadAudioIndex()), Toast.LENGTH_LONG).show();
             Intent playerIntent = new Intent(context, MediaPlayerService.class);
             context.startService(playerIntent);
             context.bindService(playerIntent, serviceConnection, Context.BIND_AUTO_CREATE);
-        } else if (mediaPlayerService.isPng()) {
+        } else {
             //Store the new audioIndex to SharedPreferences
             StorageUtil storage = new StorageUtil(context);
             storage.storeAudioIndex(audioIndex);
-
-            //Service is active
-            //Send a broadcast to the service -> PLAY_NEW_AUDIO
-            Intent broadcastIntent = new Intent(Broadcast_PLAY_NEW_AUDIO);
-            Toast.makeText(context, String.valueOf(audioIndex), Toast.LENGTH_SHORT).show();
-            context.sendBroadcast(broadcastIntent);
-        }else{
-
-            StorageUtil storage = new StorageUtil(context);
-            storage.storeAudioIndex(audioIndex);
-
+            storage.storeAudio(song_list);
             //Service is active
             //Send a broadcast to the service -> PLAY_NEW_AUDIO
             Intent broadcastIntent = new Intent(Broadcast_PLAY_NEW_AUDIO);
             context.sendBroadcast(broadcastIntent);
-
-            Toast.makeText(context, String.valueOf(audioIndex), Toast.LENGTH_SHORT).show();
-
         }
     }
 
-    public static boolean isServiceBound(){
+
+    public static boolean isServiceBound() {
         return serviceBound;
+    }
+
+    public void startAudioService(int audioIndex, ArrayList<Audio> song_list) {
+        StorageUtil storage = new StorageUtil(context);
+        //Check is service is active
+
+        //Store Serializable audioList to SharedPreferences
+//        StorageUtil storage = new StorageUtil(this);
+        storage.storeAudio(song_list);
+        storage.storeAudioIndex(audioIndex);
+
+//            Toast.makeText(context, String.valueOf(storage.loadAudioIndex()), Toast.LENGTH_LONG).show();
+        Intent playerIntent = new Intent(context, MediaPlayerService.class);
+        playerIntent.putExtra(DONOT_PLAY_CHECKER, "donotplay");
+        context.startService(playerIntent);
+        context.bindService(playerIntent, serviceConnection, Context.BIND_AUTO_CREATE);
+        serviceBound = true;
+
+
     }
 
 
     //gridview decoration
-    public static int dpToPx(int dp,Context context) {
+    public static int dpToPx(int dp, Context context) {
         Resources r = context.getResources();
         return Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, r.getDisplayMetrics()));
     }
@@ -151,7 +170,6 @@ public class Utils {
             }
         }
     }
-
 
 
 }

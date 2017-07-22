@@ -39,45 +39,44 @@
             </android.support.design.widget.AppBarLayout>
 
 
-            <com.sothree.slidinguppanel.SlidingUpPanelLayout
-            xmlns:sothree="http://schemas.android.com/apk/res-auto"
-            android:id="@+id/sliding_layout"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="bottom"
-            sothree:umanoDragView="@+id/dragView"
-            sothree:umanoOverlay="true"
-            sothree:umanoPanelHeight="@dimen/seventy"
-                sothree:umanoShadowHeight="4dp">
-
-
-            <FrameLayout
-                android:id="@+id/containerView"
+            <com.sothree.slidinguppanel.SlidingUpPanelLayout xmlns:sothree="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/sliding_layout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_below="@+id/appBar"
-
-               />
-
-            <LinearLayout
-                android:id="@+id/mini_layout"
-                android:layout_gravity="bottom"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:clickable="true"
-                android:layout_alignParentBottom="true"
+                android:layout_below="@+id/app_bar_layout"
+                android:gravity="bottom"
+                sothree:umanoDragView="@+id/dragView"
+                sothree:umanoOverlay="true"
+                sothree:umanoPanelHeight="@dimen/seventy"
+                sothree:umanoShadowHeight="4dp"
+                android:layout_marginTop="?attr/actionBarSize"
                 >
 
-                <include layout="@layout/view_mini_player2"
+
+                <FrameLayout
+                    android:id="@+id/containerView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_below="@+id/appBar"
 
                     />
 
-            </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/mini_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:layout_gravity="bottom"
+                    android:clickable="true">
+
+                    <include layout="@layout/view_mini_player2"
+
+                        />
+
+                </LinearLayout>
 
             </com.sothree.slidinguppanel.SlidingUpPanelLayout>
         </RelativeLayout>
-
-
 
 
         <!--<android.support.design.widget.FloatingActionButton-->

@@ -178,6 +178,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             if(checker!=null){
                 mediaPlayer.seekTo(resumePosition);
                 playbackStatus = PlaybackStatus.PAUSED;
+                checker =null;
 
             }else {
                 mediaPlayer.start();
@@ -584,38 +585,40 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         audioList = storageUtil.loadAudio();
         audioIndex = storageUtil.loadAudioIndex();
 
-        activeAudio = audioList.get(audioIndex);
+        if(audioList!=null) {
+            activeAudio = audioList.get(audioIndex);
 
-        Uri albumArtUri = null;
+            Uri albumArtUri = null;
 
-        if (activeAudio.getAlbumArtUriString() != null) {
-            albumArtUri = Uri.parse(activeAudio.getAlbumArtUriString());
+            if (activeAudio.getAlbumArtUriString() != null) {
+                albumArtUri = Uri.parse(activeAudio.getAlbumArtUriString());
 
-        }
-        Bitmap albumArt = null;
-        try {
-
-            if (albumArtUri != null) {
-                albumArt = MediaStore.Images.Media.getBitmap(
-                        getContentResolver(), albumArtUri);
-                albumArt = Bitmap.createScaledBitmap(albumArt, 30, 30, true);
             }
+            Bitmap albumArt = null;
+            try {
 
-        } catch (FileNotFoundException exception) {
-            exception.printStackTrace();
-            albumArt = BitmapFactory.decodeResource(getResources(),
-                    R.drawable.ic_default_music_image);
-        } catch (IOException e) {
+                if (albumArtUri != null) {
+                    albumArt = MediaStore.Images.Media.getBitmap(
+                            getContentResolver(), albumArtUri);
+                    albumArt = Bitmap.createScaledBitmap(albumArt, 30, 30, true);
+                }
 
-            e.printStackTrace();
+            } catch (FileNotFoundException exception) {
+                exception.printStackTrace();
+                albumArt = BitmapFactory.decodeResource(getResources(),
+                        R.drawable.ic_default_music_image);
+            } catch (IOException e) {
+
+                e.printStackTrace();
+            }
+            // Update the current metadata
+            mediaSession.setMetadata(new MediaMetadataCompat.Builder()
+                    .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, albumArt)
+                    .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, activeAudio.getArtist())
+                    .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, activeAudio.getAlbum())
+                    .putString(MediaMetadataCompat.METADATA_KEY_TITLE, activeAudio.getTitle())
+                    .build());
         }
-        // Update the current metadata
-        mediaSession.setMetadata(new MediaMetadataCompat.Builder()
-                .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, albumArt)
-                .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, activeAudio.getArtist())
-                .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, activeAudio.getAlbum())
-                .putString(MediaMetadataCompat.METADATA_KEY_TITLE, activeAudio.getTitle())
-                .build());
     }
 
     public void skipToNext(ArrayList<Audio> audioList, int audioIndex, Context context, MediaPlayer mediaPlayer) {

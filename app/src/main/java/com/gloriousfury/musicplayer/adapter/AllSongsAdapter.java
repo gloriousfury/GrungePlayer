@@ -42,10 +42,6 @@ public class AllSongsAdapter extends RecyclerView.Adapter<AllSongsAdapter.ViewHo
     boolean serviceBound = false;
     private MediaPlayerService player;
     String SONG = "single_audio";
-    String SONG_DURATION = "song_duration";
-    String SONG_TITLE = "song_title";
-    String SONG_ARTIST = "song_artist";
-    String ALBUM_ART_URI = "song_album_art_uri";
     String CLICK_CHECKER = "click_checker";
 
 
@@ -83,7 +79,10 @@ public class AllSongsAdapter extends RecyclerView.Adapter<AllSongsAdapter.ViewHo
             int adapterposition = getAdapterPosition();
             String checker = null;
             Audio singleSong = song_list.get(adapterposition);
-            playAudio(adapterposition);
+//            Utils appUtils = new Utils(context);
+
+            new Utils(context).playAudio(getAdapterPosition(),song_list);
+
             Intent openSingleSongActivity = new Intent(context, SingleSongActivity.class);
             openSingleSongActivity.putExtra(CLICK_CHECKER,checker);
             openSingleSongActivity.putExtra(SONG, singleSong);
@@ -147,49 +146,49 @@ public class AllSongsAdapter extends RecyclerView.Adapter<AllSongsAdapter.ViewHo
 
     }
 
-    private ServiceConnection serviceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            // We've bound to LocalService, cast the IBinder and get LocalService instance
-            MediaPlayerService.LocalBinder binder = (MediaPlayerService.LocalBinder) service;
-            player = binder.getService();
-            serviceBound = true;
-           Utils.serviceBound =true;
+//    private ServiceConnection serviceConnection = new ServiceConnection() {
+//        @Override
+//        public void onServiceConnected(ComponentName name, IBinder service) {
+//            // We've bound to LocalService, cast the IBinder and get LocalService instance
+//            MediaPlayerService.LocalBinder binder = (MediaPlayerService.LocalBinder) service;
+//            player = binder.getService();
+//            serviceBound = true;
+//           Utils.serviceBound =true;
+//
+//
+//            Toast.makeText(context, "Service Bound", Toast.LENGTH_SHORT).show();
+//        }
+//
+//        @Override
+//        public void onServiceDisconnected(ComponentName name) {
+//            serviceBound = false;
+//        }
+//    };
 
 
-            Toast.makeText(context, "Service Bound", Toast.LENGTH_SHORT).show();
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            serviceBound = false;
-        }
-    };
-
-
-    private void playAudio(int audioIndex) {
-        //Check is service is active
-        if (!serviceBound) {
-            //Store Serializable audioList to SharedPreferences
-            StorageUtil storage = new StorageUtil(context);
-            storage.storeAudio(song_list);
-            storage.storeAudioIndex(audioIndex);
-
-//            Toast.makeText(context, String.valueOf(storage.loadAudioIndex()), Toast.LENGTH_LONG).show();
-            Intent playerIntent = new Intent(context, MediaPlayerService.class);
-            context.startService(playerIntent);
-            context.bindService(playerIntent, serviceConnection, Context.BIND_AUTO_CREATE);
-        } else {
-            //Store the new audioIndex to SharedPreferences
-            StorageUtil storage = new StorageUtil(context);
-            storage.storeAudioIndex(audioIndex);
-
-            //Service is active
-            //Send a broadcast to the service -> PLAY_NEW_AUDIO
-            Intent broadcastIntent = new Intent(Broadcast_PLAY_NEW_AUDIO);
-            context.sendBroadcast(broadcastIntent);
-        }
-    }
+//    private void playAudio(int audioIndex) {
+//        //Check is service is active
+//        if (!serviceBound) {
+//            //Store Serializable audioList to SharedPreferences
+//            StorageUtil storage = new StorageUtil(context);
+//            storage.storeAudio(song_list);
+//            storage.storeAudioIndex(audioIndex);
+//
+////            Toast.makeText(context, String.valueOf(storage.loadAudioIndex()), Toast.LENGTH_LONG).show();
+//            Intent playerIntent = new Intent(context, MediaPlayerService.class);
+//            context.startService(playerIntent);
+//            context.bindService(playerIntent, serviceConnection, Context.BIND_AUTO_CREATE);
+//        } else {
+//            //Store the new audioIndex to SharedPreferences
+//            StorageUtil storage = new StorageUtil(context);
+//            storage.storeAudioIndex(audioIndex);
+//
+//            //Service is active
+//            //Send a broadcast to the service -> PLAY_NEW_AUDIO
+//            Intent broadcastIntent = new Intent(Broadcast_PLAY_NEW_AUDIO);
+//            context.sendBroadcast(broadcastIntent);
+//        }
+//    }
 }
 
 

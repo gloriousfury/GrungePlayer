@@ -243,7 +243,7 @@ public class SingleSongActivity extends AppCompatActivity implements
         if (currentMediaPlayer.isPlaying()) {
 
             playPauseView.setImageDrawable(ContextCompat
-                    .getDrawable(SingleSongActivity.this, R.drawable.ic_play_circle_filled_white_black_24dp));
+                    .getDrawable(SingleSongActivity.this, R.drawable.ic_pause_circle_filled_black_24dp));
 
             mediaPlayerService.pauseMedia(currentMediaPlayer);
 
@@ -271,7 +271,7 @@ public class SingleSongActivity extends AppCompatActivity implements
         } else {
 
             playPauseView.setImageDrawable(ContextCompat
-                    .getDrawable(SingleSongActivity.this, R.drawable.ic_pause_circle_filled_black_24dp));
+                    .getDrawable(SingleSongActivity.this, R.drawable.ic_play_circle_filled_white_black_24dp));
             mediaPlayerService.resumeMedia(currentMediaPlayer);
             // set Progress bar values
             seekBar.setProgress(0);
@@ -497,6 +497,11 @@ public class SingleSongActivity extends AppCompatActivity implements
         super.onStart();
 //        if (bus == null) {
         currentMediaPlayer = mediaPlayerService.getMediaPlayerInstance();
+        if(currentMediaPlayer.isPlaying()){
+
+            playPauseView.setImageDrawable(ContextCompat
+                    .getDrawable(SingleSongActivity.this, R.drawable.ic_play_circle_filled_white_black_24dp));
+        }
 
 
         bus.register(this);

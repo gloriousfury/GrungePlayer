@@ -79,7 +79,7 @@ import de.greenrobot.event.EventBus;
 
 public class LibraryActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
-        LoaderManager.LoaderCallbacks<ArrayList<Audio>>, View.OnClickListener{
+        LoaderManager.LoaderCallbacks<ArrayList<Audio>>, View.OnClickListener {
 
     FragmentManager mFragmentManager;
     FragmentTransaction mFragmentTransaction;
@@ -151,11 +151,21 @@ public class LibraryActivity extends AppCompatActivity
         storage = new StorageUtil(this);
         audioList = storage.loadAudio();
         audioIndex = storage.loadAudioIndex();
+        if (audioList != null) {
+            Utils utils = Utils.getInstance();
+            utils.startAudioService(audioIndex, audioList);
+        } else {
+
+            startTasks();
+
+        }
+
         mediaPlayerService = new MediaPlayerService(this);
         currentMediaPlayer = mediaPlayerService.getMediaPlayerInstance();
+
         songBackground.setOnClickListener(this);
         playPauseView.setOnClickListener(this);
-        Utils.serviceBound =false;
+        Utils.serviceBound = false;
 //        nextSong.setOnClickListener(this);
 //        previousSong.setOnClickListener(this);
 
@@ -193,7 +203,7 @@ public class LibraryActivity extends AppCompatActivity
         if (savedInstanceState == null) {
             mFragmentManager = getSupportFragmentManager();
             mFragmentTransaction = mFragmentManager.beginTransaction();
-            mFragmentTransaction.replace(R.id.containerView, new ScrollFragmentContainer(),FRAGMENT_TAG).commit();
+            mFragmentTransaction.replace(R.id.containerView, new ScrollFragmentContainer(), FRAGMENT_TAG).commit();
         } else {
             ScrollFragmentContainer test = (ScrollFragmentContainer) getSupportFragmentManager().findFragmentByTag(FRAGMENT_TAG);
 
@@ -638,15 +648,20 @@ public class LibraryActivity extends AppCompatActivity
     public void changeMiniPlayer(Audio activeAudio) {
 
 
-
-       queueRecycler.setHasFixedSize(true);
+        queueRecycler.setHasFixedSize(true);
 
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
 //
         queueRecycler.setLayoutManager(layoutManager);
-        List<Audio> truncatedArray = audioList.subList(0,4);
+        List<Audio> truncatedArray;
+        if (audioList.size() > 4) {
+            truncatedArray = audioList.subList(0, 4);
+        } else {
+            truncatedArray = audioList;
+
+        }
 //        ArrayList<String> al2 = new ArrayList<String>(al.subList(1, 4));
-       TruncatedAllSongsAdapter adapter = new TruncatedAllSongsAdapter(this, truncatedArray);
+        TruncatedAllSongsAdapter adapter = new TruncatedAllSongsAdapter(this, truncatedArray);
         queueRecycler.setAdapter(adapter);
 
 
@@ -663,12 +678,12 @@ public class LibraryActivity extends AppCompatActivity
         } else if (!currentMediaPlayer.isPlaying() && serviceBound) {
             playPauseView.setImageResource(R.drawable.ic_play_arrow_black_24dp);
 
-        }else if(!currentMediaPlayer.isPlaying() && !serviceBound){
+        } else if (!currentMediaPlayer.isPlaying() && !serviceBound) {
             mediaPlayerService = new MediaPlayerService(this);
             currentMediaPlayer = mediaPlayerService.getMediaPlayerInstance();
 
             currentDuration = new StorageUtil(this).loadPlayBackPosition();
-            totalDuration =  activeAudio.getDuration();
+            totalDuration = activeAudio.getDuration();
             // Updating progress bar
             int progress = (int) (Timer.getProgressPercentage(currentDuration, totalDuration));
             seekBar.setProgress(progress);
@@ -799,21 +814,20 @@ public class LibraryActivity extends AppCompatActivity
 
                 } else if (!mediaPlayerService.isPng()) {
 
-                    if (!serviceBound) {
-                        playPauseView.setImageDrawable(ContextCompat
-                                .getDrawable(LibraryActivity.this, R.drawable.ic_pause_black_24dp));
-                        mediaPlayerService.resumeMedia(currentMediaPlayer);
+                    playPauseView.setImageDrawable(ContextCompat
+                            .getDrawable(LibraryActivity.this, R.drawable.ic_pause_black_24dp));
+                    mediaPlayerService.resumeMedia(currentMediaPlayer);
 
-                        //TODO BUILD EXTERNAL PLAYER
+                    //TODO BUILD EXTERNAL PLAYER
 
-                        serviceBound = true;
-                    } else {
-                        playPauseView.setImageDrawable(ContextCompat
-                                .getDrawable(LibraryActivity.this, R.drawable.ic_pause_black_24dp));
 
-                        mediaPlayerService.resumeMedia(currentMediaPlayer);
+                } else {
+                    playPauseView.setImageDrawable(ContextCompat
+                            .getDrawable(LibraryActivity.this, R.drawable.ic_pause_black_24dp));
 
-                    }
+                    mediaPlayerService.resumeMedia(currentMediaPlayer);
+
+
                 }
 //                 set Progress bar values
 
@@ -839,56 +853,16 @@ public class LibraryActivity extends AppCompatActivity
                 break;
 
             case R.id.song_background:
-                startAudioService();
+
                 Intent openSingleSongActivity = new Intent(this, SingleSongActivity.class);
                 openSingleSongActivity.putExtra(SONG, activeAudio);
-                openSingleSongActivity.putExtra(CLICK_CHECKER,"miniplayer");
+                openSingleSongActivity.putExtra(CLICK_CHECKER, "miniplayer");
                 startActivity(openSingleSongActivity);
 //                Toast.makeText(this, "I just don't want to respond",Toast.LENGTH_LONG).show();
                 break;
 
         }
     }
-
-
-    private void startAudioService() {
-        audioIndex = storage.loadAudioIndex();
-        //Check is service is active
-
-            //Store Serializable audioList to SharedPreferences
-            StorageUtil storage = new StorageUtil(this);
-            storage.storeAudio(audioList);
-            storage.storeAudioIndex(audioIndex);
-
-//            Toast.makeText(context, String.valueOf(storage.loadAudioIndex()), Toast.LENGTH_LONG).show();
-            Intent playerIntent = new Intent(this, MediaPlayerService.class);
-            playerIntent.putExtra(DONOT_PLAY_CHECKER, "donotplay");
-            startService(playerIntent);
-            bindService(playerIntent, serviceConnection, Context.BIND_AUTO_CREATE);
-
-
-
-    }
-    private ServiceConnection serviceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            // We've bound to LocalService, cast the IBinder and get LocalService instance
-            MediaPlayerService.LocalBinder binder = (MediaPlayerService.LocalBinder) service;
-            player = binder.getService();
-            serviceBound = true;
-            Utils.serviceBound = true;
-
-
-            Toast.makeText(LibraryActivity.this, "Service Bound", Toast.LENGTH_SHORT).show();
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            serviceBound = false;
-            Utils.serviceBound = false;
-        }
-    };
-
 
 
     public boolean isPlaying() {

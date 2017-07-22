@@ -36,6 +36,7 @@ import com.gloriousfury.musicplayer.model.Audio;
 import com.gloriousfury.musicplayer.service.AppMainServiceEvent;
 import com.gloriousfury.musicplayer.service.MediaPlayerService;
 import com.gloriousfury.musicplayer.utils.StorageUtil;
+import com.gloriousfury.musicplayer.utils.Utils;
 import com.squareup.picasso.Picasso;
 
 import java.io.FileNotFoundException;
@@ -110,7 +111,6 @@ public class AlbumActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
 
-
         storage = new StorageUtil(this);
         mediaPlayerService = new MediaPlayerService(this);
 
@@ -159,42 +159,8 @@ public class AlbumActivity extends AppCompatActivity {
     @OnClick(R.id.img_play_pause)
     public void playPause() {
         currentMediaPlayer = mediaPlayerService.getMediaPlayerInstance();
-        playPauseView.setImageDrawable(ContextCompat
-                .getDrawable(AlbumActivity.this, R.drawable.ic_pause_black_24dp));
-        if (!serviceBound) {
-            //Store Serializable audioList to SharedPreferences
-            StorageUtil storage = new StorageUtil(this);
-            storage.storeAudio(albumAudioList);
-            storage.storeAudioIndex(0);
 
-            Intent playerIntent = new Intent(this, MediaPlayerService.class);
-            startService(playerIntent);
-            bindService(playerIntent, serviceConnection, Context.BIND_AUTO_CREATE);
-        }
-        //check this for when a song is already playing and you launch an album
-        else {
-            //Store the new audioIndex to SharedPreferences
-            if (currentMediaPlayer.isPlaying()) {
-
-                playPauseView.setImageDrawable(ContextCompat
-                        .getDrawable(AlbumActivity.this, R.drawable.ic_pause_black_24dp));
-
-                mediaPlayerService.pauseMedia(currentMediaPlayer);
-
-            }else {
-
-                StorageUtil storage = new StorageUtil(this);
-                storage.storeAudio(albumAudioList);
-                storage.storeAudioIndex(0);
-
-                //Service is active
-                //Send a broadcast to the service -> PLAY_NEW_AUDIO
-                Intent broadcastIntent = new Intent(Broadcast_PLAY_NEW_AUDIO);
-                sendBroadcast(broadcastIntent);
-
-            }
-
-        }
+       Utils.getInstance().playAudio(0, albumAudioList);
 
     }
 
@@ -333,7 +299,7 @@ public class AlbumActivity extends AppCompatActivity {
         super.onResume();
         bus.register(this);
 
-
+            //TODO Rethink this whole stuff man
         if (audioList != null && audioIndex != -1) {
             audioList = storage.loadAudio();
             audioIndex = storage.loadAudioIndex();
