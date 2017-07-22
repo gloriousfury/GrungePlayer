@@ -26,6 +26,8 @@ dependencies {
     })
     compile group: 'com.google.code.gson', name: 'gson', version: '2.7', changing: true
 
+
+
     compile 'com.android.support:appcompat-v7:25.3.1'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.android.support:design:25.3.1'
@@ -36,9 +38,7 @@ dependencies {
     compile 'de.hdodenhof:circleimageview:2.1.0'
     compile 'com.github.zhukic:sectioned-recyclerview:1.0.1'
     compile 'com.android.support:palette-v7:25.3.1'
+    compile 'com.sothree.slidinguppanel:library:3.0.0'
     testCompile 'junit:junit:4.12'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.6.0'
-    compile 'com.sothree.slidinguppanel:library:3.3.1'
-
-
 }

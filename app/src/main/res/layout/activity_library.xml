@@ -39,31 +39,42 @@
             </android.support.design.widget.AppBarLayout>
 
 
+            <com.sothree.slidinguppanel.SlidingUpPanelLayout
+            xmlns:sothree="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/sliding_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="bottom"
+            sothree:umanoDragView="@+id/dragView"
+            sothree:umanoOverlay="true"
+            sothree:umanoPanelHeight="@dimen/seventy"
+                sothree:umanoShadowHeight="4dp">
+
+
             <FrameLayout
                 android:id="@+id/containerView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_above="@+id/mini_layout"
                 android:layout_below="@+id/appBar"
 
-
-
-                ></FrameLayout>
+               />
 
             <LinearLayout
                 android:id="@+id/mini_layout"
                 android:layout_gravity="bottom"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:clickable="true"
                 android:layout_alignParentBottom="true"
                 >
 
-                <include layout="@layout/view_mini_player3"
+                <include layout="@layout/view_mini_player2"
 
                     />
 
             </LinearLayout>
+
+            </com.sothree.slidinguppanel.SlidingUpPanelLayout>
         </RelativeLayout>
 
 

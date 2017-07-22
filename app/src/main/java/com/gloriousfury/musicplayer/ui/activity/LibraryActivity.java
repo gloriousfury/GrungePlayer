@@ -127,7 +127,7 @@ public class LibraryActivity extends AppCompatActivity
     @BindView(R.id.img_play_pause)
     ImageView playPauseView;
     @BindView(R.id.relative_layout_mini_player)
-    LinearLayout miniPlayerView;
+    RelativeLayout miniPlayerView;
 
     @BindView(R.id.queuelist_view)
     RecyclerView queueRecycler;

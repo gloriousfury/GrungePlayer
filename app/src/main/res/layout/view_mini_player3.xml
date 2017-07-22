@@ -1,15 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<com.sothree.slidinguppanel.SlidingUpPanelLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:gravity="bottom">
-
     <LinearLayout
-        android:id="@+id/relative_layout_mini_player"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+
+    android:id="@+id/relative_layout_mini_player"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:background="@color/white"
         android:clickable="true"
         android:orientation="vertical">
@@ -96,17 +93,14 @@
 
         </RelativeLayout>
 
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/queuelist_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone">
+
+
+    </android.support.v7.widget.RecyclerView>
     </LinearLayout>
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/queuelist_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:visibility="gone">
 
-
-        </android.support.v7.widget.RecyclerView>
-
-
-
-</com.sothree.slidinguppanel.SlidingUpPanelLayout>
