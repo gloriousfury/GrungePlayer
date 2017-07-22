@@ -112,6 +112,7 @@ public class SingleSongActivity extends AppCompatActivity implements
     boolean shuffleState;
     String CLICK_CHECKER = "click_checker";
     String checker;
+    long currentPosition;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -181,10 +182,10 @@ public class SingleSongActivity extends AppCompatActivity implements
 
             storage = new StorageUtil(getApplicationContext());
             if (!currentMediaPlayer.isPlaying() && !serviceBound) {
-                long currentPosition = storage.loadPlayBackPosition();
+                currentPosition = storage.loadPlayBackPosition();
                 setSeekBarProgress(currentPosition);
                 songCurrentDuration.setText(String.valueOf(Timer.milliSecondsToTimer(currentPosition)));
-                Toast.makeText(this, String.valueOf(currentPosition), Toast.LENGTH_LONG).show();
+//                Toast.makeText(this, String.valueOf(currentPosition), Toast.LENGTH_LONG).show();
             } else {
 
                 updateProgressBar();
@@ -246,11 +247,16 @@ public class SingleSongActivity extends AppCompatActivity implements
 
             mediaPlayerService.pauseMedia(currentMediaPlayer);
 
-        } else if (!currentMediaPlayer.isPlaying() &&checker!=null) {
+        } else if (!currentMediaPlayer.isPlaying() && checker != null) {
 
             audioIndex = storage.loadAudioIndex();
+            currentPosition = storage.loadPlayBackPosition();
+            mediaPlayerService.resumeMedia1(currentMediaPlayer, (int) currentPosition);
+            seekBar.setProgress(0);
+            seekBar.setMax(100);
 
-            playOldAudio(audioIndex);
+            // Updating progress bar
+            updateProgressBar();
 //            Utils utilInstance = new Utils(this);
 //            utilInstance.playAudio(audioIndex);
 //            playPauseView.setImageDrawable(ContextCompat

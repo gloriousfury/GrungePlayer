@@ -174,9 +174,16 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
     private void playMedia() {
         if (!mediaPlayer.isPlaying()) {
-            mediaPlayer.start();
-            playbackStatus = PlaybackStatus.PLAYING;
-            duration = mediaPlayer.getDuration();
+
+            if(checker!=null){
+                mediaPlayer.seekTo(resumePosition);
+                playbackStatus = PlaybackStatus.PAUSED;
+
+            }else {
+                mediaPlayer.start();
+                playbackStatus = PlaybackStatus.PLAYING;
+                duration = mediaPlayer.getDuration();
+            }
         }
     }
 
@@ -199,6 +206,13 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     }
 
     public void resumeMedia(MediaPlayer mediaPlayer) {
+        if (!mediaPlayer.isPlaying()) {
+            mediaPlayer.seekTo(resumePosition);
+            mediaPlayer.start();
+        }
+    }
+
+    public void resumeMedia1(MediaPlayer mediaPlayer, int resumePosition) {
         if (!mediaPlayer.isPlaying()) {
             mediaPlayer.seekTo(resumePosition);
             mediaPlayer.start();
@@ -459,12 +473,23 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     };
 
 
-    public void playOldAudio( ){
+    public void playOldAudio() {
         StorageUtil storageUtil = new StorageUtil(context);
         audioList = storageUtil.loadAudio();
         audioIndex = storageUtil.loadAudioIndex();
         activeAudio = audioList.get(audioIndex);
-        resumePosition = (int)storageUtil.loadPlayBackPosition();
+        resumePosition = (int) storageUtil.loadPlayBackPosition();
+        if (mediaSessionManager == null) {
+            try {
+                initMediaSession();
+                initMediaPlayer();
+
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
+
+
         resumeMedia(mediaPlayer);
 
     }
@@ -861,7 +886,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             StorageUtil storage = new StorageUtil(getContext());
             audioList = storage.loadAudio();
             audioIndex = storage.loadAudioIndex();
-             checker = intent.getExtras().getString(DONOT_PLAY_CHECKER);
+            checker = intent.getExtras().getString(DONOT_PLAY_CHECKER);
 
             if (audioIndex != -1 && audioIndex < audioList.size()) {
                 //index is in a valid range
@@ -879,7 +904,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             stopSelf();
         }
 
-        if (mediaSessionManager == null ){
+        if (mediaSessionManager == null ) {
             try {
                 initMediaSession();
                 initMediaPlayer();
@@ -930,7 +955,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         try {
             unregisterReceiver(becomingNoisyReceiver);
             unregisterReceiver(playNewAudio);
-        }catch (Exception e){
+        } catch (Exception e) {
 
 
         }

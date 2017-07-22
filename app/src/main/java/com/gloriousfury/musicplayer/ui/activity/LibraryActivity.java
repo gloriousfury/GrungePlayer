@@ -90,6 +90,7 @@ public class LibraryActivity extends AppCompatActivity
     ArrayList<Albums> retrievedAlbumsList = new ArrayList<>();
     StorageUtil storage;
     MediaPlayerService mediaPlayerService;
+    private MediaPlayerService player;
     MediaPlayer currentMediaPlayer;
     Audio activeAudio, nextAudio;
     private static final int TASK_LOADER_ID = 0;
@@ -853,7 +854,7 @@ public class LibraryActivity extends AppCompatActivity
     private void startAudioService() {
         audioIndex = storage.loadAudioIndex();
         //Check is service is active
-        if (!serviceBound) {
+
             //Store Serializable audioList to SharedPreferences
             StorageUtil storage = new StorageUtil(this);
             storage.storeAudio(audioList);
@@ -865,7 +866,7 @@ public class LibraryActivity extends AppCompatActivity
             startService(playerIntent);
             bindService(playerIntent, serviceConnection, Context.BIND_AUTO_CREATE);
 
-        }
+
 
     }
     private ServiceConnection serviceConnection = new ServiceConnection() {
@@ -873,7 +874,7 @@ public class LibraryActivity extends AppCompatActivity
         public void onServiceConnected(ComponentName name, IBinder service) {
             // We've bound to LocalService, cast the IBinder and get LocalService instance
             MediaPlayerService.LocalBinder binder = (MediaPlayerService.LocalBinder) service;
-            mediaPlayerService = binder.getService();
+            player = binder.getService();
             serviceBound = true;
             Utils.serviceBound = true;
 
