@@ -20,7 +20,7 @@
             android:layout_marginLeft="@dimen/twenty"
             android:layout_marginRight="@dimen/five"
             android:layout_centerVertical="true"
-            android:src="@drawable/ic_default_music_image"
+            android:src="@drawable/ic_default_playlist_option1"
             />
 
         <TextView

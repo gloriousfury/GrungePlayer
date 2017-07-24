@@ -322,12 +322,12 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                     AudioManager amanager = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
                     int maxVolume = amanager.getStreamMaxVolume(AudioManager.STREAM_ALARM);
                     amanager.setStreamVolume(AudioManager.STREAM_ALARM, maxVolume, 0);
-
-                    try {
-                        mediaPlayer.prepare();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+//
+//                    try {
+//                        mediaPlayer.prepare();
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                    }
                     mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
                     mediaPlayer.start();
 
@@ -607,7 +607,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             } catch (FileNotFoundException exception) {
                 exception.printStackTrace();
                 albumArt = BitmapFactory.decodeResource(getResources(),
-                        R.drawable.ic_default_music_image);
+                        R.drawable.ic_default_music_option2);
             } catch (IOException e) {
 
                 e.printStackTrace();

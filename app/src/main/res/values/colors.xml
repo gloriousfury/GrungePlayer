@@ -129,6 +129,6 @@
 
     <color name="darker_blue">#01152a</color>
     <color name="light_grey">#7d7d7d</color>
-
+    <color name="mixed_grey">#585d61</color>
 
 </resources>

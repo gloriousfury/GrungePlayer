@@ -217,7 +217,7 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.ViewHolder> 
                         }
                     });
                 }else{
-                    Picasso.with(context).load(R.drawable.ic_default_music_image).into(Holder.song_background);
+                    Picasso.with(context).load(R.drawable.background_cover).into(Holder.song_background);
 
                 }
 //
@@ -233,8 +233,8 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.ViewHolder> 
 //                });
 
             } else {
-                Picasso.with(context).load(R.drawable.ic_default_music_image).into(Holder.song_background);
-                int brownColor = ContextCompat.getColor(context, R.color.darker_brown);
+                Picasso.with(context).load(R.drawable.background_cover).into(Holder.song_background);
+                int brownColor = ContextCompat.getColor(context, R.color.mixed_grey);
                 holder.backgroundRelativeLayout.setBackgroundColor(brownColor);
 
             }
