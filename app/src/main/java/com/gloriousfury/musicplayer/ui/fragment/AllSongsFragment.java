@@ -98,13 +98,15 @@ public class AllSongsFragment extends Fragment {
             if (savedInstanceState == null || !savedInstanceState.containsKey(LIFECYCLE_AUDIOLIST_CALLBACKS_KEY)) {
                 if (audioList != null) {
                     adapter.setAudioListData(audioList);
-
+                    progressBar.setVisibility(View.INVISIBLE);
                 } else if (audioList == null) {
+                    progressBar.setVisibility(View.VISIBLE);
                     audioList = storage.loadAllAudio();
                     adapter.setAudioListData(audioList);
+                    progressBar.setVisibility(View.INVISIBLE);
                 } else {
-                    adapter.setAudioListData(audioList);
                     progressBar.setVisibility(View.VISIBLE);
+                    adapter.setAudioListData(audioList);
                     recyclerView.setVisibility(View.INVISIBLE);
                     Toast.makeText(getActivity(), "Not loaded yet", Toast.LENGTH_LONG).show();
 

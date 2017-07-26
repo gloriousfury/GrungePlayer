@@ -133,16 +133,16 @@ public class SingleSongActivity extends AppCompatActivity implements
         // Updating progress bar
 
 
-//        if (currentMediaPlayer.isPlaying()) {
-//            playPauseView.setImageDrawable(ContextCompat
-//                    .getDrawable(SingleSongActivity.this,R.drawable.ic_pause_circle_filled_black_24dp));
-//
-//
-//        } else if (!currentMediaPlayer.isPlaying()) {
-//            playPauseView.setImageDrawable(ContextCompat
-//                    .getDrawable(SingleSongActivity.this,R.drawable.ic_play_circle_filled_white_black_24dp));
-//
-//        }
+        if (currentMediaPlayer.isPlaying()) {
+            playPauseView.setImageDrawable(ContextCompat
+                    .getDrawable(SingleSongActivity.this,R.drawable.ic_pause_circle_filled_black_24dp));
+
+
+        } else if (!currentMediaPlayer.isPlaying()) {
+            playPauseView.setImageDrawable(ContextCompat
+                    .getDrawable(SingleSongActivity.this,R.drawable.ic_play_circle_filled_white_black_24dp));
+
+        }
 
         Intent getSongData = getIntent();
         Bundle getData = getSongData.getExtras();
@@ -154,6 +154,7 @@ public class SingleSongActivity extends AppCompatActivity implements
                 Utils.serviceBound = false;
                 playPauseView.setImageDrawable(ContextCompat
                         .getDrawable(SingleSongActivity.this, R.drawable.ic_play_circle_filled_white_black_24dp));
+
             } else {
                 Utils.serviceBound = true;
                 serviceBound = true;
@@ -243,18 +244,20 @@ public class SingleSongActivity extends AppCompatActivity implements
         if (currentMediaPlayer.isPlaying()) {
 
             playPauseView.setImageDrawable(ContextCompat
-                    .getDrawable(SingleSongActivity.this, R.drawable.ic_pause_circle_filled_black_24dp));
+                    .getDrawable(SingleSongActivity.this, R.drawable.ic_play_circle_filled_white_black_24dp));
 
             mediaPlayerService.pauseMedia(currentMediaPlayer);
 
         } else if (!currentMediaPlayer.isPlaying() && checker != null) {
 
+            playPauseView.setImageDrawable(ContextCompat
+                    .getDrawable(SingleSongActivity.this, R.drawable.ic_pause_circle_filled_black_24dp));
             audioIndex = storage.loadAudioIndex();
             currentPosition = storage.loadPlayBackPosition();
             mediaPlayerService.resumeMedia1(currentMediaPlayer, (int) currentPosition);
             seekBar.setProgress(0);
             seekBar.setMax(100);
-
+            checker = "definately not null";
             // Updating progress bar
             updateProgressBar();
 //            Utils utilInstance = new Utils(this);
@@ -268,7 +271,18 @@ public class SingleSongActivity extends AppCompatActivity implements
 //
 //            // Updating progress bar
 //            updateProgressBar();
-        } else {
+        } else if (!currentMediaPlayer.isPlaying()) {
+
+            playPauseView.setImageDrawable(ContextCompat
+                    .getDrawable(SingleSongActivity.this, R.drawable.ic_pause_circle_filled_black_24dp));
+            mediaPlayerService.resumeMedia(currentMediaPlayer);
+            // set Progress bar values
+            seekBar.setProgress(0);
+            seekBar.setMax(100);
+
+            // Updating progress bar
+            updateProgressBar();
+        }else {
 
             playPauseView.setImageDrawable(ContextCompat
                     .getDrawable(SingleSongActivity.this, R.drawable.ic_play_circle_filled_white_black_24dp));
@@ -280,6 +294,7 @@ public class SingleSongActivity extends AppCompatActivity implements
             // Updating progress bar
             updateProgressBar();
         }
+
 
 
     }
@@ -500,7 +515,11 @@ public class SingleSongActivity extends AppCompatActivity implements
         if(currentMediaPlayer.isPlaying()){
 
             playPauseView.setImageDrawable(ContextCompat
+                    .getDrawable(SingleSongActivity.this, R.drawable.ic_pause_circle_filled_black_24dp));
+        }else{
+            playPauseView.setImageDrawable(ContextCompat
                     .getDrawable(SingleSongActivity.this, R.drawable.ic_play_circle_filled_white_black_24dp));
+
         }
 
 

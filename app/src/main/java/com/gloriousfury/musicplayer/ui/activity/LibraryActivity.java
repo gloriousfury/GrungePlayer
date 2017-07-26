@@ -151,23 +151,12 @@ public class LibraryActivity extends AppCompatActivity
         storage = new StorageUtil(this);
         audioList = storage.loadAudio();
         audioIndex = storage.loadAudioIndex();
-        if (audioList != null && audioIndex!=-1) {
-//            Utils utils = Utils.getInstance();
-//            utils.startAudioService(audioIndex, audioList);
-
-            new Utils(this).startAudioService(1,audioList);
-        } else {
-
-            startTasks();
-
-        }
-
         mediaPlayerService = new MediaPlayerService(this);
         currentMediaPlayer = mediaPlayerService.getMediaPlayerInstance();
 
         songBackground.setOnClickListener(this);
         playPauseView.setOnClickListener(this);
-        Utils.serviceBound = false;
+
 //        nextSong.setOnClickListener(this);
 //        previousSong.setOnClickListener(this);
 
@@ -219,12 +208,20 @@ public class LibraryActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+        if (audioList != null || audioIndex != -1) {
 
-        if (checkPermissions()) {
-            startTasks();
-
+//            Utils utils = Utils.getInstance();
+            new Utils(this).startAudioService(audioIndex, audioList);
+            Utils.serviceBound = true;
         } else {
-            checkPermissions();
+            if (checkPermissions()) {
+                startTasks();
+
+            } else {
+                checkPermissions();
+
+            }
+
 
         }
     }
@@ -321,6 +318,7 @@ public class LibraryActivity extends AppCompatActivity
                     deliverResult(retrievedAudioList);
                 } else {
                     // Force a new load
+
                     forceLoad();
                 }
             }
@@ -424,7 +422,8 @@ public class LibraryActivity extends AppCompatActivity
     @Override
     public void onLoadFinished(Loader<ArrayList<Audio>> loader, ArrayList<Audio> data) {
         storage.storeAllAudio(data);
-
+        new Utils(this).startAudioService(0, audioList);
+        Utils.serviceBound = true;
 
 //        responseIntent.putExtra(AppMainServiceEvent.RESPONSE_DATA, activeAudio);
         Log.d(TAG, "I sent in sometihing here");
@@ -704,6 +703,10 @@ public class LibraryActivity extends AppCompatActivity
 
             Picasso.with(this).load(albumArtUri).into(songBackground);
 
+
+        } else {
+
+            Picasso.with(this).load(R.drawable.ic_default_music_option2).into(songBackground);
 
         }
 

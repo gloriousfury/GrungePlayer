@@ -81,8 +81,12 @@ public class AllSongsAdapter extends RecyclerView.Adapter<AllSongsAdapter.ViewHo
             String checker = null;
             Audio singleSong = song_list.get(adapterposition);
 //            Utils appUtils = new Utils(context);
+            if (Utils.getInstance() != null) {
+                Utils.getInstance().playAudio(getAdapterPosition(), song_list);
 
-            new Utils(context).playAudio(getAdapterPosition(), song_list);
+            } else {
+                new Utils(context).playAudio(getAdapterPosition(), song_list);
+            }
 
             Intent openSingleSongActivity = new Intent(context, SingleSongActivity.class);
             openSingleSongActivity.putExtra(CLICK_CHECKER, checker);
@@ -187,9 +191,9 @@ public class AllSongsAdapter extends RecyclerView.Adapter<AllSongsAdapter.ViewHo
     @Override
     public int getItemViewType(int position) {
         int viewType = 0;
-        if (song_list.get(position).getTitle().contentEquals("Header")){
+        if (song_list.get(position).getTitle().contentEquals("Header")) {
             viewType = TYPE_HEADER;
-        } else  {
+        } else {
             viewType = 2;
         }
 
