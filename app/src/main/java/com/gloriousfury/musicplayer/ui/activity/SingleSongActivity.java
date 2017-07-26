@@ -528,6 +528,13 @@ public class SingleSongActivity extends AppCompatActivity implements
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        bus.unregister(this);
+    }
+
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         mHandler.removeCallbacks(mUpdateTimeTask);

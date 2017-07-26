@@ -88,11 +88,21 @@ public class AlbumsFragment extends Fragment {
         recyclerView = (RecyclerView) v.findViewById(R.id.recyclerView);
         recyclerView.setHasFixedSize(true);
 
+        RecyclerView.LayoutManager layoutManager = new GridLayoutManager(getActivity(), 2);
+        recyclerView.setLayoutManager(layoutManager);
+
+        recyclerView.addItemDecoration(new Utils.GridSpacingItemDecoration(2, dpToPx(1,getContext()), true));
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+//        recyclerView.addItemDecoration(new DividerItemDecoration(context,
+//                LinearLayoutManager.VERTICAL, R.drawable.divider_white));
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+
 
 
         String currentActivity= getActivity().getClass().getSimpleName();
         Log.e(TAG,currentActivity);
-
+        adapter = new AlbumAdapter(getActivity(), retrievedAlbumList);
+        recyclerView.setAdapter(adapter);
         if(currentActivity.contentEquals("LibraryActivity")){
 
             retrievedAlbumList = storage.loadAllAlbums();
@@ -101,7 +111,7 @@ public class AlbumsFragment extends Fragment {
             getData = getActivity().getIntent().getExtras();
 
             if(getData!=null){
-                retrievedAlbumList = new ArrayList<>();
+
                 Artist singleArtist = getData.getParcelable(ARTIST_ITEM);
                 String artist_name = singleArtist.getArtistName();
 //            String album_art_uri = singleArtist.getAlbumArtUri();
@@ -112,32 +122,6 @@ public class AlbumsFragment extends Fragment {
             }
         }
 
-
-
-
-//
-//        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext());
-//
-//        recyclerView.setLayoutManager(layoutManager);
-
-        recyclerView = (RecyclerView) v.findViewById(R.id.recyclerView);
-        recyclerView.setHasFixedSize(true);
-
-//        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext());
-
-
-        recyclerView.setHasFixedSize(true);
-
-        RecyclerView.LayoutManager layoutManager = new GridLayoutManager(getActivity(), 2);
-        recyclerView.setLayoutManager(layoutManager);
-
-        recyclerView.addItemDecoration(new Utils.GridSpacingItemDecoration(2, dpToPx(1,getContext()), true));
-        recyclerView.setItemAnimator(new DefaultItemAnimator());
-//        recyclerView.addItemDecoration(new DividerItemDecoration(context,
-//                LinearLayoutManager.VERTICAL, R.drawable.divider_white));
-        recyclerView.setItemAnimator(new DefaultItemAnimator());
-
-        adapter = new AlbumAdapter(getActivity(), retrievedAlbumList);
 
         if (retrievedAlbumList != null) {
             adapter.setAudioListData(addAlphabets(sortList(retrievedAlbumList)));
@@ -151,7 +135,7 @@ public class AlbumsFragment extends Fragment {
 
 
         }
-        recyclerView.setAdapter(adapter);
+
 
         Context context = getActivity();
 

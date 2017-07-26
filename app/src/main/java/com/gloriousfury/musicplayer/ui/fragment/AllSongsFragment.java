@@ -127,22 +127,27 @@ public class AllSongsFragment extends Fragment {
 //                actionBar.setTitle(savedInstanceState.getString(LIFECYCLE_ACTIONBAR_TITLE));
 //                moviesAdapter.setMoviesData(movieList);
             }
+
+            recyclerView.setAdapter(adapter);
         } else if (currentActivity.contentEquals("ArtistActivity")) {
             Bundle getData = getActivity().getIntent().getExtras();
             if (getData != null) {
 
                 Artist singleArtist = getData.getParcelable(ARTIST_ITEM);
                 String artist_name = singleArtist.getArtistName();
+                Log.e(TAG, currentActivity + "I came to artist activity " + artist_name);
 //            String album_art_uri = singleArtist.getAlbumArtUri();
                 long artist_id = singleArtist.getArtistId();
                 progressBar.setVisibility(View.VISIBLE);
                 audioList = loadAudioWithArtistName(artist_name);
+                adapter = new AllSongsAdapter(getActivity(), audioList);
 
             }
+            recyclerView.setAdapter(adapter);
         }
 
 
-        recyclerView.setAdapter(adapter);
+
         return v;
     }
 
