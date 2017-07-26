@@ -319,18 +319,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                     Log.e(TAG, "I came to the init  player part");
                 } else if (!mediaPlayer.isPlaying()) {
 
-                    AudioManager amanager = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
-                    int maxVolume = amanager.getStreamMaxVolume(AudioManager.STREAM_ALARM);
-                    amanager.setStreamVolume(AudioManager.STREAM_ALARM, maxVolume, 0);
-//
-//                    try {
-//                        mediaPlayer.prepare();
-//                    } catch (IOException e) {
-//                        e.printStackTrace();
-//                    }
-                    mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
                     mediaPlayer.start();
-
                     Log.e(TAG, "I came to the is not playing part");
 //                    mediaPlayer.setVolume(1.0f, 1.0f);
                 } else if (mediaPlayer.isPlaying()) {
@@ -362,7 +351,9 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
                 // Lost focus for a short time, but it's ok to keep playing
                 // at an attenuated level
-                if (mediaPlayer.isPlaying()) mediaPlayer.setVolume(0.1f, 0.1f);
+                if (mediaPlayer.isPlaying())
+                    mediaPlayer.pause();
+//                    mediaPlayer.setVolume(0.1f, 0.1f);
                 break;
 
         }

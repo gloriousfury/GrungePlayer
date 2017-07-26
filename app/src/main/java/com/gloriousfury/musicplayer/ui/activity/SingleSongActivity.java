@@ -285,7 +285,7 @@ public class SingleSongActivity extends AppCompatActivity implements
         }else {
 
             playPauseView.setImageDrawable(ContextCompat
-                    .getDrawable(SingleSongActivity.this, R.drawable.ic_play_circle_filled_white_black_24dp));
+                    .getDrawable(SingleSongActivity.this, R.drawable.ic_pause_circle_filled_black_24dp));
             mediaPlayerService.resumeMedia(currentMediaPlayer);
             // set Progress bar values
             seekBar.setProgress(0);
