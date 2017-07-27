@@ -113,13 +113,15 @@ public class SingleSongActivity extends AppCompatActivity implements
     String CLICK_CHECKER = "click_checker";
     String checker;
     long currentPosition;
+    Intent responseIntent = new Intent();
+    AppMainServiceEvent event = new AppMainServiceEvent();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_single_song_test);
         ButterKnife.bind(this);
-        mediaPlayerService = new MediaPlayerService(this);
+        mediaPlayerService = MediaPlayerService.getMediaPlayerServiceInstance();
         currentMediaPlayer = mediaPlayerService.getMediaPlayerInstance();
         songTitle.setSelected(true);
 //        shuffleState = storage.getShuffleSettings();
@@ -136,12 +138,12 @@ public class SingleSongActivity extends AppCompatActivity implements
 
         if (currentMediaPlayer.isPlaying()) {
             playPauseView.setImageDrawable(ContextCompat
-                    .getDrawable(SingleSongActivity.this,R.drawable.ic_pause_circle_filled_black_24dp));
+                    .getDrawable(SingleSongActivity.this, R.drawable.ic_pause_circle_filled_black_24dp));
 
 
         } else if (!currentMediaPlayer.isPlaying()) {
             playPauseView.setImageDrawable(ContextCompat
-                    .getDrawable(SingleSongActivity.this,R.drawable.ic_play_circle_filled_white_black_24dp));
+                    .getDrawable(SingleSongActivity.this, R.drawable.ic_play_circle_filled_white_black_24dp));
 
         }
 
@@ -246,8 +248,19 @@ public class SingleSongActivity extends AppCompatActivity implements
             playPauseView.setImageDrawable(ContextCompat
                     .getDrawable(SingleSongActivity.this, R.drawable.ic_play_circle_filled_white_black_24dp));
 
+//            currentMediaPlayer.pause();
+
             mediaPlayerService.pauseMedia(currentMediaPlayer);
             mediaPlayerService.buildNotification(PlaybackStatus.PAUSED);
+            responseIntent.putExtra(AppMainServiceEvent.RESPONSE_DATA, true);
+            event.setMainIntent(responseIntent);
+            event.setEventType(AppMainServiceEvent.PLAYBACK_CHANGE1);
+            EventBus.getDefault().post(event);
+
+
+
+//            mediaPlayerService.buildNotification(PlaybackStatus.PAUSED);
+//            mediaPlayerService.changeNotificationState(PlaybackStatus.PAUSED);
 
         } else if (!currentMediaPlayer.isPlaying() && checker != null) {
 
@@ -255,8 +268,10 @@ public class SingleSongActivity extends AppCompatActivity implements
                     .getDrawable(SingleSongActivity.this, R.drawable.ic_pause_circle_filled_black_24dp));
             audioIndex = storage.loadAudioIndex();
             currentPosition = storage.loadPlayBackPosition();
-            mediaPlayerService.resumeMedia1(currentMediaPlayer, (int) currentPosition);
-            mediaPlayerService.buildNotification(PlaybackStatus.PLAYING);
+//            currentMediaPlayer.start();
+//            mediaPlayerService.resumeMedia1(currentMediaPlayer, (int) currentPosition);
+//            mediaPlayerService.changeNotificationState(PlaybackStatus.PLAYING);
+//            mediaPlayerService.buildNotification(PlaybackStatus.PLAYING);
             seekBar.setProgress(0);
             seekBar.setMax(100);
             checker = "definately not null";
@@ -277,27 +292,31 @@ public class SingleSongActivity extends AppCompatActivity implements
 
             playPauseView.setImageDrawable(ContextCompat
                     .getDrawable(SingleSongActivity.this, R.drawable.ic_pause_circle_filled_black_24dp));
+//            currentMediaPlayer.start();
             mediaPlayerService.resumeMedia(currentMediaPlayer);
             mediaPlayerService.buildNotification(PlaybackStatus.PLAYING);
             // set Progress bar values
             seekBar.setProgress(0);
             seekBar.setMax(100);
+            responseIntent.putExtra(AppMainServiceEvent.RESPONSE_DATA, false);
+            event.setMainIntent(responseIntent);
+            event.setEventType(AppMainServiceEvent.PLAYBACK_CHANGE1);
+            EventBus.getDefault().post(event);
 
             // Updating progress bar
             updateProgressBar();
-        }else {
+        } else {
 
             playPauseView.setImageDrawable(ContextCompat
                     .getDrawable(SingleSongActivity.this, R.drawable.ic_pause_circle_filled_black_24dp));
-            mediaPlayerService.resumeMedia(currentMediaPlayer);
+            mediaPlayerService.resumeMedia1(currentMediaPlayer,mediaPlayerService.getCurrentDur());
             // set Progress bar values
-            seekBar.setProgress(0);
-            seekBar.setMax(100);
+//            seekBar.setProgress(0);
+//            seekBar.setMax(100);
 
             // Updating progress bar
             updateProgressBar();
         }
-
 
 
     }
@@ -515,11 +534,11 @@ public class SingleSongActivity extends AppCompatActivity implements
         super.onStart();
 //        if (bus == null) {
         currentMediaPlayer = mediaPlayerService.getMediaPlayerInstance();
-        if(currentMediaPlayer.isPlaying()){
+        if (currentMediaPlayer.isPlaying()) {
 
             playPauseView.setImageDrawable(ContextCompat
                     .getDrawable(SingleSongActivity.this, R.drawable.ic_pause_circle_filled_black_24dp));
-        }else{
+        } else {
             playPauseView.setImageDrawable(ContextCompat
                     .getDrawable(SingleSongActivity.this, R.drawable.ic_play_circle_filled_white_black_24dp));
 
@@ -575,12 +594,14 @@ public class SingleSongActivity extends AppCompatActivity implements
             }
 
 
-        }
-        if (event.getEventType() == AppMainServiceEvent.PLAYBACK_CHANGE) {
+        } else if (event.getEventType() == AppMainServiceEvent.PLAYBACK_CHANGE) {
             if (i != null) {
 
-             boolean  changePlayback  = i.getBooleanExtra(AppMainServiceEvent.RESPONSE_DATA);
+                Log.e(TAG,"I came to singleactivity playback");
 
+                boolean playbackStage = i.getBooleanExtra(AppMainServiceEvent.RESPONSE_DATA,false);
+                Log.e(TAG,"I came to singleactivity playback" + playbackStage);
+                changePlayPauseImage(playbackStage);
 
             } else {
 
@@ -590,6 +611,22 @@ public class SingleSongActivity extends AppCompatActivity implements
 
 
         }
+    }
+
+
+    public void changePlayPauseImage(boolean playbackStatus) {
+        if (playbackStatus) {
+            playPauseView.setImageDrawable(ContextCompat
+                    .getDrawable(SingleSongActivity.this, R.drawable.ic_pause_circle_filled_black_24dp));
+
+        } else if (!playbackStatus) {
+            playPauseView.setImageDrawable(ContextCompat
+                    .getDrawable(SingleSongActivity.this, R.drawable.ic_play_circle_filled_white_black_24dp));
+        } else {
+
+        }
+
+
     }
 
 }

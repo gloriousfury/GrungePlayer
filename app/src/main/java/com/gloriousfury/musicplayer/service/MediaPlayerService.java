@@ -74,11 +74,12 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     int duration;
     Intent responseIntent = new Intent();
     AppMainServiceEvent event = new AppMainServiceEvent();
-    Context context;
+    static Context context;
     PlaybackStatus playbackStatus;
     boolean shuffleState = false;
     boolean shouldItPlay = false;
     String checker;
+
 
     //MediaSession
     private MediaSessionManager mediaSessionManager;
@@ -111,6 +112,12 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         this.context = context;
     }
 
+    private final static MediaPlayerService ourInstance = new MediaPlayerService(context);
+
+    public static MediaPlayerService getMediaPlayerServiceInstance() {
+        return ourInstance;
+    }
+
     public MediaPlayer getMediaPlayerInstance() {
         if (mediaPlayer == null) {
             mediaPlayer = new MediaPlayer();
@@ -132,7 +139,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     @Override
     public void onCreate() {
         super.onCreate();
-
+        EventBus.getDefault().register(this);
         // Perform one-time setup procedures
         StorageUtil storage = new StorageUtil(getContext());
         shuffleState = storage.getShuffleSettings();
@@ -320,9 +327,9 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                     initMediaPlayer();
                     Log.e(TAG, "I came to the init  player part");
                 } else if (!mediaPlayer.isPlaying()) {
-                    if(shouldItPlay){
-                    mediaPlayer.start();
-                    Log.e(TAG, "I came to the is not playing part");
+                    if (shouldItPlay) {
+                        mediaPlayer.start();
+                        Log.e(TAG, "I came to the is not playing part");
 //                    mediaPlayer.setVolume(1.0f, 1.0f);
                     }
                 } else if (mediaPlayer.isPlaying()) {
@@ -521,24 +528,23 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             public void onPlay() {
                 super.onPlay();
                 resumeMedia(mediaPlayer);
-                responseIntent.putExtra(AppMainServiceEvent.RESPONSE_DATA, convertPlaybackToBool(PlaybackStatus.PLAYING));
+                buildNotification(PlaybackStatus.PLAYING);
+                responseIntent.putExtra(AppMainServiceEvent.RESPONSE_DATA, convertFromPlaybackToBool(PlaybackStatus.PLAYING));
                 event.setMainIntent(responseIntent);
                 event.setEventType(AppMainServiceEvent.PLAYBACK_CHANGE);
-                //TODO see if we are creating multiple instance of eventbus by doing this
                 EventBus.getDefault().post(event);
-                buildNotification(PlaybackStatus.PLAYING);
+
             }
 
             @Override
             public void onPause() {
                 super.onPause();
                 pauseMedia(mediaPlayer);
-                responseIntent.putExtra(AppMainServiceEvent.RESPONSE_DATA, convertPlaybackToBool(PlaybackStatus.PAUSED));
+                buildNotification(PlaybackStatus.PAUSED);
+                responseIntent.putExtra(AppMainServiceEvent.RESPONSE_DATA, convertFromPlaybackToBool(PlaybackStatus.PAUSED));
                 event.setMainIntent(responseIntent);
                 event.setEventType(AppMainServiceEvent.PLAYBACK_CHANGE);
-                //TODO see if we are creating multiple instance of eventbus by doing this
                 EventBus.getDefault().post(event);
-                buildNotification(PlaybackStatus.PAUSED);
             }
 
             @Override
@@ -581,6 +587,51 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         });
     }
 
+    private void updateMetaDataCon(Context context) {
+//        Bitmap albumArt = BitmapFactory.decodeResource(getContext().getResources(),
+//                R.mipmap.ic_launcher); //replace with medias albumArt
+
+        StorageUtil storageUtil = new StorageUtil(context);
+        Toast.makeText(getContext(), "I came to the updateMetaData", Toast.LENGTH_LONG).show();
+        audioList = storageUtil.loadAudio();
+        audioIndex = storageUtil.loadAudioIndex();
+
+        if (audioList != null) {
+            activeAudio = audioList.get(audioIndex);
+
+            Uri albumArtUri = null;
+
+            if (activeAudio.getAlbumArtUriString() != null) {
+                albumArtUri = Uri.parse(activeAudio.getAlbumArtUriString());
+
+            }
+            Bitmap albumArt = null;
+            try {
+
+                if (albumArtUri != null) {
+                    albumArt = MediaStore.Images.Media.getBitmap(
+                            context.getContentResolver(), albumArtUri);
+                    albumArt = Bitmap.createScaledBitmap(albumArt, 30, 30, true);
+                }
+
+
+            } catch (FileNotFoundException exception) {
+                exception.printStackTrace();
+                albumArt = BitmapFactory.decodeResource(getResources(),
+                        R.drawable.ic_default_music_option2);
+            } catch (IOException e) {
+
+                e.printStackTrace();
+            }
+            // Update the current metadata
+            mediaSession.setMetadata(new MediaMetadataCompat.Builder()
+                    .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, albumArt)
+                    .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, activeAudio.getArtist())
+                    .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, activeAudio.getAlbum())
+                    .putString(MediaMetadataCompat.METADATA_KEY_TITLE, activeAudio.getTitle())
+                    .build());
+        }
+    }
 
     public void updateMetaData() {
 //        Bitmap albumArt = BitmapFactory.decodeResource(getContext().getResources(),
@@ -737,7 +788,10 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         int notificationAction = android.R.drawable.ic_media_pause;//needs to be initialized
         PendingIntent play_pauseAction = null;
         setPlaybackStatus(playbackStatus);
-
+        getActiveAudio();
+        if (mediaSession == null) {
+            afterMethod();
+        }
 
         Uri albumArtUri = null;
 
@@ -796,7 +850,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 .setContentText(activeAudio.getArtist())
                 .setContentTitle(activeAudio.getTitle())
                 .setContentInfo(activeAudio.getAlbum())
-                .setOngoing(convertPlaybackToBool(playbackStatus))
+                .setOngoing(convertFromPlaybackToBool(playbackStatus))
                 // Add playback actions
                 .addAction(android.R.drawable.ic_media_previous, "previous", playbackAction(3))
                 .addAction(notificationAction, "pause", play_pauseAction)
@@ -805,22 +859,47 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         ((NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE)).notify(NOTIFICATION_ID, notificationBuilder.build());
     }
 
-    private boolean convertPlaybackToBool(PlaybackStatus playbackStatus){
-        if(playbackStatus == PlaybackStatus.PAUSED){
+
+    public void changeNotificationState(PlaybackStatus playbackStatus) {
+        if (playbackStatus == PlaybackStatus.PAUSED) {
+
+            buildNotification(PlaybackStatus.PAUSED);
+        } else if (playbackStatus == PlaybackStatus.PLAYING) {
+            buildNotification(PlaybackStatus.PLAYING);
+        }
+
+    }
+
+    private boolean convertFromPlaybackToBool(PlaybackStatus playbackStatus) {
+        if (playbackStatus == PlaybackStatus.PAUSED) {
 
             return false;
-        }else if(playbackStatus == PlaybackStatus.PLAYING){
+        } else if (playbackStatus == PlaybackStatus.PLAYING) {
             return true;
-        }else {
+        } else {
             return false;
         }
 
     }
 
-    private void setPlaybackStatus(PlaybackStatus playbackStatus){
-        if(playbackStatus == PlaybackStatus.PLAYING){
+
+    private PlaybackStatus convertFromBoolToPlaybackStatus(Boolean playbackBool) {
+        if (playbackBool) {
+            return PlaybackStatus.PAUSED;
+
+        } else if (!playbackBool) {
+            return PlaybackStatus.PLAYING;
+        } else {
+            return PlaybackStatus.PAUSED;
+        }
+
+    }
+
+
+    private void setPlaybackStatus(PlaybackStatus playbackStatus) {
+        if (playbackStatus == PlaybackStatus.PLAYING) {
             shouldItPlay = true;
-        }else  if(playbackStatus == PlaybackStatus.PAUSED){
+        } else if (playbackStatus == PlaybackStatus.PAUSED) {
             shouldItPlay = false;
         }
 
@@ -983,6 +1062,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     @Override
     public void onDestroy() {
         super.onDestroy();
+        EventBus.getDefault().unregister(this);
         if (mediaPlayer != null) {
             if (Utils.isServiceBound()) {
                 resumePosition = mediaPlayer.getCurrentPosition();
@@ -1015,6 +1095,28 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
         //clear cached playlist
 //        new StorageUtil(getContext()).clearCachedAudioPlaylist();
+    }
+
+
+    public void onEventBackgroundThread(AppMainServiceEvent event) {
+        Log.d(TAG, "onEventMainThread() called with: " + "event = [" + event + "]");
+        Intent i = event.getMainIntent();
+
+
+        if (event.getEventType() == AppMainServiceEvent.PLAYBACK_CHANGE1) {
+            boolean playbackStage = i.getParcelableExtra(AppMainServiceEvent.RESPONSE_DATA);
+            if (i != null) {
+                buildNotification(convertFromBoolToPlaybackStatus(playbackStage));
+                Log.e(TAG, "i Came to the onPlaybackChange");
+
+            } else {
+
+                Toast statu = Toast.makeText(this, "Cant Retrieve data at the moment, Try again", Toast.LENGTH_LONG);
+                statu.show();
+            }
+
+
+        }
     }
 
 

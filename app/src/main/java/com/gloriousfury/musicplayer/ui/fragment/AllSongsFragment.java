@@ -13,11 +13,18 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.GestureDetectorCompat;
+
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.ActionMode;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -46,7 +53,7 @@ import de.greenrobot.event.EventBus;
  * Created by OLORIAKE KEHINDE on 11/16/2016.
  */
 
-public class AllSongsFragment extends Fragment {
+public class AllSongsFragment extends Fragment{
 
 
     public static AllSongsFragment newInstance() {
@@ -72,12 +79,15 @@ public class AllSongsFragment extends Fragment {
     //    private static final String LIFECYCLE_PAGE_NO_KEY = "page_no";
     String ARTIST_ITEM = "artist_item";
     AllSongsAdapter adapter;
+    GestureDetectorCompat gestureScanner;
+    ActionMode actionMode;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_allsongs, container, false);
+        gestureScanner =   new GestureDetectorCompat(getActivity(), new RecyclerViewOnGestureListener());
         storage = new StorageUtil(getContext());
 
         progressBar = (ProgressBar) v.findViewById(R.id.progressBar);
@@ -307,5 +317,64 @@ public class AllSongsFragment extends Fragment {
     public void onAttach(Context context) {
         super.onAttach(context);
         bus.register(this);
+    }
+
+
+    private class RecyclerViewOnGestureListener extends GestureDetector.SimpleOnGestureListener {
+
+
+        public void onLongPress(MotionEvent e) {
+            View view = recyclerView.findChildViewUnder(e.getX(), e.getY());
+            if (actionMode != null) {
+                return;
+            }
+            // Start the CAB using the ActionMode.Callback defined above
+            actionMode = getActivity().startActionMode(new android.view.ActionMode.Callback() {
+                @Override
+                public boolean onCreateActionMode(android.view.ActionMode actionMode, Menu menu) {
+                    return false;
+                }
+
+                @Override
+                public boolean onPrepareActionMode(android.view.ActionMode actionMode, Menu menu) {
+                    return false;
+                }
+
+                @Override
+                public boolean onActionItemClicked(android.view.ActionMode actionMode, MenuItem menuItem) {
+
+//                        switch (menuItem.getItemId()) {
+////                            case R.id.menu_delete:
+////                                List<Integer> selectedItemPositions =
+////                                        adapter.getSelectedItems();
+////                                for (int i = selectedItemPositions.size() – 1;
+////                                i >= 0;
+////                                i–) {
+////                                adapter.removeData(selectedItemPositions.get(i));
+////                            }
+////                            actionMode.finish();
+//                            return true;
+//                            default:
+//                                return false;
+                    return false;
+                }
+
+                @Override
+                public void onDestroyActionMode(android.view.ActionMode actionMode) {
+
+                }
+            });
+
+            int idx = recyclerView.getChildPosition(view);
+            myToggleSelection(idx);
+            super.onLongPress(e);
+
+            super.onLongPress(e);
+        }
+    }
+    private void myToggleSelection(int idx) {
+        adapter.toggleSelection(idx);
+//        String title = getString( R.string.selected_count,adapter.getSelectedItemCount());
+        actionMode.setTitle(" Issa 5");
     }
 }
