@@ -220,7 +220,7 @@ public class SingleSongActivity extends AppCompatActivity implements
             mediaPlayerService.shuffleToNext(audioList, audioIndex);
         } else {
             mediaPlayerService.skipToNext(audioList, audioIndex, this, currentMediaPlayer);
-
+//            mediaPlayerService.buildNotification(PlaybackStatus.PLAYING);
         }
 
     }
