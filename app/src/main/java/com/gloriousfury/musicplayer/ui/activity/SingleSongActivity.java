@@ -121,6 +121,7 @@ public class SingleSongActivity extends AppCompatActivity implements
         ButterKnife.bind(this);
         mediaPlayerService = new MediaPlayerService(this);
         currentMediaPlayer = mediaPlayerService.getMediaPlayerInstance();
+        songTitle.setSelected(true);
 //        shuffleState = storage.getShuffleSettings();
         seekBar.setOnSeekBarChangeListener(this);
 
@@ -220,7 +221,6 @@ public class SingleSongActivity extends AppCompatActivity implements
             mediaPlayerService.shuffleToNext(audioList, audioIndex);
         } else {
             mediaPlayerService.skipToNext(audioList, audioIndex, this, currentMediaPlayer);
-//            mediaPlayerService.buildNotification(PlaybackStatus.PLAYING);
         }
 
     }

@@ -620,7 +620,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 //                R.mipmap.ic_launcher); //replace with medias albumArt
 
         StorageUtil storageUtil = new StorageUtil(getContext());
-        Toast.makeText(getContext(), "I came to the updateMetaData", Toast.LENGTH_LONG).show();
+//        Toast.makeText(getContext(), "I came to the updateMetaData", Toast.LENGTH_LONG).show();
         audioList = storageUtil.loadAudio();
         audioIndex = storageUtil.loadAudioIndex();
 

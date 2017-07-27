@@ -123,7 +123,10 @@
             android:textColor="@color/black"
             android:textSize="20sp"
             android:textStyle="bold"
-            tools:text="Passenger" />
+            tools:text="Passenger"
+
+
+            />
 
 
         <TextView
@@ -135,7 +138,16 @@
             android:layout_marginTop="@dimen/three"
             android:textSize="14sp"
             android:textStyle="bold"
-            tools:text="Let her go " />
+            tools:text="Let her go "
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:maxLines="1"
+            android:scrollHorizontally="true"
+            android:ellipsize="marquee"
+            android:marqueeRepeatLimit ="marquee_forever"
+
+
+            />
 
 
         <RelativeLayout
