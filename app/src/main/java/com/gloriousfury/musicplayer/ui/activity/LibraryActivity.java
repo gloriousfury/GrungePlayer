@@ -742,7 +742,7 @@ public class LibraryActivity extends AppCompatActivity
         super.onDestroy();
         bus.unregister(this);
         mHandler.removeCallbacks(mUpdateTimeTask);
-        mediaPlayerService.onDestroy();
+//        mediaPlayerService.onDestroy();
 
     }
 
@@ -819,12 +819,14 @@ public class LibraryActivity extends AppCompatActivity
                             .getDrawable(LibraryActivity.this, R.drawable.ic_play_arrow_black_24dp));
 
                     mediaPlayerService.pauseMedia(currentMediaPlayer);
+                    mediaPlayerService.buildNotification(PlaybackStatus.PAUSED);
 
                 } else if (!mediaPlayerService.isPng()) {
 
                     playPauseView.setImageDrawable(ContextCompat
                             .getDrawable(LibraryActivity.this, R.drawable.ic_pause_black_24dp));
                     mediaPlayerService.resumeMedia(currentMediaPlayer);
+                    mediaPlayerService.buildNotification(PlaybackStatus.PLAYING);
 
                     //TODO BUILD EXTERNAL PLAYER
 
@@ -834,6 +836,7 @@ public class LibraryActivity extends AppCompatActivity
                             .getDrawable(LibraryActivity.this, R.drawable.ic_pause_black_24dp));
 
                     mediaPlayerService.resumeMedia(currentMediaPlayer);
+                    mediaPlayerService.buildNotification(PlaybackStatus.PLAYING);
 
 
                 }

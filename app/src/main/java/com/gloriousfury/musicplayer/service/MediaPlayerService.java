@@ -77,6 +77,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     Context context;
     PlaybackStatus playbackStatus;
     boolean shuffleState = false;
+    boolean shouldItPlay = false;
     String checker;
 
     //MediaSession
@@ -319,10 +320,11 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                     initMediaPlayer();
                     Log.e(TAG, "I came to the init  player part");
                 } else if (!mediaPlayer.isPlaying()) {
-
+                    if(shouldItPlay){
                     mediaPlayer.start();
                     Log.e(TAG, "I came to the is not playing part");
 //                    mediaPlayer.setVolume(1.0f, 1.0f);
+                    }
                 } else if (mediaPlayer.isPlaying()) {
 
                     AudioManager amanager = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
@@ -519,6 +521,11 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             public void onPlay() {
                 super.onPlay();
                 resumeMedia(mediaPlayer);
+                responseIntent.putExtra(AppMainServiceEvent.RESPONSE_DATA, convertPlaybackToBool(PlaybackStatus.PLAYING));
+                event.setMainIntent(responseIntent);
+                event.setEventType(AppMainServiceEvent.PLAYBACK_CHANGE);
+                //TODO see if we are creating multiple instance of eventbus by doing this
+                EventBus.getDefault().post(event);
                 buildNotification(PlaybackStatus.PLAYING);
             }
 
@@ -526,6 +533,11 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             public void onPause() {
                 super.onPause();
                 pauseMedia(mediaPlayer);
+                responseIntent.putExtra(AppMainServiceEvent.RESPONSE_DATA, convertPlaybackToBool(PlaybackStatus.PAUSED));
+                event.setMainIntent(responseIntent);
+                event.setEventType(AppMainServiceEvent.PLAYBACK_CHANGE);
+                //TODO see if we are creating multiple instance of eventbus by doing this
+                EventBus.getDefault().post(event);
                 buildNotification(PlaybackStatus.PAUSED);
             }
 
@@ -569,51 +581,6 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         });
     }
 
-    private void updateMetaDataCon(Context context) {
-//        Bitmap albumArt = BitmapFactory.decodeResource(getContext().getResources(),
-//                R.mipmap.ic_launcher); //replace with medias albumArt
-
-        StorageUtil storageUtil = new StorageUtil(context);
-        Toast.makeText(getContext(), "I came to the updateMetaData", Toast.LENGTH_LONG).show();
-        audioList = storageUtil.loadAudio();
-        audioIndex = storageUtil.loadAudioIndex();
-
-        if (audioList != null) {
-            activeAudio = audioList.get(audioIndex);
-
-            Uri albumArtUri = null;
-
-            if (activeAudio.getAlbumArtUriString() != null) {
-                albumArtUri = Uri.parse(activeAudio.getAlbumArtUriString());
-
-            }
-            Bitmap albumArt = null;
-            try {
-
-                if (albumArtUri != null) {
-                    albumArt = MediaStore.Images.Media.getBitmap(
-                            context.getContentResolver(), albumArtUri);
-                    albumArt = Bitmap.createScaledBitmap(albumArt, 30, 30, true);
-                }
-
-
-            } catch (FileNotFoundException exception) {
-                exception.printStackTrace();
-                albumArt = BitmapFactory.decodeResource(getResources(),
-                        R.drawable.ic_default_music_option2);
-            } catch (IOException e) {
-
-                e.printStackTrace();
-            }
-            // Update the current metadata
-            mediaSession.setMetadata(new MediaMetadataCompat.Builder()
-                    .putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, albumArt)
-                    .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, activeAudio.getArtist())
-                    .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, activeAudio.getAlbum())
-                    .putString(MediaMetadataCompat.METADATA_KEY_TITLE, activeAudio.getTitle())
-                    .build());
-        }
-    }
 
     public void updateMetaData() {
 //        Bitmap albumArt = BitmapFactory.decodeResource(getContext().getResources(),
@@ -769,6 +736,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
         int notificationAction = android.R.drawable.ic_media_pause;//needs to be initialized
         PendingIntent play_pauseAction = null;
+        setPlaybackStatus(playbackStatus);
+
 
         Uri albumArtUri = null;
 
@@ -793,7 +762,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             albumArt = BitmapFactory.decodeResource(getContext().getResources(),
                     R.drawable.ic_default_music_image);
         }
-        albumArt = Bitmap.createScaledBitmap(albumArt, 60, 60, true);
+        albumArt = Bitmap.createScaledBitmap(albumArt, 300, 300, true);
 
         //Build a new notification according to the current state of the MediaPlayer
         if (playbackStatus == PlaybackStatus.PLAYING) {
@@ -827,12 +796,34 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 .setContentText(activeAudio.getArtist())
                 .setContentTitle(activeAudio.getTitle())
                 .setContentInfo(activeAudio.getAlbum())
+                .setOngoing(convertPlaybackToBool(playbackStatus))
                 // Add playback actions
                 .addAction(android.R.drawable.ic_media_previous, "previous", playbackAction(3))
                 .addAction(notificationAction, "pause", play_pauseAction)
                 .addAction(android.R.drawable.ic_media_next, "next", playbackAction(2));
 
         ((NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE)).notify(NOTIFICATION_ID, notificationBuilder.build());
+    }
+
+    private boolean convertPlaybackToBool(PlaybackStatus playbackStatus){
+        if(playbackStatus == PlaybackStatus.PAUSED){
+
+            return false;
+        }else if(playbackStatus == PlaybackStatus.PLAYING){
+            return true;
+        }else {
+            return false;
+        }
+
+    }
+
+    private void setPlaybackStatus(PlaybackStatus playbackStatus){
+        if(playbackStatus == PlaybackStatus.PLAYING){
+            shouldItPlay = true;
+        }else  if(playbackStatus == PlaybackStatus.PAUSED){
+            shouldItPlay = false;
+        }
+
     }
 
     private void removeNotification() {
@@ -973,7 +964,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 e.printStackTrace();
                 stopSelf();
             }
-            buildNotification(PlaybackStatus.PLAYING);
+//            buildNotification(PlaybackStatus.PLAYING);
         }
 
 //        }else if(mediaSessionManager == null && !Utils.isServiceBound()){

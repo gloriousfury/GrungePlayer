@@ -8,6 +8,8 @@ import android.content.Intent;
 public class AppMainServiceEvent {
 
     public static final int ONCOMPLETED_RESPONSE = 1101;
+    public static final int PLAYBACK_CHANGE = 1102;
+
     public static final int CATEGORIES_RESPONSE = 1001;
     public static final int ONDATALOADED = 1002;
     public static final int ONDATA_RECIEVED_ALLSONGS = 1003;

@@ -247,6 +247,7 @@ public class SingleSongActivity extends AppCompatActivity implements
                     .getDrawable(SingleSongActivity.this, R.drawable.ic_play_circle_filled_white_black_24dp));
 
             mediaPlayerService.pauseMedia(currentMediaPlayer);
+            mediaPlayerService.buildNotification(PlaybackStatus.PAUSED);
 
         } else if (!currentMediaPlayer.isPlaying() && checker != null) {
 
@@ -255,6 +256,7 @@ public class SingleSongActivity extends AppCompatActivity implements
             audioIndex = storage.loadAudioIndex();
             currentPosition = storage.loadPlayBackPosition();
             mediaPlayerService.resumeMedia1(currentMediaPlayer, (int) currentPosition);
+            mediaPlayerService.buildNotification(PlaybackStatus.PLAYING);
             seekBar.setProgress(0);
             seekBar.setMax(100);
             checker = "definately not null";
@@ -276,6 +278,7 @@ public class SingleSongActivity extends AppCompatActivity implements
             playPauseView.setImageDrawable(ContextCompat
                     .getDrawable(SingleSongActivity.this, R.drawable.ic_pause_circle_filled_black_24dp));
             mediaPlayerService.resumeMedia(currentMediaPlayer);
+            mediaPlayerService.buildNotification(PlaybackStatus.PLAYING);
             // set Progress bar values
             seekBar.setProgress(0);
             seekBar.setMax(100);
@@ -564,6 +567,20 @@ public class SingleSongActivity extends AppCompatActivity implements
                 Audio recievedAudio = i.getParcelableExtra(AppMainServiceEvent.RESPONSE_DATA);
                 updateMetaData(recievedAudio);
                 Toast statu = Toast.makeText(this, "Came to the onComplete", Toast.LENGTH_LONG);
+
+            } else {
+
+                Toast statu = Toast.makeText(this, "Cant Retrieve data at the moment, Try again", Toast.LENGTH_LONG);
+                statu.show();
+            }
+
+
+        }
+        if (event.getEventType() == AppMainServiceEvent.PLAYBACK_CHANGE) {
+            if (i != null) {
+
+             boolean  changePlayback  = i.getBooleanExtra(AppMainServiceEvent.RESPONSE_DATA);
+
 
             } else {
 
