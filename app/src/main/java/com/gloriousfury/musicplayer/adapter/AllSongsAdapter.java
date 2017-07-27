@@ -51,7 +51,7 @@ public class AllSongsAdapter extends RecyclerView.Adapter<AllSongsAdapter.ViewHo
     public AllSongsAdapter(Context context, ArrayList<Audio> song_list) {
         this.context = context;
         this.song_list = song_list;
-
+        selectedItems = new SparseBooleanArray();
 
     }
 
@@ -97,6 +97,8 @@ public class AllSongsAdapter extends RecyclerView.Adapter<AllSongsAdapter.ViewHo
             context.startActivity(openSingleSongActivity);
 
         }
+
+
     }
 
 
@@ -173,6 +175,8 @@ public class AllSongsAdapter extends RecyclerView.Adapter<AllSongsAdapter.ViewHo
                 Picasso.with(context).load(R.drawable.ic_default_music_option2).into(holder.song_background);
 
             }
+
+//            holder.itemView.setActivated(selectedItems.get(position, false));
 
         }
 

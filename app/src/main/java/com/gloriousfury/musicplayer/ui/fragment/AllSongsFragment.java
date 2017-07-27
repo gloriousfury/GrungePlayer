@@ -53,7 +53,7 @@ import de.greenrobot.event.EventBus;
  * Created by OLORIAKE KEHINDE on 11/16/2016.
  */
 
-public class AllSongsFragment extends Fragment{
+public class AllSongsFragment extends Fragment implements RecyclerView.OnItemTouchListener{
 
 
     public static AllSongsFragment newInstance() {
@@ -156,7 +156,7 @@ public class AllSongsFragment extends Fragment{
             recyclerView.setAdapter(adapter);
         }
 
-
+        recyclerView.addOnItemTouchListener(this);
 
         return v;
     }
@@ -319,11 +319,28 @@ public class AllSongsFragment extends Fragment{
         bus.register(this);
     }
 
+    @Override
+    public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
+        gestureScanner.onTouchEvent(e);
+        return false;
+    }
+
+    @Override
+    public void onTouchEvent(RecyclerView rv, MotionEvent e) {
+
+    }
+
+    @Override
+    public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
+
+    }
+
 
     private class RecyclerViewOnGestureListener extends GestureDetector.SimpleOnGestureListener {
 
 
         public void onLongPress(MotionEvent e) {
+            Log.e(TAG, "I came to the LongPress side");
             View view = recyclerView.findChildViewUnder(e.getX(), e.getY());
             if (actionMode != null) {
                 return;
@@ -375,6 +392,6 @@ public class AllSongsFragment extends Fragment{
     private void myToggleSelection(int idx) {
         adapter.toggleSelection(idx);
 //        String title = getString( R.string.selected_count,adapter.getSelectedItemCount());
-        actionMode.setTitle(" Issa 5");
+//        actionMode.setTitle(" Issa 5");
     }
 }

@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="@dimen/seventy"
     xmlns:tools="http://schemas.android.com/tools"
-    android:background="@color/app_white_smoke"
+    android:background="@drawable/state_drawable"
     android:orientation="vertical">
 
     <RelativeLayout
