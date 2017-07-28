@@ -53,7 +53,7 @@
             android:text="3:11"
             android:layout_centerVertical="true"
             android:layout_alignParentRight="true"
-            android:layout_marginRight="@dimen/ten"
+            android:layout_marginRight="@dimen/five"
             />
 
         <View
