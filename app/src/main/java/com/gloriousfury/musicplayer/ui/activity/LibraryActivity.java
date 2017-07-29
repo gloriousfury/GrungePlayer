@@ -660,9 +660,10 @@ public class LibraryActivity extends AppCompatActivity
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
 //
         queueRecycler.setLayoutManager(layoutManager);
-        List<Audio> truncatedArray;
+        ArrayList<Audio> truncatedArray;
         if (audioList.size() > 4) {
-            truncatedArray = audioList.subList(1, 5);
+
+            truncatedArray =new ArrayList<Audio>(audioList.subList(1, 5));
         } else {
             truncatedArray = audioList;
 

@@ -28,6 +28,7 @@ import com.gloriousfury.musicplayer.utils.Timer;
 import com.gloriousfury.musicplayer.utils.Utils;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.gloriousfury.musicplayer.ui.activity.MainActivity.Broadcast_PLAY_NEW_AUDIO;
@@ -35,7 +36,7 @@ import static com.gloriousfury.musicplayer.ui.activity.MainActivity.Broadcast_PL
 
 public class TruncatedAllSongsAdapter extends RecyclerView.Adapter<TruncatedAllSongsAdapter.ViewHolder> {
     Context context;
-    private List<Audio> song_list;
+    private ArrayList<Audio> song_list;
     boolean serviceBound = false;
     private MediaPlayerService player;
     String SONG = "single_audio";
@@ -46,7 +47,7 @@ public class TruncatedAllSongsAdapter extends RecyclerView.Adapter<TruncatedAllS
     String CLICK_CHECKER = "click_checker";
 
 
-    public TruncatedAllSongsAdapter(Context context, List<Audio> song_list) {
+    public TruncatedAllSongsAdapter(Context context, ArrayList<Audio> song_list) {
         this.context = context;
         this.song_list = song_list;
 
@@ -80,19 +81,24 @@ public class TruncatedAllSongsAdapter extends RecyclerView.Adapter<TruncatedAllS
             int adapterposition = getAdapterPosition();
             String checker = null;
             Audio singleSong = song_list.get(adapterposition);
-            playAudio(adapterposition);
-            Intent openSingleSongActivity = new Intent(context, SingleSongActivity.class);
-            openSingleSongActivity.putExtra(CLICK_CHECKER,checker);
-            openSingleSongActivity.putExtra(SONG, singleSong);
+            if (Utils.getInstance() != null) {
+                Utils.getInstance().playAudio(getAdapterPosition(), song_list);
 
-            context.startActivity(openSingleSongActivity);
+            } else {
+                new Utils(context).playAudio(getAdapterPosition(), song_list);
+            }
+//            Intent openSingleSongActivity = new Intent(context, SingleSongActivity.class);
+//            openSingleSongActivity.putExtra(CLICK_CHECKER,checker);
+//            openSingleSongActivity.putExtra(SONG, singleSong);
+//
+//            context.startActivity(openSingleSongActivity);
 
         }
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_allsongs, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_queue2, parent, false);
         return new ViewHolder(view);
     }
 
@@ -117,7 +123,7 @@ public class TruncatedAllSongsAdapter extends RecyclerView.Adapter<TruncatedAllS
             Uri albumArtUri = Uri.parse(song_list.get(position).getAlbumArtUriString());
             Picasso.with(context).load(albumArtUri).resize(120, 120).into(holder.song_background);
         }else{
-            Picasso.with(context).load(R.drawable.ic_default_music_image).into(holder.song_background);
+            Picasso.with(context).load(R.drawable.ic_default_music_option2).into(holder.song_background);
 
         }
 
@@ -135,7 +141,7 @@ public class TruncatedAllSongsAdapter extends RecyclerView.Adapter<TruncatedAllS
 
     }
 
-    public void setAudioListData(List<Audio> songlist) {
+    public void setAudioListData(ArrayList<Audio> songlist) {
         if (songlist != null) {
             this.song_list = songlist;
             notifyDataSetChanged();
@@ -144,49 +150,6 @@ public class TruncatedAllSongsAdapter extends RecyclerView.Adapter<TruncatedAllS
 
     }
 
-    private ServiceConnection serviceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            // We've bound to LocalService, cast the IBinder and get LocalService instance
-            MediaPlayerService.LocalBinder binder = (MediaPlayerService.LocalBinder) service;
-            player = binder.getService();
-            serviceBound = true;
-           Utils.serviceBound =true;
-
-
-            Toast.makeText(context, "Service Bound", Toast.LENGTH_SHORT).show();
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            serviceBound = false;
-        }
-    };
-
-
-    private void playAudio(int audioIndex) {
-        //Check is service is active
-        if (!serviceBound) {
-            //Store Serializable audioList to SharedPreferences
-            StorageUtil storage = new StorageUtil(context);
-//            storage.storeAudio(song_list);
-//            storage.storeAudioIndex(audioIndex);
-
-            Toast.makeText(context, String.valueOf(storage.loadAudioIndex()), Toast.LENGTH_LONG).show();
-            Intent playerIntent = new Intent(context, MediaPlayerService.class);
-            context.startService(playerIntent);
-            context.bindService(playerIntent, serviceConnection, Context.BIND_AUTO_CREATE);
-        } else {
-            //Store the new audioIndex to SharedPreferences
-            StorageUtil storage = new StorageUtil(context);
-            storage.storeAudioIndex(audioIndex);
-
-            //Service is active
-            //Send a broadcast to the service -> PLAY_NEW_AUDIO
-            Intent broadcastIntent = new Intent(Broadcast_PLAY_NEW_AUDIO);
-            context.sendBroadcast(broadcastIntent);
-        }
-    }
 }
 
 

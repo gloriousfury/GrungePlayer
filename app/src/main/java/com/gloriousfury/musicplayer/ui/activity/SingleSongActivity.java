@@ -23,6 +23,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.MediaController;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -87,6 +88,9 @@ public class SingleSongActivity extends AppCompatActivity implements
 
     @BindView(R.id.songProgressBar)
     SeekBar seekBar;
+
+    @BindView(R.id.queue_view)
+    RelativeLayout queueLayout;
 
     String SONG_TITLE = "song_title";
     String SONG_ARTIST = "song_artist";
@@ -334,6 +338,15 @@ public class SingleSongActivity extends AppCompatActivity implements
 
     }
 
+    @OnClick(R.id.queue_view)
+    public void startQueueActivity() {
+
+        Intent queueActivity = new Intent(this,QueueActivity.class);
+        startActivity(queueActivity);
+
+
+    }
+
 
     public void updateProgressBar() {
         mHandler.postDelayed(mUpdateTimeTask, 100);
@@ -459,6 +472,8 @@ public class SingleSongActivity extends AppCompatActivity implements
                 // API 5+ solution
                 onBackPressed();
                 return true;
+
+
 
             default:
                 return super.onOptionsItemSelected(item);

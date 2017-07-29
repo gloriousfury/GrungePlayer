@@ -85,7 +85,7 @@ public class AllSongsFragment extends Fragment implements RecyclerView.OnItemTou
     String ARTIST_ITEM = "artist_item";
     static AllSongsAdapter adapter;
     GestureDetectorCompat gestureScanner;
-    static ActionMode actionMode;
+    public static ActionMode actionMode;
     String SONG = "single_audio";
     String CLICK_CHECKER = "click_checker";
 
@@ -361,28 +361,29 @@ public class AllSongsFragment extends Fragment implements RecyclerView.OnItemTou
 
                 int idx = recyclerView.getChildPosition(view);
                 myToggleSelection(idx);
-            } else {
-                View view = recyclerView.findChildViewUnder(e.getX(), e.getY());
-
-                int idx = recyclerView.getChildPosition(view);
-                String checker = null;
-                Audio singleSong = audioList.get(idx);
-                Utils appUtils = new Utils(getActivity());
-                if (Utils.getInstance() != null) {
-                    Utils.getInstance().playAudio(idx, audioList);
-
-                } else {
-                    new Utils(getActivity()).playAudio(idx, audioList);
-                }
-//            ((SingleRecipeActivity) context).onDescriptionSelected(stepParameters, getAdapterPosition());
-                Intent openSingleSongActivity = new Intent(getActivity(), SingleSongActivity.class);
-                openSingleSongActivity.putExtra(CLICK_CHECKER, checker);
-                openSingleSongActivity.putExtra(SONG, singleSong);
-
-                getActivity().startActivity(openSingleSongActivity);
-
-
             }
+// else {
+//                View view = recyclerView.findChildViewUnder(e.getX(), e.getY());
+//
+//                int idx = recyclerView.getChildPosition(view);
+//                String checker = null;
+//                Audio singleSong = audioList.get(idx);
+//                Utils appUtils = new Utils(getActivity());
+//                if (Utils.getInstance() != null) {
+//                    Utils.getInstance().playAudio(idx, audioList);
+//
+//                } else {
+//                    new Utils(getActivity()).playAudio(idx, audioList);
+//                }
+////            ((SingleRecipeActivity) context).onDescriptionSelected(stepParameters, getAdapterPosition());
+//                Intent openSingleSongActivity = new Intent(getActivity(), SingleSongActivity.class);
+//                openSingleSongActivity.putExtra(CLICK_CHECKER, checker);
+//                openSingleSongActivity.putExtra(SONG, singleSong);
+//
+//                getActivity().startActivity(openSingleSongActivity);
+//
+//
+//            }
             return super.onSingleTapConfirmed(e);
         }
 
@@ -409,7 +410,9 @@ public class AllSongsFragment extends Fragment implements RecyclerView.OnItemTou
     private void myToggleSelection(int idx) {
         adapter.toggleSelection(idx);
 //        String title = getString( R.string.selected_count,adapter.getSelectedItemCount());
-        actionMode.setTitle(" Issa 5");
+        //TODO Make this right man
+                String title = String.valueOf(adapter.getSelectedItemCount());
+        actionMode.setTitle(title);
     }
 
 

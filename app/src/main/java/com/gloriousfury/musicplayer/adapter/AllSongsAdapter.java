@@ -25,6 +25,7 @@ import android.widget.Toast;
 
 import com.gloriousfury.musicplayer.R;
 import com.gloriousfury.musicplayer.model.Audio;
+import com.gloriousfury.musicplayer.ui.activity.LibraryActivity;
 import com.gloriousfury.musicplayer.utils.StorageUtil;
 import com.gloriousfury.musicplayer.service.MediaPlayerService;
 import com.gloriousfury.musicplayer.ui.activity.SingleSongActivity;
@@ -36,6 +37,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.gloriousfury.musicplayer.ui.activity.MainActivity.Broadcast_PLAY_NEW_AUDIO;
+import static com.gloriousfury.musicplayer.ui.fragment.AllSongsFragment.actionMode;
 
 
 public class AllSongsAdapter extends RecyclerView.Adapter<AllSongsAdapter.ViewHolder> {
@@ -79,23 +81,27 @@ public class AllSongsAdapter extends RecyclerView.Adapter<AllSongsAdapter.ViewHo
 
         @Override
         public void onClick(View v) {
-            int adapterposition = getAdapterPosition();
-            String checker = null;
-            Audio singleSong = song_list.get(adapterposition);
-//            Utils appUtils = new Utils(context);
-//            if (Utils.getInstance() != null) {
-//                Utils.getInstance().playAudio(getAdapterPosition(), song_list);
-//
-//            } else {
-//                new Utils(context).playAudio(getAdapterPosition(), song_list);
-//            }
-////            ((SingleRecipeActivity) context).onDescriptionSelected(stepParameters, getAdapterPosition());
-//            Intent openSingleSongActivity = new Intent(context, SingleSongActivity.class);
-//            openSingleSongActivity.putExtra(CLICK_CHECKER, checker);
-//            openSingleSongActivity.putExtra(SONG, singleSong);
-//
-//            context.startActivity(openSingleSongActivity);
 
+            if (actionMode == null) {
+
+
+                if (Utils.getInstance() != null) {
+                    Utils.getInstance().playAudio(getAdapterPosition(), song_list);
+
+                } else {
+                    new Utils(context).playAudio(getAdapterPosition(), song_list);
+                }
+                int adapterposition = getAdapterPosition();
+                String checker = null;
+                Audio singleSong = song_list.get(adapterposition);
+//            ((SingleRecipeActivity) context).onDescriptionSelected(stepParameters, getAdapterPosition());
+                Intent openSingleSongActivity = new Intent(context, SingleSongActivity.class);
+                openSingleSongActivity.putExtra(CLICK_CHECKER, checker);
+                openSingleSongActivity.putExtra(SONG, singleSong);
+
+                context.startActivity(openSingleSongActivity);
+
+            }
         }
 
 

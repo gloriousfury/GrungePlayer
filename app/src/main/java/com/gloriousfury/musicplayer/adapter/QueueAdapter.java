@@ -72,13 +72,18 @@ public class QueueAdapter extends RecyclerView.Adapter<QueueAdapter.ViewHolder> 
             Audio singleSong = song_list.get(adapterposition);
 //            Utils appUtils = new Utils(context);
 
-            new Utils(context).playAudio(getAdapterPosition(), song_list);
+            if (Utils.getInstance() != null) {
+                Utils.getInstance().playAudio(getAdapterPosition(), song_list);
 
-            Intent openSingleSongActivity = new Intent(context, SingleSongActivity.class);
-            openSingleSongActivity.putExtra(CLICK_CHECKER, checker);
-            openSingleSongActivity.putExtra(SONG, singleSong);
-
-            context.startActivity(openSingleSongActivity);
+            } else {
+                new Utils(context).playAudio(getAdapterPosition(), song_list);
+            }
+//
+//            Intent openSingleSongActivity = new Intent(context, SingleSongActivity.class);
+//            openSingleSongActivity.putExtra(CLICK_CHECKER, checker);
+//            openSingleSongActivity.putExtra(SONG, singleSong);
+//
+//            context.startActivity(openSingleSongActivity);
 
         }
     }

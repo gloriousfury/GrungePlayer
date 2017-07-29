@@ -21,6 +21,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.MediaSessionCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.NotificationCompat;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
@@ -29,6 +30,7 @@ import android.widget.Toast;
 
 import com.gloriousfury.musicplayer.R;
 import com.gloriousfury.musicplayer.model.Audio;
+import com.gloriousfury.musicplayer.ui.activity.LibraryActivity;
 import com.gloriousfury.musicplayer.ui.activity.SingleSongActivity;
 import com.gloriousfury.musicplayer.utils.StorageUtil;
 import com.gloriousfury.musicplayer.ui.activity.MainActivity;
@@ -70,6 +72,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     public static final String ACTION_PREVIOUS = "com.gloriousfury.musicplayer.ACTION_PREVIOUS";
     public static final String ACTION_NEXT = "com.gloriousfury.musicplayer.ACTION_NEXT";
     public static final String ACTION_STOP = "com.gloriousfury.musicplayer.ACTION_STOP";
+    private static final String NOTIFICATION_DELETED_ACTION = "NOTIFICATION_DELETED";
     String DONOT_PLAY_CHECKER = "do_not_play_checker";
     int duration;
     Intent responseIntent = new Intent();
@@ -789,6 +792,10 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         PendingIntent play_pauseAction = null;
         setPlaybackStatus(playbackStatus);
         getActiveAudio();
+//        Intent intent = new Intent(NOTIFICATION_DELETED_ACTION);
+//        PendingIntent deletePendintIntent = PendingIntent.getBroadcast(getContext(), 0, intent, 0);
+//        registerReceiver(receiver, new IntentFilter(NOTIFICATION_DELETED_ACTION));
+
         if (mediaSession == null) {
             afterMethod();
         }
@@ -851,10 +858,12 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 .setContentTitle(activeAudio.getTitle())
                 .setContentInfo(activeAudio.getAlbum())
                 .setOngoing(convertFromPlaybackToBool(playbackStatus))
+//                .setDeleteIntent(deletePendintIntent)
                 // Add playback actions
                 .addAction(android.R.drawable.ic_media_previous, "previous", playbackAction(3))
                 .addAction(notificationAction, "pause", play_pauseAction)
                 .addAction(android.R.drawable.ic_media_next, "next", playbackAction(2));
+
 
         ((NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE)).notify(NOTIFICATION_ID, notificationBuilder.build());
     }
@@ -909,6 +918,15 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         NotificationManager notificationManager = (NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.cancel(NOTIFICATION_ID);
     }
+
+    private final BroadcastReceiver receiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+//            AppCompatActivity activity = (AppCompatActivity) context;
+//            activity.finish();
+            unregisterReceiver(this);
+        }
+    };
 
 
     private PendingIntent playbackAction(int actionNumber) {
