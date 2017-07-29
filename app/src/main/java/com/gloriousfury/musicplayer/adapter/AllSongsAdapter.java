@@ -83,18 +83,18 @@ public class AllSongsAdapter extends RecyclerView.Adapter<AllSongsAdapter.ViewHo
             String checker = null;
             Audio singleSong = song_list.get(adapterposition);
 //            Utils appUtils = new Utils(context);
-            if (Utils.getInstance() != null) {
-                Utils.getInstance().playAudio(getAdapterPosition(), song_list);
-
-            } else {
-                new Utils(context).playAudio(getAdapterPosition(), song_list);
-            }
-
-            Intent openSingleSongActivity = new Intent(context, SingleSongActivity.class);
-            openSingleSongActivity.putExtra(CLICK_CHECKER, checker);
-            openSingleSongActivity.putExtra(SONG, singleSong);
-
-            context.startActivity(openSingleSongActivity);
+//            if (Utils.getInstance() != null) {
+//                Utils.getInstance().playAudio(getAdapterPosition(), song_list);
+//
+//            } else {
+//                new Utils(context).playAudio(getAdapterPosition(), song_list);
+//            }
+////            ((SingleRecipeActivity) context).onDescriptionSelected(stepParameters, getAdapterPosition());
+//            Intent openSingleSongActivity = new Intent(context, SingleSongActivity.class);
+//            openSingleSongActivity.putExtra(CLICK_CHECKER, checker);
+//            openSingleSongActivity.putExtra(SONG, singleSong);
+//
+//            context.startActivity(openSingleSongActivity);
 
         }
 
@@ -176,7 +176,7 @@ public class AllSongsAdapter extends RecyclerView.Adapter<AllSongsAdapter.ViewHo
 
             }
 
-//            holder.itemView.setActivated(selectedItems.get(position, false));
+            holder.itemView.setActivated(selectedItems.get(position, false));
 
         }
 

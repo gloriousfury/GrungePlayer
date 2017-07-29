@@ -15,11 +15,13 @@ import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.GestureDetectorCompat;
 
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.view.ActionMode;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.util.TypedValue;
-import android.view.ActionMode;
+
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -38,13 +40,15 @@ import com.gloriousfury.musicplayer.adapter.AllSongsAdapter;
 import com.gloriousfury.musicplayer.model.Artist;
 import com.gloriousfury.musicplayer.model.Audio;
 import com.gloriousfury.musicplayer.service.AppMainServiceEvent;
-import com.gloriousfury.musicplayer.ui.activity.MainActivity;
+import com.gloriousfury.musicplayer.ui.activity.SingleSongActivity;
+import com.gloriousfury.musicplayer.utils.OnSongClickListener;
 import com.gloriousfury.musicplayer.utils.StorageUtil;
+import com.gloriousfury.musicplayer.utils.Utils;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.logging.Logger;
+
 
 import de.greenrobot.event.EventBus;
 
@@ -53,7 +57,8 @@ import de.greenrobot.event.EventBus;
  * Created by OLORIAKE KEHINDE on 11/16/2016.
  */
 
-public class AllSongsFragment extends Fragment implements RecyclerView.OnItemTouchListener{
+public class AllSongsFragment extends Fragment implements RecyclerView.OnItemTouchListener,
+        OnSongClickListener {
 
 
     public static AllSongsFragment newInstance() {
@@ -78,25 +83,29 @@ public class AllSongsFragment extends Fragment implements RecyclerView.OnItemTou
     private static final String LIFECYCLE_AUDIOLIST_CALLBACKS_KEY = "audioList";
     //    private static final String LIFECYCLE_PAGE_NO_KEY = "page_no";
     String ARTIST_ITEM = "artist_item";
-    AllSongsAdapter adapter;
+    static AllSongsAdapter adapter;
     GestureDetectorCompat gestureScanner;
-    ActionMode actionMode;
+    static ActionMode actionMode;
+    String SONG = "single_audio";
+    String CLICK_CHECKER = "click_checker";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_allsongs, container, false);
-        gestureScanner =   new GestureDetectorCompat(getActivity(), new RecyclerViewOnGestureListener());
+        gestureScanner = new GestureDetectorCompat(getActivity(), new RecyclerViewOnGestureListener());
         storage = new StorageUtil(getContext());
 
         progressBar = (ProgressBar) v.findViewById(R.id.progressBar);
         recyclerView = (RecyclerView) v.findViewById(R.id.recyclerView);
+
         recyclerView.setHasFixedSize(true);
 
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext());
 
         recyclerView.setLayoutManager(layoutManager);
+
 
         adapter = new AllSongsAdapter(getActivity(), audioList);
         String currentActivity = getActivity().getClass().getSimpleName();
@@ -335,63 +344,115 @@ public class AllSongsFragment extends Fragment implements RecyclerView.OnItemTou
 
     }
 
+    @Override
+    public void onSongSelectedClick(Bundle stepParameters, int position) {
+
+
+    }
+
 
     private class RecyclerViewOnGestureListener extends GestureDetector.SimpleOnGestureListener {
 
+        @Override
+        public boolean onSingleTapConfirmed(MotionEvent e) {
+            if (actionMode != null) {
+
+                View view = recyclerView.findChildViewUnder(e.getX(), e.getY());
+
+                int idx = recyclerView.getChildPosition(view);
+                myToggleSelection(idx);
+            } else {
+                View view = recyclerView.findChildViewUnder(e.getX(), e.getY());
+
+                int idx = recyclerView.getChildPosition(view);
+                String checker = null;
+                Audio singleSong = audioList.get(idx);
+                Utils appUtils = new Utils(getActivity());
+                if (Utils.getInstance() != null) {
+                    Utils.getInstance().playAudio(idx, audioList);
+
+                } else {
+                    new Utils(getActivity()).playAudio(idx, audioList);
+                }
+//            ((SingleRecipeActivity) context).onDescriptionSelected(stepParameters, getAdapterPosition());
+                Intent openSingleSongActivity = new Intent(getActivity(), SingleSongActivity.class);
+                openSingleSongActivity.putExtra(CLICK_CHECKER, checker);
+                openSingleSongActivity.putExtra(SONG, singleSong);
+
+                getActivity().startActivity(openSingleSongActivity);
+
+
+            }
+            return super.onSingleTapConfirmed(e);
+        }
 
         public void onLongPress(MotionEvent e) {
             Log.e(TAG, "I came to the LongPress side");
             View view = recyclerView.findChildViewUnder(e.getX(), e.getY());
+            AppCompatActivity activity = (AppCompatActivity) getActivity();
+
+
             if (actionMode != null) {
                 return;
             }
             // Start the CAB using the ActionMode.Callback defined above
-            actionMode = getActivity().startActionMode(new android.view.ActionMode.Callback() {
-                @Override
-                public boolean onCreateActionMode(android.view.ActionMode actionMode, Menu menu) {
-                    return false;
-                }
-
-                @Override
-                public boolean onPrepareActionMode(android.view.ActionMode actionMode, Menu menu) {
-                    return false;
-                }
-
-                @Override
-                public boolean onActionItemClicked(android.view.ActionMode actionMode, MenuItem menuItem) {
-
-//                        switch (menuItem.getItemId()) {
-////                            case R.id.menu_delete:
-////                                List<Integer> selectedItemPositions =
-////                                        adapter.getSelectedItems();
-////                                for (int i = selectedItemPositions.size() – 1;
-////                                i >= 0;
-////                                i–) {
-////                                adapter.removeData(selectedItemPositions.get(i));
-////                            }
-////                            actionMode.finish();
-//                            return true;
-//                            default:
-//                                return false;
-                    return false;
-                }
-
-                @Override
-                public void onDestroyActionMode(android.view.ActionMode actionMode) {
-
-                }
-            });
+            actionMode = activity.startSupportActionMode(mActionModeCallback);
 
             int idx = recyclerView.getChildPosition(view);
             myToggleSelection(idx);
-            super.onLongPress(e);
+
 
             super.onLongPress(e);
         }
     }
+
     private void myToggleSelection(int idx) {
         adapter.toggleSelection(idx);
 //        String title = getString( R.string.selected_count,adapter.getSelectedItemCount());
-//        actionMode.setTitle(" Issa 5");
+        actionMode.setTitle(" Issa 5");
     }
+
+
+    public static ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
+
+        // Called when the user selects a contextual menu item
+        @Override
+        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            // TODO Auto-generated method stub
+//            switch(item.getItemId())
+//            {
+//                case R.id.menu_delete:
+//                    return true;
+//
+//            }
+//
+            return false;
+        }
+
+
+        //// Called when the action mode is created; startActionMode() was called
+        @Override
+        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+            // TODO Auto-generated method stub
+            mode.getMenuInflater().inflate(R.menu.delete_only, menu);
+            return true;
+        }
+
+        // Called when the user exits the action mode
+        @Override
+        public void onDestroyActionMode(ActionMode mode) {
+            // TODO Auto-generated method stub
+            actionMode = null;
+            adapter.clearSelections();
+        }
+
+        //// Called each time the action mode is shown. Always called after onCreateActionMode, but
+        // may be called multiple times if the mode is invalidated.
+        @Override
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            // TODO Auto-generated method stub
+            return false;
+        }
+    };
+
 }

@@ -27,6 +27,7 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
+import android.support.v7.view.ActionMode;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -79,7 +80,7 @@ import de.greenrobot.event.EventBus;
 
 public class LibraryActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
-        LoaderManager.LoaderCallbacks<ArrayList<Audio>>, View.OnClickListener {
+        LoaderManager.LoaderCallbacks<ArrayList<Audio>>, View.OnClickListener{
 
     FragmentManager mFragmentManager;
     FragmentTransaction mFragmentTransaction;
@@ -106,6 +107,7 @@ public class LibraryActivity extends AppCompatActivity
     String SONG = "single_audio";
     String CLICK_CHECKER = "click_checker";
     String DONOT_PLAY_CHECKER = "do_not_play_checker";
+    public static ActionMode mActionMode = null;
 
     Intent responseIntent = new Intent();
     AppMainServiceEvent event = new AppMainServiceEvent();
@@ -113,6 +115,8 @@ public class LibraryActivity extends AppCompatActivity
     @BindView(R.id.artist)
     TextView artist;
 
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
 
     @BindView(R.id.song_title)
     TextView songTitle;
@@ -161,7 +165,6 @@ public class LibraryActivity extends AppCompatActivity
 //        previousSong.setOnClickListener(this);
 
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
 //        if(mediaPlayerService.getActiveAudio()!=null){
@@ -881,6 +884,15 @@ public class LibraryActivity extends AppCompatActivity
             return mediaPlayerService.isPng();
         return false;
     }
+
+//    public void actionModeStarter(){
+//
+//
+//        mActionMode= startSupportActionMode(mActionModeCallback);
+//
+//
+//
+//    }
 
 
 }
