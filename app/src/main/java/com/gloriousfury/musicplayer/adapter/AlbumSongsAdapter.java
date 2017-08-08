@@ -94,7 +94,13 @@ public class AlbumSongsAdapter extends RecyclerView.Adapter<AlbumSongsAdapter.Vi
 
 
 //            song_title.setTextSize(20);
-            playAudio(activeAudioIndex);
+            if (Utils.getInstance() != null) {
+                Utils.getInstance().playAudio(activeAudioIndex, song_list);
+
+            } else {
+                new Utils(context).playAudio(getAdapterPosition(), song_list);
+            }
+
             notifyItemChanged(activeAudioIndex);
 
 

@@ -67,7 +67,7 @@ public class Utils {
             Utils.serviceBound = true;
 
 
-            Toast.makeText(context, "Service Bound", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(context, "Service Bound", Toast.LENGTH_SHORT).show();
         }
 
         @Override
@@ -118,7 +118,7 @@ public class Utils {
         storage.storeAudio(song_list);
         storage.storeAudioIndex(audioIndex);
 
-            Toast.makeText(context, String.valueOf(song_list.size()), Toast.LENGTH_LONG).show();
+//            Toast.makeText(context, String.valueOf(song_list.size()), Toast.LENGTH_LONG).show();
         Intent playerIntent = new Intent(context, MediaPlayerService.class);
         playerIntent.putExtra(DONOT_PLAY_CHECKER, "donotplay");
         context.startService(playerIntent);

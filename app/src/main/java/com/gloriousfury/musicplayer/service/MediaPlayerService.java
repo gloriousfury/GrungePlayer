@@ -180,6 +180,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             stopSelf();
         }
         if (activeAudio.getData() != null)
+
             mediaPlayer.prepareAsync();
     }
 
@@ -331,7 +332,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                     Log.e(TAG, "I came to the init  player part");
                 } else if (!mediaPlayer.isPlaying()) {
                     if (shouldItPlay) {
-                        mediaPlayer.start();
+                        resumeMedia1(mediaPlayer,resumePosition);
                         Log.e(TAG, "I came to the is not playing part");
 //                    mediaPlayer.setVolume(1.0f, 1.0f);
                     }
@@ -350,22 +351,27 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 break;
             case AudioManager.AUDIOFOCUS_LOSS:
                 // Lost focus for an unbounded amount of time: stop playback and release media seek
-                if (mediaPlayer.isPlaying()) mediaPlayer.stop();
-                mediaPlayer.release();
-                mediaPlayer = null;
+                if (mediaPlayer.isPlaying()) {
+                    mediaPlayer.stop();
+                    mediaPlayer.release();
+                    mediaPlayer = null;
+                }
                 break;
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
                 // Lost focus for a short time, but we have to stop
                 // playback. We don't release the media seek because playback
                 // is likely to resume
-                if (mediaPlayer.isPlaying()) mediaPlayer.pause();
+                if (mediaPlayer.isPlaying())
+//                    mediaPlayer.pause();
+                pauseMedia(mediaPlayer);
 
                 break;
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
                 // Lost focus for a short time, but it's ok to keep playing
                 // at an attenuated level
                 if (mediaPlayer.isPlaying())
-                    mediaPlayer.pause();
+//                    mediaPlayer.pause();
+                    pauseMedia(mediaPlayer);
 //                    mediaPlayer.setVolume(0.1f, 0.1f);
                 break;
 
@@ -815,13 +821,13 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             } catch (IOException e) {
                 e.printStackTrace();
                 albumArt = BitmapFactory.decodeResource(getContext().getResources(),
-                        R.drawable.ic_default_music_image);
+                        R.drawable.ic_default_music_option2);
             }
 
         } else {
 
             albumArt = BitmapFactory.decodeResource(getContext().getResources(),
-                    R.drawable.ic_default_music_image);
+                    R.drawable.ic_default_music_option2);
         }
         albumArt = Bitmap.createScaledBitmap(albumArt, 300, 300, true);
 
@@ -973,7 +979,18 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     }
 
     public int getCurrentDur() {
-        return mediaPlayer.getCurrentPosition();
+        if(mediaPlayer==null){
+            return resumePosition;
+
+        }else if(mediaPlayer.isPlaying()) {
+            return mediaPlayer.getCurrentPosition();
+        } else if(!mediaPlayer.isPlaying() && mediaPlayer!=null){
+            return resumePosition;
+
+        }else{
+
+            return  resumePosition;
+        }
     }
 
 

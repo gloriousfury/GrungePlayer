@@ -67,7 +67,9 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentBottom="true"
                     android:layout_gravity="bottom"
-                    android:clickable="true">
+                    android:clickable="true"
+
+                    >
 
                     <include layout="@layout/view_mini_player2"
 

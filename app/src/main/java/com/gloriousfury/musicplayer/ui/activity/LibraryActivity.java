@@ -244,7 +244,8 @@ public class LibraryActivity extends AppCompatActivity
             ActivityCompat.requestPermissions(this,
                     new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE},
                     REQUEST_STORAGE_PERMISSION);
-        } else if (ContextCompat.checkSelfPermission(this,
+        }
+        if (ContextCompat.checkSelfPermission(this,
                 android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
 
@@ -253,7 +254,7 @@ public class LibraryActivity extends AppCompatActivity
                     new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                     REQUEST_STORAGE_PERMISSION);
 
-        } else if (ContextCompat.checkSelfPermission(this,
+        }  if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.MEDIA_CONTENT_CONTROL) !=
                 PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,
@@ -262,6 +263,14 @@ public class LibraryActivity extends AppCompatActivity
 
 
         }
+
+//        ActivityCompat.requestPermissions(new String[]{
+//                        android.Manifest.permission.READ_EXTERNAL_STORAGE,
+//                        android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
+//                        Manifest.permission.MEDIA_CONTENT_CONTROL
+//                }, MULTIPLE ASK_MULTIPLE_PERMISSION_REQUEST_CODE)
+//
+
 
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_EXTERNAL_STORAGE)
                 == PackageManager.PERMISSION_GRANTED
@@ -280,6 +289,13 @@ public class LibraryActivity extends AppCompatActivity
 
     }
 
+    public void getReadPermission(){
+
+
+
+
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
@@ -289,7 +305,10 @@ public class LibraryActivity extends AppCompatActivity
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // If you get permission, launch the camera
-                    getSupportLoaderManager().initLoader(TASK_LOADER_ID, null, this);
+
+                        startTasks();
+
+
                 } else {
                     // If you do not get permission, show a Toast
                     Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show();
@@ -673,7 +692,7 @@ public class LibraryActivity extends AppCompatActivity
         queueRecycler.setAdapter(adapter);
 
 
-        if (Utils.isServiceBound()) {
+        if (Utils.isServiceBound() && currentMediaPlayer.isPlaying() ) {
             totalDuration = activeAudio.getDuration();
             playPauseView.setImageResource(R.drawable.ic_pause_black_24dp);
 //            int currentPosition = Timer.progressToTimer(seekBar.getProgress(), totalDuration);
@@ -683,10 +702,16 @@ public class LibraryActivity extends AppCompatActivity
 
             updateProgressBar();
 
-        } else if (!currentMediaPlayer.isPlaying() && serviceBound) {
+        } else if (!currentMediaPlayer.isPlaying() && Utils.isServiceBound()) {
             playPauseView.setImageResource(R.drawable.ic_play_arrow_black_24dp);
+            currentDuration = new StorageUtil(this).loadPlayBackPosition();
+            totalDuration = activeAudio.getDuration();
+            // Updating progress bar
+            int progress = (int) (Timer.getProgressPercentage(currentDuration, totalDuration));
+            seekBar.setProgress(progress);
 
-        } else if (!currentMediaPlayer.isPlaying() && !serviceBound) {
+
+        } else if (!currentMediaPlayer.isPlaying() && !Utils.serviceBound) {
             mediaPlayerService = new MediaPlayerService(this);
             currentMediaPlayer = mediaPlayerService.getMediaPlayerInstance();
 

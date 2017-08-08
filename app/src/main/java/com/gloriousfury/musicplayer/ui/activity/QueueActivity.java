@@ -64,9 +64,10 @@ public class QueueActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
 //        setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle("Queue");
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle("Queue");
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
 
         storage = new StorageUtil(this);
         audioList = storage.loadAudio();
