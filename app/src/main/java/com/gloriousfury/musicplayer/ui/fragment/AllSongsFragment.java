@@ -30,6 +30,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
@@ -88,6 +89,7 @@ public class AllSongsFragment extends Fragment implements RecyclerView.OnItemTou
     public static ActionMode actionMode;
     String SONG = "single_audio";
     String CLICK_CHECKER = "click_checker";
+    public static LinearLayout selection_options;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -99,7 +101,7 @@ public class AllSongsFragment extends Fragment implements RecyclerView.OnItemTou
 
         progressBar = (ProgressBar) v.findViewById(R.id.progressBar);
         recyclerView = (RecyclerView) v.findViewById(R.id.recyclerView);
-
+        selection_options = (LinearLayout) v.findViewById(R.id.ln_selection);
         recyclerView.setHasFixedSize(true);
 
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext());
@@ -391,7 +393,7 @@ public class AllSongsFragment extends Fragment implements RecyclerView.OnItemTou
             Log.e(TAG, "I came to the LongPress side");
             View view = recyclerView.findChildViewUnder(e.getX(), e.getY());
             AppCompatActivity activity = (AppCompatActivity) getActivity();
-
+            selection_options.setVisibility(View.VISIBLE);
 
             if (actionMode != null) {
                 return;
@@ -445,6 +447,7 @@ public class AllSongsFragment extends Fragment implements RecyclerView.OnItemTou
         @Override
         public void onDestroyActionMode(ActionMode mode) {
             // TODO Auto-generated method stub
+            selection_options.setVisibility(View.GONE);
             actionMode = null;
             adapter.clearSelections();
         }

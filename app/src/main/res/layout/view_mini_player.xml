@@ -57,13 +57,13 @@
 
 
     <!--<ImageView-->
-        <!--android:id="@+id/img_fast_foward"-->
-        <!--android:layout_width="@dimen/twenty_five"-->
-        <!--android:layout_height="@dimen/twenty_five"-->
-        <!--android:layout_alignParentRight="true"-->
-        <!--android:layout_centerVertical="true"-->
-        <!--android:layout_marginRight="@dimen/ten"-->
-        <!--android:src="@drawable/ic_fast_forward_black_24dp" />-->
+    <!--android:id="@+id/img_fast_foward"-->
+    <!--android:layout_width="@dimen/twenty_five"-->
+    <!--android:layout_height="@dimen/twenty_five"-->
+    <!--android:layout_alignParentRight="true"-->
+    <!--android:layout_centerVertical="true"-->
+    <!--android:layout_marginRight="@dimen/ten"-->
+    <!--android:src="@drawable/ic_fast_forward_black_24dp" />-->
 
 
     <ImageView
@@ -74,21 +74,20 @@
         android:layout_centerVertical="true"
         android:layout_marginLeft="@dimen/five"
         android:layout_marginRight="@dimen/five"
-  android:layout_alignParentRight="true"
+        android:layout_alignParentRight="true"
         android:src="@drawable/ic_play_arrow_black_24dp" />
 
 
     <!--<ImageView-->
-        <!--android:id="@+id/img_rewind"-->
-        <!--android:layout_width="@dimen/twenty_five"-->
-        <!--android:layout_height="@dimen/twenty_five"-->
+    <!--android:id="@+id/img_rewind"-->
+    <!--android:layout_width="@dimen/twenty_five"-->
+    <!--android:layout_height="@dimen/twenty_five"-->
 
-        <!--android:layout_centerVertical="true"-->
-        <!--android:layout_marginLeft="@dimen/five"-->
-        <!--android:layout_marginRight="@dimen/five"-->
-        <!--android:layout_toLeftOf="@id/img_play_pause"-->
-        <!--android:src="@drawable/ic_fast_rewind_black_24dp" />-->
+    <!--android:layout_centerVertical="true"-->
+    <!--android:layout_marginLeft="@dimen/five"-->
+    <!--android:layout_marginRight="@dimen/five"-->
+    <!--android:layout_toLeftOf="@id/img_play_pause"-->
+    <!--android:src="@drawable/ic_fast_rewind_black_24dp" />-->
 
 
 </RelativeLayout>
-

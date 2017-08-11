@@ -11,6 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
+        android:paddingBottom="@dimen/seventy"
         >
 
         <!--<View-->
@@ -41,9 +42,18 @@
             android:visibility="invisible"
             />
 
+        <LinearLayout
+            android:id="@+id/ln_selection"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:visibility="gone"
+            >
+
+            <include layout="@layout/view_selection" />
+        </LinearLayout>
 
 
     </RelativeLayout>
-
 
 </android.support.design.widget.CoordinatorLayout>

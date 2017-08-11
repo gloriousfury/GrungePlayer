@@ -128,6 +128,33 @@ public class Utils {
 
     }
 
+    private void addToQueue(ArrayList<Audio> arrayList){
+        StorageUtil storage = new StorageUtil(context);
+        ArrayList<Audio> audioArrayList = storage.loadAudio();
+
+        for(int i=0;i<arrayList.size()-1;i++){
+            audioArrayList.add(arrayList.get(i));
+        }
+
+        storage.storeAudio(audioArrayList);
+
+    }
+
+
+    private void playNextAudioList(ArrayList<Audio> arrayList){
+        StorageUtil storage = new StorageUtil(context);
+        ArrayList<Audio> audioArrayList = storage.loadAudio();
+        int audio_index = storage.loadAudioIndex();
+
+        for(int i=0;i<arrayList.size()-1;i++){
+            audioArrayList.add(audio_index++,arrayList.get(i));
+        }
+
+        storage.storeAudio(audioArrayList);
+
+    }
+
+
 
     //gridview decoration
     public static int dpToPx(int dp, Context context) {

@@ -1155,6 +1155,12 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     }
 
 
+
+
+
+
+
+
     public boolean isPlayBackSupposedToContinue() {
         if (playbackStatus == PlaybackStatus.PLAYING) {
             return true;

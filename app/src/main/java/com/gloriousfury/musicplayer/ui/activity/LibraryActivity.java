@@ -625,7 +625,7 @@ public class LibraryActivity extends AppCompatActivity
 
                 Audio recievedAudio = i.getParcelableExtra(AppMainServiceEvent.RESPONSE_DATA);
                 updateMetaData(recievedAudio);
-
+                changeMiniPlayer(recievedAudio);
             } else {
 
                 Toast statu = Toast.makeText(this, "Cant Retrieve data at the moment, Try again", Toast.LENGTH_LONG);
