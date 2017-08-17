@@ -673,16 +673,19 @@ public class LibraryActivity extends AppCompatActivity
 
     public void changeMiniPlayer(Audio activeAudio) {
 
-
+//        Toast.makeText(this, "I came to change mini player", Toast.LENGTH_LONG).show();
         queueRecycler.setHasFixedSize(true);
 
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
 //
         queueRecycler.setLayoutManager(layoutManager);
+        audioIndex = storage.loadAudioIndex();
+        
+
         ArrayList<Audio> truncatedArray;
         if (audioList.size() > 4) {
 
-            truncatedArray =new ArrayList<Audio>(audioList.subList(1, 5));
+            truncatedArray =new ArrayList<Audio>(audioList.subList(audioIndex, audioIndex+5));
         } else {
             truncatedArray = audioList;
 

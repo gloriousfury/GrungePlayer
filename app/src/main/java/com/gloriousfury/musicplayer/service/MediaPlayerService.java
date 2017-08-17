@@ -476,6 +476,13 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
             //A PLAY_NEW_AUDIO action received
             //reset mediaPlayer to play the new Audio
+            if(activeAudio!=null){
+                responseIntent.putExtra(AppMainServiceEvent.RESPONSE_DATA, activeAudio);
+                event.setMainIntent(responseIntent);
+                event.setEventType(AppMainServiceEvent.ONCOMPLETED_RESPONSE);
+                EventBus.getDefault().post(event);
+
+            }
             stopMedia();
             mediaPlayer.reset();
             initMediaPlayer();
