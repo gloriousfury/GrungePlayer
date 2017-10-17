@@ -17,7 +17,8 @@
         android:largeHeap="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        >
         <service android:name=".service.MediaPlayerService" />
 
         <activity
@@ -47,6 +48,12 @@
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".ui.activity.PlaylistActivity"
+            android:label="@string/title_activity_album"
+            android:theme="@style/AppTheme.NoActionBar" />
+
+
+        <activity
+            android:name=".ui.activity.GenreActivity"
             android:label="@string/title_activity_album"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity

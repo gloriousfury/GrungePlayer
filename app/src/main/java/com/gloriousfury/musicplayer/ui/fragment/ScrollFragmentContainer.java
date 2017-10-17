@@ -28,7 +28,8 @@ public class ScrollFragmentContainer extends Fragment {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);}
+        super.onCreate(savedInstanceState);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -55,7 +56,6 @@ public class ScrollFragmentContainer extends Fragment {
     }
 
 
-
     public class TodoSectionsPagerAdapter extends FragmentPagerAdapter {
 
         public TodoSectionsPagerAdapter(FragmentManager fm) {
@@ -64,18 +64,19 @@ public class ScrollFragmentContainer extends Fragment {
 
         @Override
         public Fragment getItem(int position) {
-            if(position == 0) {
+            if (position == 0) {
                 return AllSongsFragment.newInstance();
 
 
-            } else if(position == 1) {
+            } else if (position == 1) {
                 return AlbumsFragment.newInstance();
-            }
-            else if(position == 2) {
+            } else if (position == 2) {
                 return ArtistFragment.newInstance();
 
-            }else if(position == 3) {
+            } else if (position == 3) {
                 return PlaylistFragments.newInstance();
+            }else if (position == 4) {
+                return GenreFragment.newInstance();
             }
             else {
                 return BasicFragment.newInstance();
@@ -85,7 +86,7 @@ public class ScrollFragmentContainer extends Fragment {
         @Override
         public int getCount() {
             // Show 3 total pages.
-            return 4;
+            return 5;
         }
 
         @Override
@@ -101,13 +102,13 @@ public class ScrollFragmentContainer extends Fragment {
                     return "Artists";
                 case 3:
                     return "Playlists";
-
+                case 4:
+                    return "Genres";
 
             }
             return null;
         }
     }
-
 
 
 }

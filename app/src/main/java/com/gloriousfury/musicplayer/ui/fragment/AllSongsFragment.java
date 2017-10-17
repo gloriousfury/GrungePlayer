@@ -265,6 +265,7 @@ public class AllSongsFragment extends Fragment implements RecyclerView.OnItemTou
                     bitmap = Bitmap.createScaledBitmap(bitmap, 30, 30, true);
 
                 } catch (FileNotFoundException exception) {
+                   // TODO change the bitmap to null if possible
                     exception.printStackTrace();
                     bitmap = BitmapFactory.decodeResource(getResources(),
                             R.mipmap.ic_launcher);

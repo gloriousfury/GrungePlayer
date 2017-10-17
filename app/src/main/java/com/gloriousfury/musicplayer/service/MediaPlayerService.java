@@ -78,7 +78,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     Intent responseIntent = new Intent();
     AppMainServiceEvent event = new AppMainServiceEvent();
     static Context context;
-    PlaybackStatus playbackStatus;
+    static PlaybackStatus playbackStatus = PlaybackStatus.PLAYING;
     boolean shuffleState = false;
     boolean shouldItPlay = false;
     String checker;
@@ -142,7 +142,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     @Override
     public void onCreate() {
         super.onCreate();
-        EventBus.getDefault().register(this);
+
         // Perform one-time setup procedures
         StorageUtil storage = new StorageUtil(getContext());
         shuffleState = storage.getShuffleSettings();
@@ -190,12 +190,28 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
             if (checker != null) {
                 mediaPlayer.seekTo(resumePosition);
-                playbackStatus = PlaybackStatus.PAUSED;
+                playbackStatus = PlaybackStatus.PLAYING;
+
+//                Toast.makeText(context, "I came to the pause part of play media", Toast.LENGTH_LONG).show();
+
+                //just added
+                responseIntent.putExtra(AppMainServiceEvent.RESPONSE_DATA, convertFromPlaybackToBool(PlaybackStatus.PAUSED));
+                event.setMainIntent(responseIntent);
+                event.setEventType(AppMainServiceEvent.PLAYBACK_CHANGE);
+                EventBus.getDefault().post(event);
                 checker = null;
 
             } else {
                 mediaPlayer.start();
                 playbackStatus = PlaybackStatus.PLAYING;
+
+                Toast.makeText(context, "I came to play media", Toast.LENGTH_LONG).show();
+
+                //just added
+                responseIntent.putExtra(AppMainServiceEvent.RESPONSE_DATA, convertFromPlaybackToBool(PlaybackStatus.PLAYING));
+                event.setMainIntent(responseIntent);
+                event.setEventType(AppMainServiceEvent.PLAYBACK_CHANGE);
+                EventBus.getDefault().post(event);
                 duration = mediaPlayer.getDuration();
             }
         }
@@ -213,7 +229,10 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             resumePosition = mediaPlayer.getCurrentPosition();
             new StorageUtil(getContext()).storePlayBackPostition(resumePosition);
             mediaPlayer.pause();
-            playbackStatus = PlaybackStatus.PAUSED;
+//            responseIntent.putExtra(AppMainServiceEvent.RESPONSE_DATA, convertFromPlaybackToBool(PlaybackStatus.PAUSED));
+//            event.setMainIntent(responseIntent);
+//            event.setEventType(AppMainServiceEvent.PLAYBACK_CHANGE);
+//            EventBus.getDefault().post(event);
 
 
         }
@@ -222,6 +241,11 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     public void resumeMedia(MediaPlayer mediaPlayer) {
         if (!mediaPlayer.isPlaying()) {
             mediaPlayer.seekTo(resumePosition);
+            playbackStatus = PlaybackStatus.PLAYING;
+//            responseIntent.putExtra(AppMainServiceEvent.RESPONSE_DATA, convertFromPlaybackToBool(PlaybackStatus.PLAYING));
+//            event.setMainIntent(responseIntent);
+//            event.setEventType(AppMainServiceEvent.PLAYBACK_CHANGE);
+//            EventBus.getDefault().post(event);
             mediaPlayer.start();
         }
     }
@@ -229,6 +253,11 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     public void resumeMedia1(MediaPlayer mediaPlayer, int resumePosition) {
         if (!mediaPlayer.isPlaying()) {
             mediaPlayer.seekTo(resumePosition);
+
+//            responseIntent.putExtra(AppMainServiceEvent.RESPONSE_DATA, convertFromPlaybackToBool(PlaybackStatus.PLAYING));
+//            event.setMainIntent(responseIntent);
+//            event.setEventType(AppMainServiceEvent.PLAYBACK_CHANGE);
+//            EventBus.getDefault().post(event);
             mediaPlayer.start();
         }
     }
@@ -323,32 +352,63 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
     @Override
     public void onAudioFocusChange(int focusState) {
+
         //Invoked when the audio focus of the system is updated.
         switch (focusState) {
             case AudioManager.AUDIOFOCUS_GAIN:
-                // resume playback
-                if (mediaPlayer == null) {
-                    initMediaPlayer();
-                    Log.e(TAG, "I came to the init  player part");
-                } else if (!mediaPlayer.isPlaying()) {
-                    if (shouldItPlay) {
-                        resumeMedia1(mediaPlayer,resumePosition);
-                        Log.e(TAG, "I came to the is not playing part");
+//                Toast.makeText(context,"I came to the audiofocus",Toast.LENGTH_LONG).show();
+                Toast.makeText(context, playbackStatus.toString()
+                        , Toast.LENGTH_LONG).show();
+
+
+// resume playback
+//                if (mediaPlayer == null) {
+//                    initMediaPlayer();
+//                    Log.e(TAG, "I came to the init  player part");
+//                }
+//
+//
+//                if (playbackStatus == PlaybackStatus.PAUSED) {
+//                    mediaPlayer.pause();
+//
+//                } else if (playbackStatus == PlaybackStatus.PLAYING) {
+//                    resumeMedia1(mediaPlayer, resumePosition);
+//                    Log.e(TAG, "I checked through not playing and not paused");
 //                    mediaPlayer.setVolume(1.0f, 1.0f);
-                    }
-                } else if (mediaPlayer.isPlaying()) {
+//
+//                }
 
-                    AudioManager amanager = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
-                    int maxVolume = amanager.getStreamMaxVolume(AudioManager.STREAM_ALARM);
-                    amanager.setStreamVolume(AudioManager.STREAM_ALARM, maxVolume, 0);
 
-                    Log.e(TAG, "I came to the  is playing part");
-                    mediaPlayer.start();
-                    mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-                }
+                // resume playback
+//                if (mediaPlayer == null) {
+//                    initMediaPlayer();
+//                    Log.e(TAG, "I came to the init  player part");
+//                } else if (!mediaPlayer.isPlaying() && playbackStatus!= PlaybackStatus.PAUSED) {
+//
+//                        resumeMedia1(mediaPlayer, resumePosition);
+//                        Log.e(TAG, "I checked through not playing and not paused");
+////                    mediaPlayer.setVolume(1.0f, 1.0f);
+//
+//                }
+//                else if (mediaPlayer.isPlaying()) {
+//
+//                    AudioManager amanager = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
+//                    int maxVolume = amanager.getStreamMaxVolume(AudioManager.STREAM_ALARM);
+//                    amanager.setStreamVolume(AudioManager.STREAM_ALARM, maxVolume, 0);
+//
+//                    Log.e(TAG, "I came to the  is playing part");
+//                    mediaPlayer.start();
+//                    mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+//                }
 
 
                 break;
+//            case AudioManager.AUDIOFOCUS_GAIN_TRANSIENT:
+//                Log.i(TAG, "AUDIOFOCUS_GAIN_TRANSIENT");
+//                break;
+//            case AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK:
+//                Log.i(TAG, "AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK");
+//                break;
             case AudioManager.AUDIOFOCUS_LOSS:
                 // Lost focus for an unbounded amount of time: stop playback and release media seek
                 if (mediaPlayer.isPlaying()) {
@@ -361,18 +421,37 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                 // Lost focus for a short time, but we have to stop
                 // playback. We don't release the media seek because playback
                 // is likely to resume
-                if (mediaPlayer.isPlaying())
+                if (mediaPlayer.isPlaying()) {
+
+                    mediaPlayer.pause();
+                    playbackStatus = PlaybackStatus.PLAYING;
+                    Toast.makeText(context, "I  pause but played", Toast.LENGTH_LONG).show();
+
+                } else {
+                    mediaPlayer.pause();
+                    playbackStatus = PlaybackStatus.PLAYING;
+                    Toast.makeText(context, "I  pause but did not play", Toast.LENGTH_LONG).show();
+
+                }
 //                    mediaPlayer.pause();
-                pauseMedia(mediaPlayer);
 
                 break;
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
                 // Lost focus for a short time, but it's ok to keep playing
                 // at an attenuated level
-                if (mediaPlayer.isPlaying())
+                if (mediaPlayer.isPlaying()) {
+
+                    mediaPlayer.pause();
+                    playbackStatus = PlaybackStatus.PLAYING;
+
+                } else {
+                    mediaPlayer.pause();
+                    playbackStatus = PlaybackStatus.PLAYING;
+                    //                    mediaPlayer.setVolume(0.1f, 0.1f);
+                }
 //                    mediaPlayer.pause();
-                    pauseMedia(mediaPlayer);
-//                    mediaPlayer.setVolume(0.1f, 0.1f);
+
+
                 break;
 
         }
@@ -383,9 +462,13 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         int result = audioManager.requestAudioFocus(this, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
         if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
             //Focus gained
+//            Toast.makeText(context, "I gained autofocus here", Toast.LENGTH_LONG).show();
+
             return true;
         }
         //Could not gain focus
+//        Toast.makeText(context, "I did not gain autofocus here", Toast.LENGTH_LONG).show();
+
         return false;
     }
 
@@ -410,6 +493,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
         @Override
         public void onReceive(Context context, Intent intent) {
             //pause audio on ACTION_AUDIO_BECOMING_NOISY
+            playbackStatus = PlaybackStatus.PAUSED;
             pauseMedia(mediaPlayer);
             buildNotification(PlaybackStatus.PAUSED);
         }
@@ -436,7 +520,15 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                     case TelephonyManager.CALL_STATE_OFFHOOK:
                     case TelephonyManager.CALL_STATE_RINGING:
                         if (mediaPlayer != null) {
-                            pauseMedia(mediaPlayer);
+
+                            if (mediaPlayer.isPlaying()) {
+                                pauseMedia(mediaPlayer);
+                                playbackStatus = PlaybackStatus.PLAYING;
+                            } else {
+                                pauseMedia(mediaPlayer);
+                                playbackStatus = PlaybackStatus.PAUSED;
+                            }
+
                             ongoingCall = true;
                         }
                         break;
@@ -445,7 +537,20 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
                         if (mediaPlayer != null) {
                             if (ongoingCall) {
                                 ongoingCall = false;
-                                resumeMedia(mediaPlayer);
+                                if (playbackStatus == PlaybackStatus.PAUSED) {
+                                    pauseMedia(mediaPlayer);
+                                    Toast.makeText(context, "I came to pause autofocus here", Toast.LENGTH_LONG).show();
+
+
+                                } else if (playbackStatus == PlaybackStatus.PLAYING) {
+                                    resumeMedia(mediaPlayer);
+                                    Toast.makeText(context, "I came to resume autofocus here", Toast.LENGTH_LONG).show();
+
+//                                    resumeMedia1(mediaPlayer, resumePosition);
+                                    Log.e(TAG, "I checked through not playing and not paused");
+                                    mediaPlayer.setVolume(1.0f, 1.0f);
+
+                                }
                             }
                         }
                         break;
@@ -476,7 +581,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
             //A PLAY_NEW_AUDIO action received
             //reset mediaPlayer to play the new Audio
-            if(activeAudio!=null){
+            if (activeAudio != null) {
                 responseIntent.putExtra(AppMainServiceEvent.RESPONSE_DATA, activeAudio);
                 event.setMainIntent(responseIntent);
                 event.setEventType(AppMainServiceEvent.ONCOMPLETED_RESPONSE);
@@ -556,6 +661,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             public void onPause() {
                 super.onPause();
                 pauseMedia(mediaPlayer);
+                playbackStatus = PlaybackStatus.PAUSED;
                 buildNotification(PlaybackStatus.PAUSED);
                 responseIntent.putExtra(AppMainServiceEvent.RESPONSE_DATA, convertFromPlaybackToBool(PlaybackStatus.PAUSED));
                 event.setMainIntent(responseIntent);
@@ -907,13 +1013,15 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
     private PlaybackStatus convertFromBoolToPlaybackStatus(Boolean playbackBool) {
         if (playbackBool) {
-            return PlaybackStatus.PAUSED;
+            playbackStatus = PlaybackStatus.PLAYING;
 
         } else if (!playbackBool) {
-            return PlaybackStatus.PLAYING;
+            playbackStatus = PlaybackStatus.PAUSED;
+
         } else {
-            return PlaybackStatus.PAUSED;
+            playbackStatus = PlaybackStatus.PAUSED;
         }
+        return playbackStatus;
 
     }
 
@@ -986,17 +1094,17 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     }
 
     public int getCurrentDur() {
-        if(mediaPlayer==null){
+        if (mediaPlayer == null) {
             return resumePosition;
 
-        }else if(mediaPlayer.isPlaying()) {
+        } else if (mediaPlayer.isPlaying()) {
             return mediaPlayer.getCurrentPosition();
-        } else if(!mediaPlayer.isPlaying() && mediaPlayer!=null){
+        } else if (!mediaPlayer.isPlaying() && mediaPlayer != null) {
             return resumePosition;
 
-        }else{
+        } else {
 
-            return  resumePosition;
+            return resumePosition;
         }
     }
 
@@ -1054,7 +1162,11 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     //The system calls this method when an activity, requests the service be started
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        if (!EventBus.getDefault().isRegistered(this)) {
+            EventBus.getDefault().register(this);
+        }
         try {
+            Toast.makeText(context, "I came to onStart", Toast.LENGTH_LONG).show();
             //Load data from SharedPreferences
             StorageUtil storage = new StorageUtil(getContext());
             audioList = storage.loadAudio();
@@ -1146,10 +1258,10 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
 
         if (event.getEventType() == AppMainServiceEvent.PLAYBACK_CHANGE1) {
-            boolean playbackStage = i.getParcelableExtra(AppMainServiceEvent.RESPONSE_DATA);
+            boolean playbackStage = i.getBooleanExtra(AppMainServiceEvent.RESPONSE_DATA, false);
             if (i != null) {
                 buildNotification(convertFromBoolToPlaybackStatus(playbackStage));
-                Log.e(TAG, "i Came to the onPlaybackChange");
+//                Log.e(TAG, "i Came to the onPlaybackChange");
 
             } else {
 
@@ -1158,14 +1270,21 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
             }
 
 
+        } else if (event.getEventType() == AppMainServiceEvent.PLAYBACK_CHANGE) {
+            boolean playbackStage = i.getBooleanExtra(AppMainServiceEvent.RESPONSE_DATA, false);
+            if (i != null) {
+//                Toast.makeText(this, "I recieved data here", Toast.LENGTH_LONG).show();
+
+                buildNotification(convertFromBoolToPlaybackStatus(playbackStage));
+//                Log.e(TAG, "i Came to the onPlaybackChange");
+
+            } else {
+
+                Toast statu = Toast.makeText(this, "Cant Retrieve data at the moment, Try again", Toast.LENGTH_LONG);
+                statu.show();
+            }
         }
     }
-
-
-
-
-
-
 
 
     public boolean isPlayBackSupposedToContinue() {

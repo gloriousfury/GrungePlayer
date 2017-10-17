@@ -5,7 +5,7 @@ android {
     buildToolsVersion "25.0.2"
     defaultConfig {
         applicationId "com.gloriousfury.musicplayer"
-        minSdkVersion 15
+        minSdkVersion 16
         targetSdkVersion 25
         versionCode 1
         versionName "1.0"
@@ -39,6 +39,7 @@ dependencies {
     compile 'com.github.zhukic:sectioned-recyclerview:1.0.1'
     compile 'com.android.support:palette-v7:25.3.1'
     compile 'com.sothree.slidinguppanel:library:3.0.0'
+    compile 'com.github.stfalcon:multiimageview:0.1'
     testCompile 'junit:junit:4.12'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.6.0'
 }

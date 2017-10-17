@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/one_twenty_five"
+    android:background="@color/app_white_smoke"
+    android:orientation="vertical">
+
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+
+        <ImageView
+            android:id="@+id/img_background1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:src="@drawable/background_cover" />
+
+
+
+
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+
+            android:alpha="0.4"
+            android:background="@color/black" />
+
+        <TextView
+            android:id="@+id/genre_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_marginLeft="@dimen/five"
+            android:layout_marginRight="@dimen/fifty"
+            android:layout_marginTop="@dimen/fifteen"
+            android:maxLines="1"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            tools:text="Rock" />
+
+
+        <TextView
+            android:id="@+id/no_of_songs"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/genre_title"
+            android:layout_centerInParent="true"
+            android:maxLines="1"
+            android:text="15 Songs"
+            android:textColor="@color/white" />
+
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_alignParentTop="true"
+            android:layout_marginLeft="@dimen/ten"
+            android:layout_marginRight="@dimen/ten"
+            android:background="@color/greyish_white" />
+
+    </RelativeLayout>
+
+
+</LinearLayout>

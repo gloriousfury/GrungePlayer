@@ -161,9 +161,9 @@ public class PlaylistFragments extends Fragment implements LoaderManager.LoaderC
                 android.provider.MediaStore.Audio.Playlists._ID,
                 android.provider.MediaStore.Audio.Playlists.NAME};
 
-        String[] projectionPl = {
-                android.provider.MediaStore.Audio.Media._ID,
-                android.provider.MediaStore.Audio.Media.TITLE};
+//        String[] projectionPl = {
+//                android.provider.MediaStore.Audio.Media._ID,
+//                android.provider.MediaStore.Audio.Media.TITLE};
 
         ContentResolver resolver = getActivity().getContentResolver();
 
@@ -188,10 +188,10 @@ public class PlaylistFragments extends Fragment implements LoaderManager.LoaderC
                         android.provider.MediaStore.Audio.Playlists.Members
                                 .getContentUri("external", playlist_id), null,
                         null, null, null);
-                int idColumna = plCursor
-                        .getColumnIndex(MediaStore.Audio.Playlists.Members.AUDIO_ID);
-                int nameColumna = plCursor
-                        .getColumnIndex(MediaStore.Audio.Playlists.Members.TITLE);
+//                int idColumna = plCursor
+//                        .getColumnIndex(MediaStore.Audio.Playlists.Members.AUDIO_ID);
+//                int nameColumna = plCursor
+//                        .getColumnIndex(MediaStore.Audio.Playlists.Members.TITLE);
 
                 if (plCursor != null && plCursor.getCount() > 0) {
                     audioList = new ArrayList<>();
